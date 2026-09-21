@@ -27,12 +27,13 @@ trait VersionChecks
      * Verifies XOOPS version meets minimum requirements for this module
      * @static
      *
+     * @param \XoopsModule|false|null $module false is the legacy "not found" value from getByDirname()
      * @param null|string $requiredVer
      * @return bool true if meets requirements, false if not
      */
-    public static function checkVerXoops(?\XoopsModule $module = null, $requiredVer = null): bool
+    public static function checkVerXoops(\XoopsModule|false|null $module = null, $requiredVer = null): bool
     {
-        $module ??= \XoopsModule::getByDirname(self::consumerDirname());
+        $module = $module ?: \XoopsModule::getByDirname(self::consumerDirname());
         $moduleDirName = (string)$module->getVar('dirname');
         $errorConstant = '_CO_MTOOLS_ERROR_BAD_XOOPS';
         \xoops_loadLanguage('admin', $moduleDirName);
@@ -56,13 +57,13 @@ trait VersionChecks
     /**
      * Verifies PHP version meets minimum requirements for this module
      * @static
-     * @param \XoopsModule|bool|null $module
+     * @param \XoopsModule|false|null $module false is the legacy "not found" value from getByDirname()
      *
      * @return bool true if meets requirements, false if not
      */
-    public static function checkVerPhp(?\XoopsModule $module = null): bool
+    public static function checkVerPhp(\XoopsModule|false|null $module = null): bool
     {
-        $module ??= \XoopsModule::getByDirname(self::consumerDirname());
+        $module = $module ?: \XoopsModule::getByDirname(self::consumerDirname());
         $moduleDirName = (string)$module->getVar('dirname');
         $errorConstant = '_CO_MTOOLS_ERROR_BAD_PHP';
         \xoops_loadLanguage('admin', $moduleDirName);

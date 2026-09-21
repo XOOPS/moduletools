@@ -1,12 +1,8 @@
 name: Dependency Review
 
-# NOTE: actions/dependency-review-action requires the repository's Dependency
-# Graph to be enabled (Settings → Code security → Dependency graph). Until that
-# is on, the action fails with "Dependency review is not supported on this
-# repository". The action step is marked continue-on-error so a disabled graph
-# cannot block (or red-flag) PRs: the step may fail while the job still concludes
-# successfully. Once Dependency graph is enabled, remove continue-on-error from
-# the step to make this a hard gate again.
+# actions/dependency-review-action needs the repository's Dependency Graph
+# (Settings → Code security → Dependency graph). It is enabled for this
+# repository, so the step is a hard gate: a vulnerable dependency change fails CI.
 
 on:
   pull_request:
@@ -25,4 +21,3 @@ jobs:
 
       - name: Dependency review
         uses: actions/dependency-review-action@v5
-        continue-on-error: true

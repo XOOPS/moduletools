@@ -72,6 +72,8 @@
         "symbols/Xoops\\ModuleTools\\Common\\DirectoryChecker/methods/handleRequest:added",
         "symbols/Xoops\\ModuleTools\\Common\\Output/methods/localPath:added",
         "symbols/Xoops\\ModuleTools\\Form\\ObjectFormBuilder/methods/cancelHandler:added",
-        "symbols/Xoops\\ModuleTools\\Persistence\\PersistableHandler/methods/setGrantedObjectsCriteria/documented_false_or_null:value-changed"
+        "symbols/Xoops\\ModuleTools\\Persistence\\PersistableHandler/methods/setGrantedObjectsCriteria/documented_false_or_null:value-changed",
+        "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerPhp/parameters/0/type:value-changed",
+        "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerXoops/parameters/0/type:value-changed"
     ]
 }

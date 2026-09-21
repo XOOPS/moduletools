@@ -26,6 +26,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   instead of silently returning a partial clone.
 
 ### Fixed
+- `Common\VersionChecks::checkVerXoops()` / `checkVerPhp()` accept the legacy `false` from
+  `XoopsModule::getByDirname()` again instead of throwing a `TypeError`.
+- `Common\ObjectTree` no longer installs a placeholder class when loaded before XOOPS is
+  bootstrapped; a placeholder loaded once would have shadowed the real class for the whole process.
 - `Persistence\PersistableHandler::setGrantedObjectsCriteria()` always adds a key restriction: with
   no grants or no module context the criteria now match nothing instead of every row. Conditions
   already in the criteria are grouped first so an OR among them cannot bypass the restriction.

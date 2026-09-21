@@ -565,12 +565,6 @@ parameters:
 			path: src/Common/SysUtility.php
 
 		-
-			message: '#^PHPDoc tag @param for parameter \$module with type bool\|XoopsModule\|null is not subtype of native type XoopsModule\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Common/SysUtility.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
