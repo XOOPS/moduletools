@@ -1,0 +1,24 @@
+# Dependencies / build artifacts
+/vendor/
+/.build/
+/composer.lock
+coverage.clover
+coverage.xml
+
+# Local config overrides (only .dist files are tracked)
+/phpunit.xml
+/.phpcs.xml
+/.phpunit.result.cache
+/.phpunit.cache/
+
+# Editor / tooling noise
+*.bak
+*~
+\#*
+.idea/
+.claude/
+CLAUDE.md
+/tasks/
+
+# Internal project history (audits, strategy notes) — never published
+/docs/internal/
