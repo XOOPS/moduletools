@@ -90,6 +90,7 @@ final readonly class ObjectController
         $object = $id > 0 ? $this->handler->get($id) : false;
         if (!$object instanceof \XoopsObject || $object->isNew()) {
             redirect_header((string) ($_SERVER['HTTP_REFERER'] ?? xoops_getenv('SCRIPT_NAME')), 3, defined('_NOPERM') ? _NOPERM : 'Record not found.');
+            return;
         }
         if ('POST' === ($_SERVER['REQUEST_METHOD'] ?? 'GET') && Request::getInt('confirm', 0, 'POST')) {
             self::assertValidToken();

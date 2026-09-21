@@ -30,7 +30,7 @@ class LetterChoice
     private $field_name;
     private $alphabet;
     private $url;
-    private $extra;
+    private $extra = '';
     /**
      * *#@-
      * @param mixed      $modHelper
@@ -83,7 +83,7 @@ class LetterChoice
         }
         $this->alphabet = is_file($languageFile) ? require $languageFile : range('a', 'z');
         $this->url      = $url ?? $_SERVER['SCRIPT_NAME'];
-        if ('' !== $extra_arg && ('&amp;' !== \mb_substr($extra_arg, -5) || '&' !== \mb_substr($extra_arg, -1))) {
+        if ('' !== $extra_arg && '&amp;' !== \mb_substr($extra_arg, -5) && '&' !== \mb_substr($extra_arg, -1)) {
             $this->extra = '&amp;' . $extra_arg;
         }
     }

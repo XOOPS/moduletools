@@ -52,10 +52,23 @@ final readonly class ItemPermission
     public function replace(string $name, int $itemId, array $groupIds): bool
     {
         $this->assertArguments($name, $itemId);
+        $previous = $this->gateway->groupIds($name, $itemId, $this->moduleId);
         if (!$this->gateway->delete($name, $itemId, $this->moduleId)) {
             return false;
         }
-        return array_all($this->normalizeIds($groupIds), fn($groupId) => $this->gateway->add($name, $itemId, $groupId, $this->moduleId));
+        if ($this->addAll($name, $itemId, $this->normalizeIds($groupIds))) {
+            return true;
+        }
+        // ponytail: no transaction on the gateway; best-effort restore of the previous grants
+        $this->gateway->delete($name, $itemId, $this->moduleId);
+        $this->addAll($name, $itemId, $this->normalizeIds($previous));
+        return false;
+    }
+
+    /** @param list<int> $groupIds */
+    private function addAll(string $name, int $itemId, array $groupIds): bool
+    {
+        return array_all($groupIds, fn($groupId) => $this->gateway->add($name, $itemId, $groupId, $this->moduleId));
     }
 
     public function delete(string $name, int $itemId): bool

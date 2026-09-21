@@ -175,10 +175,14 @@ class DynamicObject extends \XoopsObject
         if (null === $this->handler || !method_exists($this->handler, 'getModuleInfo')) {
             return false;
         }
+        $module = $this->handler->getModuleInfo();
+        if (!is_object($module)) {
+            return false;
+        }
         $user = self::runtimeUser();
         $groups = is_object($user) ? $user->getGroups() : [XOOPS_GROUP_ANONYMOUS];
 
-        return ItemPermission::forModule($this->handler->getModuleInfo())->isGranted($name, $this->id(), array_map(intval(...), $groups));
+        return ItemPermission::forModule($module)->isGranted($name, $this->id(), array_map(intval(...), $groups));
     }
 
     public function getForm(string $caption = '', string $operation = 'save', string|false $action = false, string|false $submitCaption = false, string|false $cancelAction = false, bool $captcha = false): \XoopsThemeForm

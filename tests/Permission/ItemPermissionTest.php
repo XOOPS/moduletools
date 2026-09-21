@@ -33,6 +33,23 @@ final class ItemPermissionTest extends TestCase
         );
     }
 
+    public function testReplaceRestoresPreviousGrantsWhenAnAddFails(): void
+    {
+        $gateway = new RecordingPermissionGateway();
+        $gateway->groups = [3, 5];
+        $gateway->failAddFor = 9;
+        $service = new ItemPermission(12, $gateway);
+
+        self::assertFalse($service->replace('item_view', 7, [8, 9]));
+        self::assertSame([
+            ['delete', 12, 'item_view', 7],
+            ['add', 12, 'item_view', 7, 8],
+            ['delete', 12, 'item_view', 7],
+            ['add', 12, 'item_view', 7, 3],
+            ['add', 12, 'item_view', 7, 5],
+        ], $gateway->writes);
+    }
+
     public function testRejectsInvalidPermissionNamesAndIdentifiers(): void
     {
         $service = new ItemPermission(42, new RecordingPermissionGateway());
@@ -49,6 +66,7 @@ final class RecordingPermissionGateway implements PermissionGatewayInterface
     /** @var list<int> */
     public array $items = [];
     public bool $right = false;
+    public ?int $failAddFor = null;
     /** @var list<array<int, int|string>> */
     public array $writes = [];
 
@@ -76,6 +94,9 @@ final class RecordingPermissionGateway implements PermissionGatewayInterface
 
     public function add(string $name, int $itemId, int $groupId, int $moduleId): bool
     {
+        if ($groupId === $this->failAddFor) {
+            return false;
+        }
         $this->writes[] = ['add', $moduleId, $name, $itemId, $groupId];
 
         return true;

@@ -91,6 +91,12 @@ SQL;
             self::assertStringContainsString("'title' => \$this->title", $entity);
             self::assertStringContainsString("'body' => \$this->body", $entity);
 
+            $repository = file_get_contents($root . '/class/Modern/SqlBridgeRepository.php');
+            self::assertIsString($repository);
+            self::assertStringContainsString("private const OPERATORS = ['=',", $repository);
+            self::assertStringContainsString("in_array(\$connector, ['AND', 'OR'], true)", $repository);
+            self::assertStringContainsString('if ($assignments === [])', $repository);
+
             $manifest = file_get_contents($root . '/class/Modern/BridgeManifest.php');
             self::assertIsString($manifest);
             self::assertStringContainsString("'rows' =>", $manifest);

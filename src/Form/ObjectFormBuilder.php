@@ -79,7 +79,7 @@ final class ObjectFormBuilder
             return $select;
         }
         if (in_array($controlName, ['select', 'select_multi', 'radio', 'check'], true)) {
-            $options = (array) ($control['options'] ?? []);
+            $options = is_array($control) ? (array) ($control['options'] ?? []) : [];
             if ('radio' === $controlName) {
                 $element = new \XoopsFormRadio($caption, $name, $value);
             } elseif ('check' === $controlName) {

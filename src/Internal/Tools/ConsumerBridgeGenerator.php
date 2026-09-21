@@ -436,6 +436,9 @@ abstract class SqlBridgeRepository implements EntityRepositoryInterface
                 $assignments[] = sprintf('`%s` = %s', $column, $this->renderValue($value));
             }
         }
+        if ($assignments === []) {
+            return $entity; // key-only table: nothing to update
+        }
         $sql = sprintf(
             'UPDATE `%s` SET %s WHERE `%s` = %d',
             $this->table,
@@ -504,12 +507,17 @@ abstract class SqlBridgeRepository implements EntityRepositoryInterface
         foreach ($criteria->conditions as $condition) {
             $column = (string) $condition['column'];
             $this->assertColumn($column);
-            $value = $condition['operator'] === 'IN'
+            $operator = strtoupper(trim((string) $condition['operator']));
+            $connector = strtoupper(trim((string) ($condition['condition'] ?? 'AND')));
+            if (!in_array($operator, self::OPERATORS, true) || !in_array($connector, ['AND', 'OR'], true)) {
+                throw new \LogicException(sprintf('%s rejects operator "%s" / connector "%s".', static::class, $operator, $connector));
+            }
+            $value = in_array($operator, ['IN', 'NOT IN'], true)
                 ? $this->renderList((array) $condition['value'])
                 : $this->renderValue($condition['value']);
-            $prefix = $parts === [] ? '' : ' ' . $condition['condition'] . ' ';
-            $clause = sprintf('%s`%s` %s %s', $prefix, $column, $condition['operator'], $value);
-            if ($condition['operator'] === 'LIKE') {
+            $prefix = $parts === [] ? '' : ' ' . $connector . ' ';
+            $clause = sprintf('%s`%s` %s %s', $prefix, $column, $operator, $value);
+            if (in_array($operator, ['LIKE', 'NOT LIKE'], true)) {
                 $clause .= ' ESCAPE ' . $this->db->quote('\\');
             }
             $parts[] = $clause;
@@ -535,6 +543,8 @@ abstract class SqlBridgeRepository implements EntityRepositoryInterface
             default => $this->db->quote((string) $value),
         };
     }
+
+    private const OPERATORS = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN'];
 
     private function assertColumn(string $column): void
     {
