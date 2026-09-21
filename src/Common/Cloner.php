@@ -34,9 +34,14 @@ final class Cloner
     /** Top-level entries never copied into a clone. */
     private const array SKIPPED_ENTRIES = ['node_modules', '.git', '.idea'];
 
+    /**
+     * A dirname becomes a PHP namespace segment and a constant prefix in the clone, so it
+     * must be a valid identifier: letters, digits and underscore only (a hyphen would emit
+     * `namespace XoopsModules\My-news;` and every file in the clone would fail to parse).
+     */
     public static function isValidDirname(string $dirname): bool
     {
-        return 1 === \preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/D', $dirname);
+        return 1 === \preg_match('/^[A-Za-z][A-Za-z0-9_]{0,63}$/D', $dirname);
     }
 
     /**
@@ -141,6 +146,13 @@ final class Cloner
             return '<p>' . \_CO_MTOOLS_CLONE_DSC . '</p>' . $form->render();
         }
 
+        // Only an administrator may write a new module tree; the page normally sits behind
+        // cp_header(), but the shared handler must not depend on that.
+        $user = self::runtimeGlobal('xoopsUser');
+        if (!$user instanceof \XoopsUser || !$user->isAdmin()) {
+            \redirect_header('clone.php', 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
+            exit;
+        }
         // Fail closed: no security service means no token check is possible, so no clone.
         $security = self::runtimeGlobal('xoopsSecurity');
         if (!\is_object($security) || !\method_exists($security, 'check') || !$security->check()) {
@@ -152,10 +164,12 @@ final class Cloner
         $safe  = \htmlspecialchars($clone, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
         if (!self::isValidDirname($clone)) {
             \redirect_header('clone.php', 3, \_CO_MTOOLS_CLONE_INVALIDNAME);
+            exit;
         }
         $modulesRoot = \dirname($helper->path());
         if (\file_exists($modulesRoot . '/' . $clone)) {
             \redirect_header('clone.php', 3, \_CO_MTOOLS_CLONE_EXISTS);
+            exit;
         }
 
         try {

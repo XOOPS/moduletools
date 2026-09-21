@@ -39,7 +39,9 @@ class DynamicObject extends \XoopsObject
     public function initVar($key, $dataType, $value = null, $required = false, $maxlength = null, $options = '', $enumerations = '', $formCaption = '', $formDescription = '', $sortBy = false, $persistent = true, $displayOnForm = true, $multilingual = false): void
     {
         $coreType = match ((int) $dataType) {
-            XOBJ_DTYPE_FLOAT, XOBJ_DTYPE_CURRENCY => XOBJ_DTYPE_OTHER,
+            // Core knows FLOAT (13) and casts it in cleanVars(); CURRENCY rides on it. Mapping
+            // FLOAT to OTHER would drop that cast when core's constant is the one defined.
+            XOBJ_DTYPE_CURRENCY => XOBJ_DTYPE_FLOAT,
             XOBJ_DTYPE_SIMPLE_ARRAY => XOBJ_DTYPE_ARRAY,
             XOBJ_DTYPE_URLLINK, XOBJ_DTYPE_FILE, XOBJ_DTYPE_IMAGE => XOBJ_DTYPE_TXTBOX,
             XOBJ_DTYPE_FORM_SECTION, XOBJ_DTYPE_FORM_SECTION_CLOSE => XOBJ_DTYPE_OTHER,
@@ -153,15 +155,15 @@ class DynamicObject extends \XoopsObject
             return null;
         }
 
-        $value = $this->getVar($name, 'e');
         $type = (int) ($this->vars[$name]['custom_type'] ?? $this->vars[$name]['data_type']);
         if (XOBJ_DTYPE_TXTAREA !== $type) {
-            return $value;
+            return $this->getVar($name, 'e');
         }
 
+        // displayTarea() expects the stored text; 'e' is already HTML-escaped and would render literally.
         $myts = \MyTextSanitizer::getInstance();
         return $myts->displayTarea(
-            (string) $value,
+            (string) $this->getVar($name, 'n'),
             (bool) ($this->getVar('dohtml', 'n') ?? false),
             (bool) ($this->getVar('dosmiley', 'n') ?? true),
             (bool) ($this->getVar('doxcode', 'n') ?? true),
@@ -192,7 +194,13 @@ class DynamicObject extends \XoopsObject
 
     public function setErrors($error, $prefix = false): void
     {
-        parent::setErrors((false !== $prefix ? $prefix : '') . (string) $error);
+        $prefix = false !== $prefix ? (string) $prefix : '';
+        // XoopsMediaUploader::getErrors(false) hands over a list; keep every message instead of "Array".
+        parent::setErrors(
+            \is_array($error)
+                ? \array_map(static fn ($message): string => $prefix . (string) $message, \array_values($error))
+                : $prefix . (string) $error
+        );
     }
 
     public function hasError(): bool

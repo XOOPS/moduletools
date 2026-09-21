@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
+
 /**
  * Transitional table presenter for modules moving from SmartObject.
  * New screens should expose the same rows through XMF DataTable builders.
@@ -141,9 +143,12 @@ class ObjectTable
         }
         foreach ($this->filters as $key => $filter) {
             $value = $this->filterValue($key, $filter['default']);
-            if ('' !== $value) {
-                $criteria->add(new \Criteria($key, $value));
+            // Only a value the handler itself offered may reach the criteria: Criteria::render()
+            // quotes but does not escape, and filter_<key> is request input on user-side tables.
+            if ('' === $value || !\array_key_exists($value, $this->filterOptions($filter))) {
+                continue;
             }
+            $criteria->add(new \Criteria($key, $this->escapeForCriteria($value)));
         }
 
         return $criteria;
@@ -160,6 +165,14 @@ class ObjectTable
         }
 
         return (false !== $default && null !== $default) ? (string) $default : '';
+    }
+
+    /** Criteria values are quoted verbatim by core, so escape here; the handler's db is the source of truth. */
+    private function escapeForCriteria(string $value): string
+    {
+        $db = $this->handler->db ?? null;
+
+        return \is_object($db) && \method_exists($db, 'escape') ? (string) $db->escape($value) : \addslashes($value);
     }
 
     /**
@@ -224,8 +237,12 @@ class ObjectTable
             foreach ($this->columns as $column) {
                 $method = $column->valueMethod;
                 $isCustom = false !== $method && method_exists($object, $method);
-                $value = $isCustom ? $object->{$method}(...(false === $column->parameters ? [] : $column->parameters)) : $object->getVar($column->key, 's');
-                $html .= '<td class="' . $escape($column->align) . '">' . ($isCustom ? (string) $value : $escape($value)) . '</td>';
+                // A value method returns presentation HTML (SmartObject contract) and is emitted as is;
+                // a plain field goes through the shared presenter (see ObjectValuePresenter).
+                $cell = $isCustom
+                    ? (string) $object->{$method}(...(false === $column->parameters ? [] : $column->parameters))
+                    : ObjectValuePresenter::html($object, $column->key);
+                $html .= '<td class="' . $escape($column->align) . '">' . $cell . '</td>';
             }
             if ([] !== $this->actions || [] !== $this->customActions) {
                 $id = (int) $object->getVar($key, 'n');

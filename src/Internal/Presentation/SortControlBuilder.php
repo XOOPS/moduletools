@@ -10,7 +10,7 @@ final class SortControlBuilder
     public function build(
         string $requestUri,
         string $scriptName,
-        int|string $start,
+        int $start,
         string $currentOrder,
         string $currentSort,
         string $requestedSort,

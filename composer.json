@@ -12,7 +12,9 @@
   "homepage": "https://xoops.org",
   "require": {
     "php": "^8.4",
+    "ext-ctype": "*",
     "ext-mbstring": "*",
+    "ext-tokenizer": "*",
     "symfony/yaml": "^6.0 || ^7.0",
     "xoops/helpers": "^1.0",
     "xoops/xmf": "^1.3"

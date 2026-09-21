@@ -110,10 +110,10 @@ trait FilesManagement
             return false;
         }
 
-        // Check for symlinks
+        // A link is never recreated: its target is not checked against any base, so a link in a
+        // module's testdata/ could point anything (mainfile.php, /etc/passwd) into the upload tree.
         if (\is_link($source)) {
-            $target = \readlink($source);
-            return false !== $target && \symlink($target, $dest);
+            return false;
         }
 
         // Simple copy for a file

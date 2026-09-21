@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
+
 final class SingleView
 {
     /** @var list<ObjectRow> */
@@ -37,10 +39,12 @@ final class SingleView
                 }
                 continue;
             }
-            $value = false !== $row->valueMethod && method_exists($this->object, $row->valueMethod)
-                ? $this->object->{$row->valueMethod}()
-                : $this->object->getVar($row->key, 's');
-            $html .= '<dt' . $class . '>' . $escape($caption) . '</dt><dd' . $class . '>' . $escape($value) . '</dd>';
+            // Same rule as ObjectTable: a value method returns presentation HTML and is emitted as is;
+            // a plain field goes through the shared presenter (see ObjectValuePresenter).
+            $cell = false !== $row->valueMethod && method_exists($this->object, $row->valueMethod)
+                ? (string) $this->object->{$row->valueMethod}()
+                : ObjectValuePresenter::html($this->object, $row->key);
+            $html .= '<dt' . $class . '>' . $escape($caption) . '</dt><dd' . $class . '>' . $cell . '</dd>';
         }
         $html .= '</dl>';
         // DynamicObject carries its handler; a plain XoopsObject may not, so read it dynamically.

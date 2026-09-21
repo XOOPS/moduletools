@@ -296,11 +296,19 @@
                             "variadic": false,
                             "has_default": true,
                             "default": "false"
+                        },
+                        {
+                            "name": "authorize",
+                            "type": "?callable",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "null"
                         }
                     ],
                     "return_type": "void",
                     "throws": [],
-                    "documented_false_or_null": false
+                    "documented_false_or_null": true
                 },
                 "handleObjectDeletionFromUserSide": {
                     "static": false,
@@ -321,11 +329,19 @@
                             "variadic": false,
                             "has_default": true,
                             "default": "'del'"
+                        },
+                        {
+                            "name": "authorize",
+                            "type": "?callable",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "null"
                         }
                     ],
                     "return_type": "void",
                     "throws": [],
-                    "documented_false_or_null": false
+                    "documented_false_or_null": true
                 },
                 "postDataToObject": {
                     "static": false,
@@ -387,11 +403,19 @@
                             "variadic": false,
                             "has_default": true,
                             "default": "false"
+                        },
+                        {
+                            "name": "authorize",
+                            "type": "?callable",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "null"
                         }
                     ],
                     "return_type": "XoopsObject|false",
                     "throws": [],
-                    "documented_false_or_null": false
+                    "documented_false_or_null": true
                 },
                 "storeSmartObject": {
                     "static": false,
@@ -3945,6 +3969,71 @@
                         }
                     ],
                     "return_type": "array",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
+                "makeSelBox": {
+                    "static": false,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        },
+                        {
+                            "name": "fieldName",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        },
+                        {
+                            "name": "prefix",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "'-'"
+                        },
+                        {
+                            "name": "selected",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "''"
+                        },
+                        {
+                            "name": "addEmptyOption",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "false"
+                        },
+                        {
+                            "name": "key",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "0"
+                        },
+                        {
+                            "name": "extra",
+                            "type": null,
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "''"
+                        }
+                    ],
+                    "return_type": null,
                     "throws": [],
                     "documented_false_or_null": false
                 },

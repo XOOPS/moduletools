@@ -69,11 +69,11 @@ class Breadcrumb
         $theme = self::runtimeGlobal('xoTheme');
         $xoops = self::runtimeGlobal('xoops');
         if (!is_object($theme)) {
-            require $xoops->path('class/theme.php');
+            require_once $xoops->path('class/theme.php');
             self::setRuntimeGlobal('xoTheme', new \xos_opal_Theme());
         }
 
-        require $xoops->path('class/template.php');
+        require_once $xoops->path('class/template.php');
         $breadcrumbTpl = new \XoopsTpl();
         $breadcrumbTpl->assign('breadcrumb', $this->bread);
         $html = $breadcrumbTpl->fetch('db:' . $this->template);

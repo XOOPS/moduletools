@@ -41,7 +41,9 @@ final class ConsumerBridgeGenerator
                 continue;
             }
 
-            if (preg_match('/^\s*\)\s*(?:ENGINE|TYPE|;|$)/i', $line)) {
+            // Inside a table a line starting with ")" can only be the terminator, whatever
+            // follows it (ENGINE=, DEFAULT CHARSET=, AUTO_INCREMENT=, COMMENT=, ";" ...).
+            if (preg_match('/^\s*\)/', $line)) {
                 $this->classifyTable($current);
                 $tables[$current['name']] = $current;
                 $current = null;
@@ -52,6 +54,10 @@ final class ConsumerBridgeGenerator
                 preg_match_all('/`?([A-Za-z_][A-Za-z0-9_]*)`?/', $match[1], $keys);
                 $current['primaryKey'] = array_values($keys[1]);
                 continue;
+            }
+            // A stray CREATE TABLE inside an open table means the previous one never closed.
+            if (preg_match('/^\s*CREATE\s+TABLE\b/i', $line)) {
+                throw new \RuntimeException(sprintf('Table %s is not closed before the next CREATE TABLE.', $current['name']));
             }
 
             if (
@@ -65,12 +71,16 @@ final class ConsumerBridgeGenerator
             }
 
             $column = $match[1];
-            if (in_array(strtoupper($column), ['PRIMARY', 'UNIQUE', 'KEY', 'FULLTEXT', 'CONSTRAINT', 'FOREIGN'], true)) {
+            if (in_array(strtoupper($column), ['PRIMARY', 'UNIQUE', 'KEY', 'INDEX', 'FULLTEXT', 'SPATIAL', 'CHECK', 'CONSTRAINT', 'FOREIGN'], true)) {
                 continue;
             }
 
             $sqlType = strtolower($match[2]);
             $modifiers = strtoupper($match[3]);
+            // `id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,` declares the key inline.
+            if (str_contains($modifiers, 'PRIMARY KEY')) {
+                $current['primaryKey'] = [$column];
+            }
             $current['columns'][$column] = [
                 'sqlType'       => $sqlType,
                 'phpType'       => $this->phpType($sqlType),
@@ -109,6 +119,12 @@ final class ConsumerBridgeGenerator
         array $tables,
         array $allTables,
     ): array {
+        // Both names are interpolated into generated PHP (namespace, class names, string literals).
+        foreach (['moduleDirname' => $moduleDirname, 'moduleNamespace' => $moduleNamespace] as $label => $identifier) {
+            if (1 !== preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/D', $identifier)) {
+                throw new \InvalidArgumentException(sprintf('%s must be a PHP identifier, "%s" given.', $label, $identifier));
+            }
+        }
         $modernPath = $modulePath . '/class/Modern';
         $testsPath = $modulePath . '/tests';
         $docsPath = $modulePath . '/docs/architecture';
@@ -186,7 +202,11 @@ final class ConsumerBridgeGenerator
         }
         if ($table['columns'][$key]['phpType'] !== 'int') {
             $table['skipReason'] = 'non-integer-primary-key';
+            return;
         }
+        // MySQL makes a primary key NOT NULL implicitly; a nullable key would give the entity
+        // `?int $id = null`, so isNew() (`0 === $id`) and save() would disagree on a fresh row.
+        $table['columns'][$key]['nullable'] = false;
     }
 
     private function phpType(string $sqlType): string
@@ -214,7 +234,9 @@ final class ConsumerBridgeGenerator
 
     private function className(string $table): string
     {
-        return str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower($table))));
+        $name = str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower($table))));
+
+        return ctype_digit($name[0] ?? '') ? 'Table' . $name : $name;
     }
 
     /** @param list<string> $columns @return array<string,string> */
@@ -229,8 +251,8 @@ final class ConsumerBridgeGenerator
                 $property .= ucfirst(strtolower($part));
             }
             $property = preg_replace('/[^A-Za-z0-9_]/', '', $property) ?: 'field';
-            if (ctype_digit($property[0])) {
-                $property = 'field' . $property;
+            if (ctype_digit($property[0]) || 'this' === strtolower($property)) {
+                $property = 'field' . ucfirst($property); // `$this` cannot be a property or parameter
             }
             $base = $property;
             $suffix = 2;
@@ -610,10 +632,11 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-defined('XOBJ_DTYPE_INT') || define('XOBJ_DTYPE_INT', 1);
-defined('XOBJ_DTYPE_TXTBOX') || define('XOBJ_DTYPE_TXTBOX', 2);
-defined('XOBJ_DTYPE_TXTAREA') || define('XOBJ_DTYPE_TXTAREA', 3);
-defined('XOBJ_DTYPE_OTHER') || define('XOBJ_DTYPE_OTHER', 5);
+// Core's values (kernel/object.php), so a schema evaluated here matches a real XOOPS run.
+defined('XOBJ_DTYPE_TXTBOX') || define('XOBJ_DTYPE_TXTBOX', 1);
+defined('XOBJ_DTYPE_TXTAREA') || define('XOBJ_DTYPE_TXTAREA', 2);
+defined('XOBJ_DTYPE_INT') || define('XOBJ_DTYPE_INT', 3);
+defined('XOBJ_DTYPE_OTHER') || define('XOBJ_DTYPE_OTHER', 7);
 
 $definitions = \XoopsModules\{{MODULE_NAMESPACE}}\Modern\BridgeManifest::definitions();
 foreach ($definitions as $definition) {

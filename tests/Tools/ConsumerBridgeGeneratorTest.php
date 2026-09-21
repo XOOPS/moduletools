@@ -53,6 +53,38 @@ SQL;
         self::assertSame('non-integer-primary-key', $tables['sample_meta']['skipReason']);
     }
 
+    public function testParsesRealWorldTableTailsIndexLinesAndInlineKeys(): void
+    {
+        $sql = <<<'SQL'
+CREATE TABLE `a_items` (
+    `id` INT UNSIGNED AUTO_INCREMENT,
+    `title` VARCHAR(200) NOT NULL DEFAULT '',
+    INDEX idx_title (title),
+    SPATIAL KEY sp (title),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARSET=utf8mb4 ENGINE=InnoDB;
+
+CREATE TABLE `b_items` (
+    `bid` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `flag` TINYINT(1) NOT NULL DEFAULT 0
+) AUTO_INCREMENT=1;
+SQL;
+
+        $tables = new ConsumerBridgeGenerator()->parseSql($sql);
+
+        self::assertSame(['a_items', 'b_items'], array_keys($tables));
+        self::assertSame(['id', 'title'], array_keys($tables['a_items']['columns']));
+        self::assertFalse($tables['a_items']['columns']['id']['nullable'], 'a primary key is never nullable');
+        self::assertSame(['bid'], $tables['b_items']['primaryKey']);
+        self::assertSame(['a_items', 'b_items'], array_keys(new ConsumerBridgeGenerator()->eligibleTables($tables)));
+    }
+
+    public function testRefusesModuleNamesThatAreNotIdentifiers(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new ConsumerBridgeGenerator()->generate(sys_get_temp_dir() . '/never-created', "x'); system('id'); //", 'Ok', [], []);
+    }
+
     public function testGeneratesAnExactRoundTripManifest(): void
     {
         $sql = <<<'SQL'

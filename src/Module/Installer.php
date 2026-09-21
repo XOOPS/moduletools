@@ -97,7 +97,11 @@ final class Installer
     {
         $db = self::runtimeGlobal('xoopsDB');
         foreach ((array)$module->getInfo('tables') as $table) {
-            $db->exec('DROP TABLE IF EXISTS ' . $db->prefix((string)$table) . ';');
+            // xoops_version.php is developer-controlled, but a table name is still an identifier.
+            if (1 !== \preg_match('/^[A-Za-z0-9_]+$/', (string)$table)) {
+                continue;
+            }
+            $db->exec('DROP TABLE IF EXISTS `' . $db->prefix((string)$table) . '`');
         }
     }
 

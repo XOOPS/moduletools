@@ -20,6 +20,21 @@ if (!class_exists('XoopsPersistableObjectHandler')) {
     }
 }
 
+if (!class_exists('XoopsUser')) {
+    /** Just enough of a user for the admin gates: isAdmin() answers what the test sets. */
+    class XoopsUser
+    {
+        public function __construct(private readonly bool $admin = false)
+        {
+        }
+
+        public function isAdmin(): bool
+        {
+            return $this->admin;
+        }
+    }
+}
+
 if (!function_exists('redirect_header')) {
     // The library redirects instead of writing; in tests the redirect becomes an exception.
     function redirect_header(string $url, int $time = 0, string $message = ''): never

@@ -117,16 +117,19 @@ class FileChecker
      */
     public static function setFilePermissions($target, $mode = 0644, ?string $allowedBasePath = null): bool
     {
-        if (!self::isAllowedPath((string)$target, $allowedBasePath)) {
+        if (!self::isAllowedPath((string)$target, $allowedBasePath) || !\is_file((string)$target)) {
             return false;
         }
 
-        return @\chmod($target, self::normalizeMode($mode, 0644));
+        return @\chmod((string)$target, self::normalizeMode($mode, 0644));
     }
 
     private static function isAllowedPath(string $path, ?string $allowedBasePath): bool
     {
-        if ('' === $path || str_contains($path, "\0") || str_contains($path, '://')) {
+        // A ".." segment is rejected before either containment check: resolveExistingPath()
+        // canonicalises only the nearest existing ancestor, so "<base>/new/../../x" would
+        // otherwise resolve inside the base while the operation targets a path outside it.
+        if ('' === $path || str_contains($path, "\0") || str_contains($path, '://') || str_contains($path, '..')) {
             return false;
         }
 
@@ -144,10 +147,6 @@ class FileChecker
 
     private static function isUnderKnownBase(string $path): bool
     {
-        if (str_contains($path, '..')) {
-            return false;
-        }
-
         $target = self::resolveExistingPath($path);
         if (false === $target) {
             return false;

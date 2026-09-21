@@ -3,10 +3,7 @@
 declare(strict_types=1);
 
 namespace {
-    if (!defined('XOOPS_ROOT_PATH')) {
-        define('XOOPS_ROOT_PATH', 'C:/test&root');
-    }
-
+    // XOOPS_ROOT_PATH ('C:/test&root') comes from tests/bootstrap.php.
     if (!function_exists('xoops_loadLanguage')) {
         function xoops_loadLanguage(string $name, string $module): bool
         {

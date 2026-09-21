@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
+
 /** Streams a standards-compliant UTF-8 CSV export without temporary files. */
 final class Export
 {
@@ -53,7 +55,8 @@ final class Export
             $row = [];
             foreach ($keys as $key) {
                 $method = false !== $this->outputMethods ? ($this->outputMethods[$key] ?? null) : null;
-                $value = is_string($method) && method_exists($object, $method) ? $object->{$method}() : $object->getVar($key, 's');
+                // A CSV has no HTML context: stored values, never entities or rendered markup.
+                $value = is_string($method) && method_exists($object, $method) ? $object->{$method}() : ObjectValuePresenter::plain($object, $key);
                 $row[] = self::csvCell(is_array($value) ? implode(', ', array_map(strval(...), $value)) : (string) $value);
             }
             fputcsv($stream, $row, escape: '');
@@ -65,6 +68,7 @@ final class Export
     /** Spreadsheets evaluate cells starting with = + - @ or a tab/CR; a leading quote keeps them as text. */
     private static function csvCell(string $value): string
     {
-        return '' !== $value && str_contains("=+-@	", $value[0]) && !is_numeric($value) ? "'" . $value : $value;
+        // Only a genuinely negative number keeps its sign; "+1" is still a formula to a spreadsheet.
+        return '' !== $value && str_contains("=+-@\t\r", $value[0]) && !('-' === $value[0] && is_numeric($value)) ? "'" . $value : $value;
     }
 }

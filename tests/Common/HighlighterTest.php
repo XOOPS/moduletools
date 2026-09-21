@@ -32,6 +32,12 @@ final class HighlighterTest extends TestCase
     }
 
     #[Test]
+    public function longerTermsWinOverTheirOwnPrefixes(): void
+    {
+        self::assertSame('<mark class="moduletools-highlight">abc</mark>', (new Highlighter('ab abc'))->highlight('abc'));
+    }
+
+    #[Test]
     public function aBareAmpersandTermMatchesTheWholeEntity(): void
     {
         $highlighter = new Highlighter('&');

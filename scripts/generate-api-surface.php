@@ -152,10 +152,11 @@ foreach ($files as $file) {
 
 ksort($surface['global_functions']);
 ksort($surface['symbols']);
-$json = json_encode($surface, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
+// Always LF: the snapshot is committed, and the --check comparison must not depend on the OS.
+$json = json_encode($surface, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
 
 if ($checkOnly) {
-    $existing = is_file($outputFile) ? file_get_contents($outputFile) : false;
+    $existing = is_file($outputFile) ? str_replace("\r\n", "\n", (string) file_get_contents($outputFile)) : false;
     if ($existing !== $json) {
         fwrite(STDERR, "API surface is stale. Run composer api:generate.\n");
         exit(1);

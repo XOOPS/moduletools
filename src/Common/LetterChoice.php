@@ -81,7 +81,8 @@ class LetterChoice
         if (!is_file($languageFile)) {
             $languageFile = $this->modHelper->path('language/english/alphabet.php');
         }
-        $this->alphabet = is_file($languageFile) ? require $languageFile : range('a', 'z');
+        // A caller-supplied alphabet wins; otherwise the module's language/<lang>/alphabet.php, then a-z.
+        $this->alphabet = [] !== $alphabet ? $alphabet : (is_file($languageFile) ? require $languageFile : range('a', 'z'));
         $this->url      = $url ?? $_SERVER['SCRIPT_NAME'];
         if ('' !== $extra_arg && '&amp;' !== \mb_substr($extra_arg, -5) && '&' !== \mb_substr($extra_arg, -1)) {
             $this->extra = '&amp;' . $extra_arg;
@@ -145,10 +146,11 @@ class LetterChoice
             unset($letter_array);
         }
 
+        // Its own key: reusing $letter here overwrote the last letter of the alphabet ("Z" vanished).
         $letter_array['letter'] = $other;
         $letter_array['count']  = $howmanyother;
-        $letter_array['url']    = $this->url . '?init=Other';
-        $alphabetArray[$letter] = $letter_array;
+        $letter_array['url']    = $this->url . '?' . $this->arg_name . '=Other' . $this->extra;
+        $alphabetArray['Other'] = $letter_array;
 
         // render output
         $theme = self::runtimeGlobal('xoTheme');

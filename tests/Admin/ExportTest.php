@@ -18,6 +18,9 @@ final class ExportTest extends TestCase
         yield 'at' => ['@SUM(1)', "'@SUM(1)"];
         yield 'tab' => ["\t=1", "'\t=1"];
         yield 'negative number stays numeric' => ['-12.5', '-12.5'];
+        yield 'positive sign is still a formula' => ['+1', "'+1"];
+        yield 'positive exponent is still a formula' => ['+1e3', "'+1e3"];
+        yield 'unsigned number' => ['1e3', '1e3'];
         yield 'plain text' => ['hello', 'hello'];
         yield 'empty' => ['', ''];
     }

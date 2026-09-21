@@ -18,15 +18,12 @@ final class ConfirmationResolver
         ?string $moduleDirName,
     ): ConfirmationModel {
         if (null !== $moduleDirName && '' !== $moduleDirName) {
+            // Each constant on its own: a module may define one of the pair and not the other.
             $upper = mb_strtoupper($moduleDirName);
-            if (!defined('_CO_' . $upper . '_DELETE_CONFIRM')) {
-                define('_CO_' . $upper . '_DELETE_CONFIRM', 'Confirm delete');
-                define('_CO_' . $upper . '_DELETE_LABEL', 'Do you really want to delete:');
-            }
-            if ('' === $title) {
+            if ('' === $title && defined('_CO_' . $upper . '_DELETE_CONFIRM')) {
                 $title = (string) constant('_CO_' . $upper . '_DELETE_CONFIRM');
             }
-            if ('' === $label) {
+            if ('' === $label && defined('_CO_' . $upper . '_DELETE_LABEL')) {
                 $label = (string) constant('_CO_' . $upper . '_DELETE_LABEL');
             }
         }

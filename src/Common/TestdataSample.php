@@ -42,10 +42,19 @@ class TestdataSample
         $this->moduleDirNameUpper = \mb_strtoupper($this->moduleDirName);
         $this->modHelper->loadLanguage('common');
 
+        // The sample data lives in the consumer's testdata/<language>/; fall back to English.
+        // (__DIR__ would be this library's own folder, which never holds sample data.)
+        $siteLanguage   = (string) ($xoopsConfig['language'] ?? 'english');
         $this->language = 'english/';
-        if (\is_dir(__DIR__ . '/' . $xoopsConfig['language'])) {
-            $this->language = ((string) ($xoopsConfig['language'] ?? 'english')) . '/';
+        if (1 === \preg_match('/^[A-Za-z0-9_-]+$/', $siteLanguage) && \is_dir($this->modHelper->path('testdata/' . $siteLanguage))) {
+            $this->language = $siteLanguage . '/';
         }
+    }
+
+    /** Absolute path of one sample-data file: <module>/testdata/<language>/<table>.yml */
+    private function dataFile(string $table): string
+    {
+        return $this->modHelper->path('testdata/' . $this->language . $table . '.yml');
     }
 
     // XMF TableLoad for SAMPLE data
@@ -59,14 +68,14 @@ class TestdataSample
 
         // load module tables
         foreach ($tables as $table) {
-            $tabledata = \Xmf\Yaml::readWrapped($this->language . $table . '.yml');
+            $tabledata = \Xmf\Yaml::readWrapped($this->dataFile((string) $table));
             \Xmf\Database\TableLoad::truncateTable($table);
             \Xmf\Database\TableLoad::loadTableFromArray($table, $tabledata);
         }
 
         // load permissions
         $table     = 'group_permission';
-        $tabledata = \Xmf\Yaml::readWrapped($this->language . $table . '.yml');
+        $tabledata = \Xmf\Yaml::readWrapped($this->dataFile($table));
         $mid       = $this->modHelper->getModule()->getVar('mid');
         $this->loadTableFromArrayWithReplace($table, $tabledata, 'gperm_modid', $mid);
 
@@ -176,15 +185,15 @@ class TestdataSample
             $valueClause = ' VALUES (';
             $first       = true;
             foreach ($row as $column => $value) {
+                // Validate before emitting the separator, or a skipped column leaves "(`a`, , `c`)".
+                if (!preg_match('/^[A-Za-z0-9_]+$/', (string)$column)) {
+                    continue;
+                }
                 if ($first) {
                     $first = false;
                 } else {
                     $insertInto  .= ', ';
                     $valueClause .= ', ';
-                }
-
-                if (!preg_match('/^[A-Za-z0-9_]+$/', (string)$column)) {
-                    continue;
                 }
 
                 $insertInto .= '`' . $column . '`';

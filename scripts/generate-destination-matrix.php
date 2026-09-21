@@ -42,7 +42,8 @@ foreach ($surface['symbols'] as $fqcn => $symbol) {
 }
 
 usort($matrix['records'], static fn (array $a, array $b): int => $a['symbol'] <=> $b['symbol']);
-$json = json_encode($matrix, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
+// Always LF: the artifacts are committed, and the --check comparison must not depend on the OS.
+$json = json_encode($matrix, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
 $markdown = renderMatrix($matrix);
 $backlog = renderBacklog($matrix);
 $targets = [
@@ -53,7 +54,7 @@ $targets = [
 
 if ($checkOnly) {
     foreach ($targets as $file => $contents) {
-        if (!is_file($file) || file_get_contents($file) !== $contents) {
+        if (!is_file($file) || str_replace("\r\n", "\n", (string) file_get_contents($file)) !== $contents) {
             fwrite(STDERR, "Destination artifacts are stale. Run composer matrix:generate.\n");
             exit(1);
         }
@@ -114,7 +115,7 @@ function renderMatrix(array $matrix): string
             $record['consumers']['usage_count'], $record['parity_test'],
         );
     }
-    return implode(PHP_EOL, $lines) . PHP_EOL;
+    return implode("\n", $lines) . "\n";
 }
 
 /** @param array<string, mixed> $matrix */
@@ -133,5 +134,5 @@ function renderBacklog(array $matrix): string
         $lines[] = '- Required evidence: behavioral parity corpus plus an explicit stable owner.';
         $lines[] = '';
     }
-    return implode(PHP_EOL, $lines) . PHP_EOL;
+    return implode("\n", $lines) . "\n";
 }

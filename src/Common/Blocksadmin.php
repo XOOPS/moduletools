@@ -97,6 +97,9 @@ class Blocksadmin
         </tr>';
         $blockArray = \XoopsBlock::getByModule($xoopsModule->mid());
         $blockCount = \count($blockArray);
+        // One-time token for the delete links; deleteBlock() validates it (see assertToken()).
+        $security    = self::runtimeGlobal('xoopsSecurity');
+        $deleteToken = \is_object($security) && \method_exists($security, 'createToken') ? (string) $security->createToken() : '';
         $class      = 'even';
         $cachetimes = [
             0       => \_NOCACHE,
@@ -220,7 +223,7 @@ class Blocksadmin
             //            if ('S' !== $i->getVar('block_type') && 'M' !== $i->getVar('block_type')) {
             if (!\in_array($i->getVar('block_type'), ['M', 'S'])) {
                 echo "&nbsp;
-                <a href='blocksadmin.php?op=delete&amp;bid=" . $i->getVar('bid') . "'><img src=" . $pathIcon16 . '/delete.png' . " alt='" . \_DELETE . "' title='" . \_DELETE . "'>
+                <a href='blocksadmin.php?op=delete&amp;bid=" . $i->getVar('bid') . '&amp;XOOPS_TOKEN_REQUEST=' . $deleteToken . "'><img src=" . $pathIcon16 . '/delete.png' . " alt='" . \_DELETE . "' title='" . \_DELETE . "'>
                      </a>";
             }
             echo "
@@ -228,7 +231,7 @@ class Blocksadmin
             <input type='hidden' name='oldside[" . $i->getVar('bid') . "]' value='" . $i->getVar('side') . "'>
             <input type='hidden' name='oldweight[" . $i->getVar('bid') . "]' value='" . $i->getVar('weight') . "'>
             <input type='hidden' name='oldvisible[" . $i->getVar('bid') . "]' value='" . $i->getVar('visible') . "'>
-            <input type='hidden' name='oldgroups[" . $i->getVar('groups') . "]' value='" . $i->getVar('groups') . "'>
+            <input type='hidden' name='oldgroups[" . $i->getVar('bid') . "]' value='" . \implode(',', \array_map(\intval(...), $groupsPermissions)) . "'>
             <input type='hidden' name='oldbcachetime[" . $i->getVar('bid') . "]' value='" . $i->getVar('bcachetime') . "'>
             <input type='hidden' name='bid[" . $i->getVar('bid') . "]' value='" . $i->getVar('bid') . "'>
             </td></tr>
@@ -236,7 +239,7 @@ class Blocksadmin
             $class = ('even' === $class) ? 'odd' : 'even';
         }
         echo "<tr><td class='foot' align='center' colspan='8'>
-        <input type='hidden' name='op' value='order'>" . self::runtimeGlobal('xoopsSecurity')->getTokenHTML() . "
+        <input type='hidden' name='op' value='order'>" . (\is_object($security) && \method_exists($security, 'getTokenHTML') ? $security->getTokenHTML() : '') . "
         <input type='submit' name='submit' value='" . \_SUBMIT . "'>
         </td></tr>
         </table>
@@ -249,22 +252,31 @@ class Blocksadmin
      */
     public function deleteBlock(int $bid): void
     {
-        //        \xoops_cp_header();
-
-
+        $this->assertToken();
 
         $myblock = new \XoopsBlock($bid);
+        // Module ('M') and system ('S') blocks are declared in xoops_version.php; the list hides
+        // their delete link and the server refuses the request as well.
+        if (\in_array((string) $myblock->getVar('block_type', 'n'), ['M', 'S'], true)) {
+            $this->helper->redirect('admin/blocksadmin.php?op=list', 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
+            return;
+        }
 
-        $sql    = \sprintf('DELETE FROM %s WHERE bid = %u', $this->db->prefix('newblocks'), $bid);
+        $sql    = \sprintf('DELETE FROM `%s` WHERE bid = %u', $this->db->prefix('newblocks'), $bid);
         $result = $this->db->exec($sql);
         if (!$result) {
             \trigger_error("Query Failed! SQL: $sql Error: " . $this->db->error(), \E_USER_ERROR);
         }
-        $sql = \sprintf('DELETE FROM %s WHERE block_id = %u', $this->db->prefix('block_module_link'), $bid);
+        $sql = \sprintf('DELETE FROM `%s` WHERE block_id = %u', $this->db->prefix('block_module_link'), $bid);
         $result = $this->db->exec($sql);
         if (!$result) {
             \trigger_error("Query Failed! SQL: $sql Error: " . $this->db->error(), \E_USER_ERROR);
         }
+        // The block's own permission and template rows go with it; nothing else references them.
+        $sql = \sprintf("DELETE FROM `%s` WHERE gperm_itemid = %u AND gperm_modid = 1 AND gperm_name = 'block_read'", $this->db->prefix('group_permission'), $bid);
+        $this->db->exec($sql);
+        $sql = \sprintf("DELETE FROM `%s` WHERE tpl_refid = %u AND tpl_type = 'block'", $this->db->prefix('tplfile'), $bid);
+        $this->db->exec($sql);
 
         $this->helper->redirect('admin/blocksadmin.php?op=list', 1, _AM_DBUPDATED);
     }
@@ -331,7 +343,7 @@ class Blocksadmin
      */
     public function isBlockCloned(int $bid, string $bside, string $bweight, string $bvisible, string $bcachetime, ?array $bmodule, ?array $options, ?array $groups): void
     {
-
+        $this->assertToken();
 
         $block = new \XoopsBlock($bid);
         /** @var \XoopsBlock $clone */
@@ -473,6 +485,8 @@ class Blocksadmin
      */
     public function updateBlock(int $bid, string $btitle, string $bside, string $bweight, string $bvisible, string $bcachetime, ?array $bmodule, ?array $options, ?array $groups): void
     {
+        $this->assertToken();
+
         $myblock = new \XoopsBlock($bid);
         $myblock->setVar('title', $btitle);
         $myblock->setVar('weight', $bweight);
@@ -511,7 +525,7 @@ class Blocksadmin
                 }
             }
         }
-        // Scoped like the bulk save below: other modules' permissions can share this item id.
+        // Scoped like orderBlock(): other modules' permissions can share this item id.
         $sql = \sprintf("DELETE FROM `%s` WHERE gperm_itemid = %u AND gperm_modid = 1 AND gperm_name = 'block_read'", $this->db->prefix('group_permission'), $bid);
         $this->db->exec($sql);
         if (!empty($groups)) {
@@ -557,10 +571,7 @@ class Blocksadmin
         array $groups,
         array $bmodule
     ): void {
-        $security = self::runtimeGlobal('xoopsSecurity');
-        if (!$security->check()) {
-            \redirect_header(Request::getString('SCRIPT_NAME', '', 'SERVER'), 3, \implode('<br>', $security->getErrors()));
-        }
+        $this->assertToken();
         foreach (\array_keys($bid) as $i) {
             $blockId = (int)$bid[$i];
             if ($blockId <= 0) {
@@ -590,7 +601,7 @@ class Blocksadmin
                     }
                 }
             }
-            $sql = \sprintf('DELETE FROM `%s` WHERE gperm_itemid = %u AND gperm_name = %s', $this->db->prefix('group_permission'), $blockId, $this->db->quote('block_read'));
+            $sql = \sprintf("DELETE FROM `%s` WHERE gperm_itemid = %u AND gperm_modid = 1 AND gperm_name = 'block_read'", $this->db->prefix('group_permission'), $blockId);
             $this->db->exec($sql);
             if (!empty($groups[$i]) && \is_array($groups[$i])) {
                 foreach ($groups[$i] as $grp) {
@@ -735,6 +746,26 @@ class Blocksadmin
         return $submittedTitle === (string) \Xmf\I18n\LabelResolver::resolve($storedTitle, $this->moduleDirName)
             ? $storedTitle
             : $submittedTitle;
+    }
+
+    /**
+     * Every write path (order, edit, clone, delete) validates the XOOPS token here and fails
+     * closed when the security service is missing. XoopsSecurity::check() consumes the token,
+     * so a consumer's blocksadmin.php must not call check() itself before delegating.
+     */
+    private function assertToken(): void
+    {
+        $security = self::runtimeGlobal('xoopsSecurity');
+        if (\is_object($security) && \method_exists($security, 'check') && $security->check()) {
+            return;
+        }
+        $errors = \is_object($security) && \method_exists($security, 'getErrors') ? (array) $security->getErrors() : [];
+        \redirect_header(
+            Request::getString('SCRIPT_NAME', '', 'SERVER'),
+            3,
+            [] === $errors ? (\defined('_NOPERM') ? \_NOPERM : 'Security token missing.') : \implode('<br>', \array_map(\strval(...), $errors))
+        );
+        exit;
     }
 
     /** @legacy-global-accessor */

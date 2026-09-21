@@ -9783,6 +9783,40 @@
             }
         },
         {
+            "symbol": "Xoops\\ModuleTools\\Common\\ObjectTree::makeSelBox()",
+            "kind": "method",
+            "disposition": "retain-compat",
+            "qualifier": "",
+            "coupling": [
+                "xoops-runtime",
+                "xoopsobject-handler"
+            ],
+            "target_package": "xoops/xmf",
+            "target_symbol": "Xmf\\Bridge\\HandlerToRepositoryBridge",
+            "target_min_version": "2.0",
+            "target_owner": "XMF bridge and repository maintainers",
+            "target_status": "stable",
+            "availability": "migrate-on-4.0",
+            "migration": [
+                "adapter",
+                "manual-recipe"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "XOOPS 2.x object compatibility; consumers use the 4.0 bridge sequence.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
+            }
+        },
+        {
             "symbol": "Xoops\\ModuleTools\\Common\\ObjectTree::makeSelBoxOptionsArray()",
             "kind": "method",
             "disposition": "retain-compat",

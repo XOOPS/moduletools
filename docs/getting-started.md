@@ -173,12 +173,20 @@ Block management inside your own admin (instead of sending users to System → B
 ```php
 $blocksadmin = new \Xoops\ModuleTools\Common\Blocksadmin($GLOBALS['xoopsDB'], $helper);
 switch ($op) {
-    case 'list':   $blocksadmin->listBlocks(); break;
-    case 'edit':   $blocksadmin->editBlock($bid); break;
-    case 'clone':  $blocksadmin->cloneBlock($bid); break;
-    case 'delete': $blocksadmin->deleteBlock($bid); break;
+    case 'list':     $blocksadmin->listBlocks(); break;
+    case 'edit':     $blocksadmin->editBlock($bid); break;
+    case 'clone':    $blocksadmin->cloneBlock($bid); break;
+    case 'delete':   $blocksadmin->deleteBlock($bid); break;                 // GET link carries a token
+    case 'order':    $blocksadmin->orderBlock($bid, $oldtitle, /* … */ $bmodule); break;
+    case 'edit_ok':  $blocksadmin->updateBlock($bid, $btitle, $bside, $bweight, $bvisible, $bcachetime, $bmodule, $options, $groups); break;
+    case 'clone_ok': $blocksadmin->isBlockCloned($bid, $bside, $bweight, $bvisible, $bcachetime, $bmodule, $options, $groups); break;
 }
 ```
+
+Every write path (`order`, `edit_ok`, `clone_ok`, `delete`) validates the XOOPS security token
+itself and fails closed. Do **not** call `$GLOBALS['xoopsSecurity']->check()` in your dispatcher
+before delegating: `check()` consumes the one-time token, so a second check would reject the
+request. The same rule applies to `ObjectController` and `TestdataSample`.
 
 Generated CRUD tables for any `XoopsPersistableObjectHandler`:
 

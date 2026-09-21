@@ -28,6 +28,10 @@ final readonly class ModuleContext
 {
     private function __construct(public string $dirname)
     {
+        // An empty dirname would define bare _URL / _PATH / _ADMIN constants and resolve to modules/.
+        if ('' === $dirname) {
+            throw new \InvalidArgumentException('A module dirname is required to build a ModuleContext.');
+        }
     }
 
     /**

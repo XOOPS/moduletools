@@ -58,6 +58,7 @@ final class DirectoryCheckerTest extends TestCase
         $target = $this->uploadPath() . '/dc-csrf-' . uniqid('', true);
         $_POST  = ['op' => 'mtools_createdir', 'path' => $target, 'mode' => '0755'];
         unset($GLOBALS['xoopsSecurity']);
+        $GLOBALS['xoopsUser'] = new \XoopsUser(true);
 
         try {
             DirectoryChecker::handleRequest('/admin/index.php');
@@ -66,9 +67,66 @@ final class DirectoryCheckerTest extends TestCase
             self::assertStringContainsString('Security token', $e->getMessage());
         } finally {
             $_POST = [];
+            unset($GLOBALS['xoopsUser']);
         }
 
         self::assertDirectoryDoesNotExist($target);
+    }
+
+    public function testHandleRequestRefusesANonAdministratorBeforeLookingAtTheToken(): void
+    {
+        $target = $this->uploadPath() . '/dc-user-' . uniqid('', true);
+        $_POST  = ['op' => 'mtools_createdir', 'path' => $target, 'mode' => '0755'];
+        unset($GLOBALS['xoopsSecurity']);
+
+        foreach ([null, new \XoopsUser(false)] as $user) {
+            $GLOBALS['xoopsUser'] = $user;
+            try {
+                DirectoryChecker::handleRequest('/admin/index.php');
+                self::fail('handleRequest() must redirect a non-administrator');
+            } catch (\RuntimeException $e) {
+                self::assertStringContainsString('Permission denied', $e->getMessage());
+            }
+        }
+        $_POST = [];
+        unset($GLOBALS['xoopsUser']);
+
+        self::assertDirectoryDoesNotExist($target);
+    }
+
+    public function testExplicitBaseRejectsTraversalInANonExistentTail(): void
+    {
+        $base = sys_get_temp_dir() . '/dc-base-' . uniqid('', true);
+        mkdir($base);
+        $outside = $base . '/new/../../dc-outside-' . uniqid('', true);
+
+        try {
+            self::assertFalse(DirectoryChecker::createDirectory($outside, 0755, $base));
+            self::assertFalse(DirectoryChecker::setDirectoryPermissions($outside, 0755, $base));
+            self::assertDirectoryDoesNotExist($outside);
+            self::assertTrue(DirectoryChecker::createDirectory($base . '/new/child', 0755, $base));
+        } finally {
+            @rmdir($base . '/new/child');
+            @rmdir($base . '/new');
+            @rmdir($base);
+        }
+    }
+
+    public function testSetDirectoryPermissionsRefusesAFile(): void
+    {
+        $base = sys_get_temp_dir() . '/dc-file-' . uniqid('', true);
+        mkdir($base);
+        $file = $base . '/plain.txt';
+        file_put_contents($file, 'x');
+        chmod($file, 0600);
+
+        try {
+            self::assertFalse(DirectoryChecker::setDirectoryPermissions($file, 0775, $base));
+            self::assertSame('600', mb_substr(decoct(fileperms($file)), -3));
+        } finally {
+            unlink($file);
+            rmdir($base);
+        }
     }
 
     private function uploadPath(): string

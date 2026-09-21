@@ -36,16 +36,25 @@ final readonly class ItemPermission
     public function grantedItems(string $name, array $groupIds): array
     {
         $this->assertName($name);
+        $groups = $this->normalizeIds($groupIds);
+        // Core builds no group predicate for an empty list and would answer for *any* group.
+        if ([] === $groups) {
+            return [];
+        }
 
-        return $this->gateway->itemIds($name, $this->normalizeIds($groupIds), $this->moduleId);
+        return $this->gateway->itemIds($name, $groups, $this->moduleId);
     }
 
     /** @param list<int> $groupIds */
     public function isGranted(string $name, int $itemId, array $groupIds): bool
     {
         $this->assertArguments($name, $itemId);
+        $groups = $this->normalizeIds($groupIds);
+        if ([] === $groups) {
+            return false;
+        }
 
-        return $this->gateway->checkRight($name, $itemId, $this->normalizeIds($groupIds), $this->moduleId);
+        return $this->gateway->checkRight($name, $itemId, $groups, $this->moduleId);
     }
 
     /** @param list<int> $groupIds */

@@ -28,6 +28,8 @@ use Xoops\ModuleTools\Internal\Update\VersionUpdatePolicy;
 final class UpdateChecker
 {
     /**
+     * @param string|null $default    kept for signature compatibility; the download link always
+     *                                points at the latest release tag, so it is no longer read
      * @param string|null $repository GitHub "owner/repo"; defaults to the module's
      *                                `github_repo` manifest entry, then XoopsModules25x/{dirname}
      */
@@ -53,10 +55,16 @@ final class UpdateChecker
         // GitHub API on every admin page load. The whole computation is
         // deterministic given the remote release data, so caching the final
         // ?array preserves the existing return contract.
+        // The cached answer depends on the installed version too: after an update the
+        // "new version" banner must not survive until the hour is up.
+        $moduleVersion = $module instanceof \XoopsModule
+            ? $module->getInfo('version') . '_' . $module->getInfo('module_status')
+            : '0.0.0';
+
         return Cache::remember(
-            'mtools_update_' . $moduleDirName . '_' . \substr(\md5($repository), 0, 8),
+            'mtools_update_' . $moduleDirName . '_' . \substr(\md5($repository . '|' . $moduleVersion), 0, 12),
             3600,
-            static function () use ($repository, $module, $default): ?array {
+            static function () use ($repository, $moduleVersion): ?array {
                 $infoReleasesUrl = "https://api.github.com/repos/$repository/releases";
 
                 // Transient network read — retry twice before giving up. On
@@ -105,16 +113,12 @@ final class UpdateChecker
                     return null;
                 }
 
-                $latestVersionLink = sprintf("https://github.com/$repository/archive/%s.zip", $releases ? reset($releases)->tag_name : $default);
+                $latestVersionLink = sprintf("https://github.com/$repository/archive/%s.zip", (string)$releases[0]->tag_name);
                 $latestVersion     = (string)$releases[0]->tag_name;
                 $prerelease        = (bool)($releases[0]->prerelease ?? false);
                 $updateLabel       = defined('_CO_MTOOLS_NEW_VERSION')
                     ? constant('_CO_MTOOLS_NEW_VERSION')
                     : 'New version: ';
-
-                $moduleVersion = $module instanceof \XoopsModule
-                    ? $module->getInfo('version') . '_' . $module->getInfo('module_status')
-                    : '0.0.0';
 
                 if (new VersionUpdatePolicy()->hasStableUpdate($moduleVersion, $latestVersion, $prerelease)) {
                     return [

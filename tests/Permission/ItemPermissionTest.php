@@ -33,6 +33,21 @@ final class ItemPermissionTest extends TestCase
         );
     }
 
+    public function testAnEmptyOrInvalidGroupListNeverReachesTheGatewayAndIsDenied(): void
+    {
+        $gateway = new RecordingPermissionGateway();
+        $service = new ItemPermission(42, $gateway);
+
+        $gateway->items = [7, 9];
+        $gateway->right = true;
+
+        self::assertSame([], $service->grantedItems('item_view', []));
+        self::assertSame([], $service->grantedItems('item_view', [0, -1, 'guest']));
+        self::assertFalse($service->isGranted('item_view', 7, []));
+        self::assertFalse($service->isGranted('item_view', 7, [0]));
+        self::assertTrue($service->isGranted('item_view', 7, [0, 3]));
+    }
+
     public function testReplaceRestoresPreviousGrantsWhenAnAddFails(): void
     {
         $gateway = new RecordingPermissionGateway();

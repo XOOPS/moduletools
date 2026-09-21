@@ -58,9 +58,30 @@ class ObjectTree extends \XoopsObjectTree
     }
 
     /**
+     * The HTML select that core's XoopsObjectTree::makeSelBox() documents.
+     *
+     * The 1.4 override returned the value => title array instead, which broke every caller
+     * written against core; that array is {@see makeOptionsArray()}. Kept as an explicit
+     * override so the public surface still names the method.
+     *
+     * @param string $name           Name of the select element
+     * @param string $fieldName      Member variable of the node objects used as the option title
+     * @param string $prefix         String to indent deeper levels
+     * @param string $selected       Value to display as selected
+     * @param bool   $addEmptyOption Add an empty option with value "0" at the top
+     * @param int    $key            ID of the object to use as the root
+     * @param string $extra          Extra attributes for the select element
+     * @return string HTML select box
+     */
+    public function makeSelBox($name, $fieldName, $prefix = '-', $selected = '', $addEmptyOption = false, $key = 0, $extra = '')
+    {
+        return parent::makeSelBox($name, $fieldName, $prefix, $selected, $addEmptyOption, $key, $extra);
+    }
+
+    /**
      * Value => indented-title pairs for the tree, ready for XoopsFormSelect::addOptionArray().
      *
-     * The inherited makeSelBox() keeps core's contract and returns HTML.
+     * makeSelBox() keeps core's contract and returns HTML.
      *
      * @param string $fieldName      Member variable of the node objects used as the option title
      * @param string $prefix         String to indent deeper levels

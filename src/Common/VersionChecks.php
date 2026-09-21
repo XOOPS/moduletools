@@ -38,7 +38,6 @@ trait VersionChecks
             return false;
         }
         $moduleDirName = (string)$module->getVar('dirname');
-        $errorConstant = '_CO_MTOOLS_ERROR_BAD_XOOPS';
         \xoops_loadLanguage('admin', $moduleDirName);
         \xoops_loadLanguage('common', $moduleDirName);
 
@@ -51,7 +50,7 @@ trait VersionChecks
 
         if ($module->versionCompare($currentVer, $requiredVer, '<')) {
             $success = false;
-            $module->setErrors(\sprintf(\constant($errorConstant), $requiredVer, $currentVer));
+            $module->setErrors(\sprintf(self::versionCheckMessage($moduleDirName, 'ERROR_BAD_XOOPS', 'This module requires XOOPS %s+ (%s installed)'), $requiredVer, $currentVer));
         }
 
         return $success;
@@ -71,7 +70,6 @@ trait VersionChecks
             return false;
         }
         $moduleDirName = (string)$module->getVar('dirname');
-        $errorConstant = '_CO_MTOOLS_ERROR_BAD_PHP';
         \xoops_loadLanguage('admin', $moduleDirName);
         \xoops_loadLanguage('common', $moduleDirName);
 
@@ -83,12 +81,39 @@ trait VersionChecks
 
         if (false !== $reqVer && '' !== $reqVer && !\is_array($reqVer)) {
             if (\version_compare($verNum, $reqVer, '<')) {
-                $module->setErrors(\sprintf(\constant($errorConstant), $reqVer, $verNum));
+                $module->setErrors(\sprintf(self::versionCheckMessage($moduleDirName, 'ERROR_BAD_PHP', 'This module requires PHP version %s+ (%s installed)'), $reqVer, $verNum));
                 $success = false;
             }
         }
 
         return $success;
+    }
+
+    /**
+     * The message for a failed check: the consumer's own `_AM_<MODULE>_*` / `_CO_<MODULE>_*`
+     * constant first (legacy mTools name), then the package catalog, then a literal. The
+     * package catalog is loaded here because nothing else on this path loads it, and a
+     * failed check must never end in "Undefined constant".
+     */
+    private static function versionCheckMessage(string $moduleDirName, string $suffix, string $fallback): string
+    {
+        $upper = \mb_strtoupper($moduleDirName);
+        foreach (['_AM_' . $upper . '_' . $suffix, '_CO_' . $upper . '_' . $suffix] as $constant) {
+            if (\defined($constant)) {
+                return (string) \constant($constant);
+            }
+        }
+        \Xoops\ModuleTools\Internal\PackageLanguage::load('common', self::versionCheckLanguage());
+
+        return \defined('_CO_MTOOLS_' . $suffix) ? (string) \constant('_CO_MTOOLS_' . $suffix) : $fallback;
+    }
+
+    /** @legacy-global-accessor */
+    private static function versionCheckLanguage(): string
+    {
+        $config = $GLOBALS['xoopsConfig'] ?? [];
+
+        return \is_array($config) ? (string) ($config['language'] ?? 'english') : 'english';
     }
 
     private static function consumerDirname(): string

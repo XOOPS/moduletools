@@ -75,10 +75,15 @@
         "symbols/Xoops\\ModuleTools\\Persistence\\PersistableHandler/methods/setGrantedObjectsCriteria/documented_false_or_null:value-changed",
         "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerPhp/parameters/0/type:value-changed",
         "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerXoops/parameters/0/type:value-changed",
-        "symbols/Xoops\\ModuleTools\\Common\\ObjectTree/methods/makeSelBox:removed",
         "symbols/Xoops\\ModuleTools\\Common\\ObjectTree/methods/makeOptionsArray:added",
         "symbols/Xoops\\ModuleTools\\Common\\Db/methods/enumValues:added",
         "symbols/Xoops\\ModuleTools\\Common\\TestdataButtons/methods/checkToken:added",
-        "symbols/Xoops\\ModuleTools\\Common\\TestdataButtons/methods/isAuthorizedRequest:added"
+        "symbols/Xoops\\ModuleTools\\Common\\TestdataButtons/methods/isAuthorizedRequest:added",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeFromDefaultForm/parameters/5:added",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeFromDefaultForm/documented_false_or_null:value-changed",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/handleObjectDeletion/parameters/3:added",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/handleObjectDeletion/documented_false_or_null:value-changed",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/handleObjectDeletionFromUserSide/parameters/2:added",
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/handleObjectDeletionFromUserSide/documented_false_or_null:value-changed"
     ]
 }

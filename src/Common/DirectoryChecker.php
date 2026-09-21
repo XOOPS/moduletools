@@ -43,6 +43,10 @@ class DirectoryChecker
         if (empty($path)) {
             return false;
         }
+        // Normalise once: the comparison, the message and the button must all use the mode
+        // that createDirectory()/setDirectoryPermissions() will actually apply (0777 -> 0755),
+        // or the page keeps offering "Set the permission" after the admin has clicked it.
+        $mode         = self::normalizeMode($mode, 0755);
         $displayPath  = self::escape((string)$path);
         $redirectFile = self::safeRedirect($redirectFile);
 
@@ -93,6 +97,12 @@ class DirectoryChecker
         $mode         = (int)\octdec((string)($_POST['mode'] ?? '0755'));
         $redirectFile = self::safeRedirect($redirectFile);
 
+        // Only an administrator may create directories or change modes on the server.
+        $user = self::runtimeGlobal('xoopsUser');
+        if (!$user instanceof \XoopsUser || !$user->isAdmin()) {
+            \redirect_header($redirectFile, 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
+            exit;
+        }
         // Fail closed: no security service means no token check is possible, so no write.
         $security = self::runtimeGlobal('xoopsSecurity');
         if (!\is_object($security) || !\method_exists($security, 'check') || !$security->check()) {
@@ -137,11 +147,11 @@ class DirectoryChecker
      */
     public static function setDirectoryPermissions($target, $mode = 0755, ?string $allowedBasePath = null): bool
     {
-        if (!self::isAllowedPath((string)$target, $allowedBasePath)) {
+        if (!self::isAllowedPath((string)$target, $allowedBasePath) || !\is_dir((string)$target)) {
             return false;
         }
 
-        return @\chmod($target, self::normalizeMode($mode, 0755));
+        return @\chmod((string)$target, self::normalizeMode($mode, 0755));
     }
 
     /**
@@ -174,7 +184,10 @@ class DirectoryChecker
 
     private static function isAllowedPath(string $path, ?string $allowedBasePath): bool
     {
-        if ('' === $path || str_contains($path, "\0") || str_contains($path, '://')) {
+        // A ".." segment is rejected before either containment check: resolveExistingPath()
+        // canonicalises only the nearest existing ancestor, so "<base>/new/../../x" would
+        // otherwise resolve inside the base while the operation targets a path outside it.
+        if ('' === $path || str_contains($path, "\0") || str_contains($path, '://') || str_contains($path, '..')) {
             return false;
         }
 
@@ -192,10 +205,6 @@ class DirectoryChecker
 
     private static function isUnderKnownBase(string $path): bool
     {
-        if (str_contains($path, '..')) {
-            return false;
-        }
-
         $target = self::resolveExistingPath($path);
         if (false === $target) {
             return false;

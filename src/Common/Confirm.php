@@ -105,7 +105,8 @@ class Confirm
         $form->setExtra('enctype="multipart/form-data"');
         $form->addElement(new \XoopsFormLabel($model->label, htmlspecialchars($model->object, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false)));
         foreach ($model->hiddens as $key => $value) {
-            $form->addElement(new \XoopsFormHidden($key, $value));
+            // XoopsFormHidden::render() emits its value verbatim; core's xoops_confirm() escapes too.
+            $form->addElement(new \XoopsFormHidden($key, htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false)));
         }
         $form->addElement(new \XoopsFormHidden('ok', '1'));
         $buttonTray = new \XoopsFormElementTray('');

@@ -13,7 +13,10 @@ final readonly class Highlighter
     public function __construct(string $keywords, bool $singleWords = true, private string $cssClass = 'moduletools-highlight')
     {
         $terms = $singleWords ? preg_split('/\s+/u', trim($keywords)) : [trim($keywords)];
-        $this->terms = array_values(array_filter(array_unique(array_map(strval(...), $terms ?: [])), static fn (string $term): bool => '' !== $term));
+        $terms = array_values(array_filter(array_unique(array_map(strval(...), $terms ?: [])), static fn (string $term): bool => '' !== $term));
+        // Longest first, so "abc" is marked whole instead of "ab" winning the alternation.
+        usort($terms, static fn (string $a, string $b): int => mb_strlen($b) <=> mb_strlen($a));
+        $this->terms = $terms;
     }
 
     public function highlight(string $text): string

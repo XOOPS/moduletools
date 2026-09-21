@@ -121,39 +121,18 @@ class Paginator
     }
 
     /**
-     * Rebuild the current query string minus the page parameter, escaping each
-     * key/value so the result is safe to embed in an href.
+     * Rebuild the current query string minus the page parameter, URL-encoding each
+     * key/value (RFC 3986) so an embedded "&" or "#" survives the round trip. The
+     * result is not HTML-escaped; {@see pageHref()} escapes the whole href at emission.
      *
      * @param list<string> $usedQuery parameter names to drop
      */
     public function processQuery(array $usedQuery): string
     {
-        $queryString = $_SERVER['QUERY_STRING'] ?? '';
-        \parse_str($queryString, $queryVars);
+        \parse_str($_SERVER['QUERY_STRING'] ?? '', $queryVars);
+        $filtered = \array_diff_key($queryVars, \array_flip($usedQuery));
 
-        $filtered = [];
-        foreach ($queryVars as $key => $value) {
-            if (\in_array($key, $usedQuery, true)) {
-                continue;
-            }
-            $safeKey = \htmlspecialchars((string) $key, \ENT_QUOTES, 'UTF-8');
-            if (\is_array($value)) {
-                foreach ($value as $arrayKey => $arrayValue) {
-                    $safeValue = \htmlspecialchars((string) $arrayValue, \ENT_QUOTES, 'UTF-8');
-                    if (\is_numeric($arrayKey)) {
-                        $filtered[] = $safeKey . '[]=' . $safeValue;
-                    } else {
-                        $safeArrayKey = \htmlspecialchars((string) $arrayKey, \ENT_QUOTES, 'UTF-8');
-                        $filtered[]   = $safeKey . '[' . $safeArrayKey . ']=' . $safeValue;
-                    }
-                }
-            } else {
-                $safeValue  = \htmlspecialchars((string) $value, \ENT_QUOTES, 'UTF-8');
-                $filtered[] = $safeKey . '=' . $safeValue;
-            }
-        }
-
-        return empty($filtered) ? '' : '?' . \implode('&', $filtered);
+        return [] === $filtered ? '' : '?' . \http_build_query($filtered, '', '&', \PHP_QUERY_RFC3986);
     }
 
     /**
@@ -254,13 +233,13 @@ class Paginator
 
     /**
      * Attribute-safe href. toPage (PHP_SELF by default) and urlOther are caller/request
-     * input; queryStr is already entity-encoded, so encode without double-encoding.
+     * input and queryStr is URL-encoded, so the whole href is HTML-escaped exactly once here.
      */
     private function pageHref(int $page, string $loadtime): string
     {
         $href = $this->toPage . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
 
-        return \htmlspecialchars($href, \ENT_QUOTES, 'UTF-8', false);
+        return \htmlspecialchars($href, \ENT_QUOTES, 'UTF-8');
     }
 
     private function linkItem(int $page, string $loadtime, string $glyph, string $label): string
