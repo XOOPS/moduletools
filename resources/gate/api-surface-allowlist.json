@@ -1,9 +1,5 @@
 {
     "allowed_changes": [
-        "symbols/Xoops\\ModuleTools\\Admin\\Utility:added",
-        "symbols/Xoops\\ModuleTools\\Module\\NamespaceAutoloader:added",
-        "symbols/Xoops\\ModuleTools\\Common\\ResizeRequest/methods/__construct/parameters/7:added",
-        "symbols/Xoops\\ModuleTools\\Common\\ResizeRequest/methods/__construct/documented_false_or_null:value-changed",
         "symbols/Xoops\\ModuleTools\\Common\\ModuleConfig/methods/__construct/parameters/11:added",
         "symbols/Xoops\\ModuleTools\\Admin\\Export:added",
         "symbols/Xoops\\ModuleTools\\Admin\\Table:added",

@@ -8,8 +8,16 @@ $currentFile  = $packageRoot . '/resources/gate/api-surface.json';
 $allowlistFile = $packageRoot . '/resources/gate/api-surface-allowlist.json';
 
 if (in_array('--accept-baseline', $argv, true)) {
-    copy($currentFile, $baselineFile);
-    fwrite(STDOUT, "Accepted current API surface as the compatibility baseline.\n");
+    if (!copy($currentFile, $baselineFile)) {
+        fwrite(STDERR, "Could not save the compatibility baseline; allowlist unchanged.\n");
+        exit(1);
+    }
+    $emptyAllowlist = json_encode(['allowed_changes' => []], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
+    if (file_put_contents($allowlistFile, $emptyAllowlist) !== strlen($emptyAllowlist)) {
+        fwrite(STDERR, "Baseline saved, but clearing the allowlist failed.\n");
+        exit(1);
+    }
+    fwrite(STDOUT, "Accepted current API surface as the compatibility baseline; allowlist cleared.\n");
     exit(0);
 }
 
@@ -30,9 +38,15 @@ compareApi($baseline['symbols'], $current['symbols'], 'symbols', $changes);
 compareApi($baseline['global_functions'], $current['global_functions'], 'global_functions', $changes);
 compareApi($baseline['alias_rules'], $current['alias_rules'], 'alias_rules', $changes);
 $unexpected = array_values(array_filter($changes, static fn (string $change): bool => !isset($allowed[$change])));
+$stale = array_values(array_diff(array_keys($allowed), $changes));
 
 if ([] !== $unexpected) {
     fwrite(STDERR, "Unexpected public API changes:\n- " . implode("\n- ", $unexpected) . "\n");
+}
+if ([] !== $stale) {
+    fwrite(STDERR, "Stale API allowlist entries:\n- " . implode("\n- ", $stale) . "\n");
+}
+if ([] !== $unexpected || [] !== $stale) {
     exit(1);
 }
 

@@ -65,10 +65,10 @@ final class Export
         exit;
     }
 
-    /** Spreadsheets evaluate cells starting with = + - @ or a tab/CR; a leading quote keeps them as text. */
+    /** Neutralize formula prefixes, including tab/CR/LF, with a leading quote. */
     private static function csvCell(string $value): string
     {
         // Only a genuinely negative number keeps its sign; "+1" is still a formula to a spreadsheet.
-        return '' !== $value && str_contains("=+-@\t\r", $value[0]) && !('-' === $value[0] && is_numeric($value)) ? "'" . $value : $value;
+        return '' !== $value && str_contains("=+-@\t\r\n", $value[0]) && !('-' === $value[0] && is_numeric($value)) ? "'" . $value : $value;
     }
 }

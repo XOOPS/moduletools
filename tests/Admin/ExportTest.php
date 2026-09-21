@@ -17,6 +17,10 @@ final class ExportTest extends TestCase
         yield 'plus' => ['+cmd|calc', "'+cmd|calc"];
         yield 'at' => ['@SUM(1)', "'@SUM(1)"];
         yield 'tab' => ["\t=1", "'\t=1"];
+        yield 'line feed' => ["\n=1", "'\n=1"];
+        yield 'carriage return' => ["\r=1", "'\r=1"];
+        yield 'crlf' => ["\r\n=1", "'\r\n=1"];
+        yield 'ordinary multiline text' => ["hello\nworld", "hello\nworld"];
         yield 'negative number stays numeric' => ['-12.5', '-12.5'];
         yield 'positive sign is still a formula' => ['+1', "'+1"];
         yield 'positive exponent is still a formula' => ['+1e3', "'+1e3"];

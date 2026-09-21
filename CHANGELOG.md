@@ -39,6 +39,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   token. A dispatcher must not call `$xoopsSecurity->check()` before delegating.
 
 ### Fixed
+- API compatibility checks reject stale approvals; accepting a baseline clears approvals only after saving succeeds.
+- CSV export neutralizes line-feed-prefixed cells; dependency review uses the verified v5.0.0 action commit.
 - Row cloning preserves SQL NULL; enum metadata is scoped to the active database.
 - HTML truncation recognizes complete entities and counts multibyte offsets correctly.
 - Update checks use GitHub's latest stable release and compare tags with a leading v correctly.
