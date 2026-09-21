@@ -17,7 +17,7 @@ final class SortControlBuilder
     ): SortControlResult {
         $ascendingIcon  = $requestedSort === $currentSort && 'asc' === $currentOrder ? 'selasc.png' : 'asc.png';
         $descendingIcon = $requestedSort === $currentSort && 'desc' === $currentOrder ? 'seldesc.png' : 'desc.png';
-        $baseUrl = $scriptName . '?start=' . $start . '&sort=' . $requestedSort . '&order=';
+        $baseUrl = $scriptName . '?start=' . (int) $start . '&sort=' . rawurlencode($requestedSort) . '&order=';
 
         return new SortControlResult(
             formAction: $requestUri,

@@ -52,9 +52,11 @@ class Output
             currentSort: (string) $sort,
             requestedSort: (string) $form_sort,
         );
-        $select_view = '<form name="form_switch" id="form_switch" action="' . $model->formAction . '" method="post"><span style="font-weight: bold;">' . $text . '</span>';
-        $select_view .= '  <a href="' . $model->ascendingUrl . '"><img src="' . $pathModIcon16 . '/' . $model->ascendingIcon . '" title="ASC" alt="ASC"></a>';
-        $select_view .= '<a href="' . $model->descendingUrl . '"><img src="' . $pathModIcon16 . '/' . $model->descendingIcon . '" title="DESC" alt="DESC"></a>';
+        // Everything here derives from the request (REQUEST_URI, sort/order) or the caller: escape at emission.
+        $escape = static fn (mixed $value): string => \htmlspecialchars((string) $value, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
+        $select_view = '<form name="form_switch" id="form_switch" action="' . $escape($model->formAction) . '" method="post"><span style="font-weight: bold;">' . $escape($text) . '</span>';
+        $select_view .= '  <a href="' . $escape($model->ascendingUrl) . '"><img src="' . $escape($pathModIcon16 . '/' . $model->ascendingIcon) . '" title="ASC" alt="ASC"></a>';
+        $select_view .= '<a href="' . $escape($model->descendingUrl) . '"><img src="' . $escape($pathModIcon16 . '/' . $model->descendingIcon) . '" title="DESC" alt="DESC"></a>';
         $select_view .= '</form>';
 
         return $select_view;

@@ -282,11 +282,16 @@ final class ConsumerBridgeGenerator
             $parameters[] = '        public ' . $type . ' $' . $property . ' = ' . $default . ',';
             $fallback = $metadata['nullable'] ? 'null' : $default;
             $value = "\$row['" . $column . "'] ?? " . $fallback;
+            // Boolean columns arrive as strings from mysqli; compare numerically so any numeric zero
+            // ('0', '0.0', ' 0') reads as false, not only the literal '0' that (bool) already handles.
+            $cast = static fn (string $expr): string => 'bool' === $metadata['phpType']
+                ? '0 !== (int) (' . $expr . ')'
+                : '(' . $metadata['phpType'] . ') (' . $expr . ')';
             if ($metadata['nullable']) {
                 $value = "array_key_exists('" . $column . "', \$row) && \$row['" . $column . "'] !== null"
-                    . " ? (" . $metadata['phpType'] . ") \$row['" . $column . "'] : null";
+                    . ' ? ' . $cast("\$row['" . $column . "']") . ' : null';
             } else {
-                $value = '(' . $metadata['phpType'] . ') (' . $value . ')';
+                $value = $cast($value);
             }
             $from[] = '            ' . $property . ': ' . $value . ',';
             $to[] = "            '" . $column . "' => \$this->" . $property . ',';
