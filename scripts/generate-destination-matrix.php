@@ -5,9 +5,19 @@ declare(strict_types=1);
 $packageRoot = dirname(__DIR__);
 $checkOnly   = in_array('--check', $argv, true);
 $surface     = json_decode((string) file_get_contents($packageRoot . '/resources/gate/api-surface.json'), true, flags: JSON_THROW_ON_ERROR);
-// The consumer audit is a private, site-specific scan; without it every symbol counts as unused.
+// The consumer audit is a private, site-specific scan that is never committed. Without it
+// (CI, fresh clones) consumer usage is carried over from the committed matrix so --check
+// stays deterministic instead of flagging every symbol as unused.
 $auditFile   = $packageRoot . '/docs/internal/consumer-audit.json';
-$audit       = is_file($auditFile) ? json_decode((string) file_get_contents($auditFile), true, flags: JSON_THROW_ON_ERROR) : ['modules' => []];
+$matrixFile  = $packageRoot . '/resources/gate/destination-matrix.json';
+$audit       = ['modules' => [], 'carried' => []];
+if (is_file($auditFile)) {
+    $audit = json_decode((string) file_get_contents($auditFile), true, flags: JSON_THROW_ON_ERROR) + ['carried' => []];
+} elseif (is_file($matrixFile)) {
+    foreach (json_decode((string) file_get_contents($matrixFile), true, flags: JSON_THROW_ON_ERROR)['records'] ?? [] as $record) {
+        $audit['carried'][str_replace('()', '', (string) $record['symbol'])] = $record['consumers'];
+    }
+}
 $decisions   = require $packageRoot . '/resources/migration/destination-decisions.php';
 $matrix      = ['schema_version' => 1, 'records' => []];
 
@@ -66,6 +76,9 @@ function addRecord(array &$records, string $symbol, string $kind, array $decisio
 function consumerUsage(string $symbol, array $audit): array
 {
     $lookup = str_replace('()', '', $symbol);
+    if ($audit['modules'] === []) {
+        return $audit['carried'][$lookup] ?? ['usage_count' => 0, 'modules' => []];
+    }
     $modules = [];
     $count = 0;
     foreach ($audit['modules'] as $module => $record) {
