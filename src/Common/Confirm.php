@@ -103,7 +103,7 @@ class Confirm
         \xoops_load('XoopsFormLoader');
         $form = new \XoopsThemeForm($model->title, 'formConfirm', $model->action, 'post', true);
         $form->setExtra('enctype="multipart/form-data"');
-        $form->addElement(new \XoopsFormLabel($model->label, $model->object));
+        $form->addElement(new \XoopsFormLabel($model->label, htmlspecialchars($model->object, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false)));
         foreach ($model->hiddens as $key => $value) {
             $form->addElement(new \XoopsFormHidden($key, $value));
         }

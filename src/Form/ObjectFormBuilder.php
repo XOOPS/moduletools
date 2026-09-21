@@ -40,6 +40,8 @@ final class ObjectFormBuilder
         $tray->addElement(new \XoopsFormButton('', 'submit', false === $submitCaption ? _SUBMIT : $submitCaption, 'submit'));
         if (false !== $cancelAction) {
             $cancel = new \XoopsFormButton('', 'cancel', _CANCEL, 'button');
+            // $cancelAction is a developer-supplied JavaScript statement (e.g. "location.href='index.php'"),
+            // never request data; it is escaped for the attribute only, callers JS-encode any embedded value.
             $cancel->setExtra('onclick="' . htmlspecialchars($cancelAction, ENT_QUOTES | ENT_HTML5) . '"');
             $tray->addElement($cancel);
         }

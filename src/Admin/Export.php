@@ -47,18 +47,24 @@ final class Export
         foreach ($this->handler->getObjects($this->criteria) as $object) {
             $keys = array_values(array_filter(array_keys($object->vars), fn (string $key): bool => (false === $this->fields || in_array($key, $this->fields, true)) && !in_array($key, $this->excluded, true)));
             if (!$headerWritten) {
-                fputcsv($stream, array_map(fn (string $key): string => (string) ($object->vars[$key]['form_caption'] ?? $key), $keys), escape: '');
+                fputcsv($stream, array_map(fn (string $key): string => self::csvCell((string) ($object->vars[$key]['form_caption'] ?? $key)), $keys), escape: '');
                 $headerWritten = true;
             }
             $row = [];
             foreach ($keys as $key) {
                 $method = false !== $this->outputMethods ? ($this->outputMethods[$key] ?? null) : null;
                 $value = is_string($method) && method_exists($object, $method) ? $object->{$method}() : $object->getVar($key, 's');
-                $row[] = is_array($value) ? implode(', ', array_map(strval(...), $value)) : (string) $value;
+                $row[] = self::csvCell(is_array($value) ? implode(', ', array_map(strval(...), $value)) : (string) $value);
             }
             fputcsv($stream, $row, escape: '');
         }
         fclose($stream);
         exit;
+    }
+
+    /** Spreadsheets evaluate cells starting with = + - @ or a tab/CR; a leading quote keeps them as text. */
+    private static function csvCell(string $value): string
+    {
+        return '' !== $value && str_contains("=+-@	", $value[0]) && !is_numeric($value) ? "'" . $value : $value;
     }
 }
