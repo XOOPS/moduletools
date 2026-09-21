@@ -27,11 +27,12 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Fixed
 - `Persistence\PersistableHandler::setGrantedObjectsCriteria()` always adds a key restriction: with
-  no grants or no module context the criteria now match nothing instead of every row.
+  no grants or no module context the criteria now match nothing instead of every row. Conditions
+  already in the criteria are grouped first so an OR among them cannot bypass the restriction.
 - `Admin\ObjectController::storeFromDefaultForm()` no longer persists or redirects after a
   rejected upload, and returns false when a permission update fails.
 - `Common\DirectoryChecker` form action and redirect accept only local paths (`javascript:` and
-  `data:` schemes were passing).
+  `data:` schemes were passing). The shared check is `Common\Output::localPath()`.
 - `Common\Cloner::clone()` removes its partial target when copying fails, and skips symlinks.
 - `Internal\Tools\ConsumerBridgeGenerator`: generated repositories allow only `ASC`/`DESC` as
   the ORDER BY direction.

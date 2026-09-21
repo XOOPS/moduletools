@@ -125,4 +125,28 @@ class Output
             $xoopsTpl->assign('xoops_metaDescription', \strip_tags($content));
         }
     }
+
+    /**
+     * A local navigation target (relative or root-relative path), or $fallback when $path is not one.
+     *
+     * Leading whitespace, control characters, backslashes, a scheme and a host are all rejected
+     * because browsers normalise them into a navigation ("  javascript:x" runs). The fallback is
+     * validated the same way and ends at a fixed "index.php".
+     */
+    public static function localPath(string $path, string $fallback = 'index.php'): string
+    {
+        if (self::isLocalPath($path)) {
+            return $path;
+        }
+
+        return self::isLocalPath($fallback) ? $fallback : 'index.php';
+    }
+
+    public static function isLocalPath(string $path): bool
+    {
+        return '' !== $path
+            && 1 !== \preg_match('/^\s|[\x00-\x1F\x7F]|\\\\/', $path)
+            && !\str_starts_with($path, '//')
+            && 1 !== \preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:/', $path);
+    }
 }

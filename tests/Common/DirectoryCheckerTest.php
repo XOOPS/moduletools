@@ -42,7 +42,7 @@ final class DirectoryCheckerTest extends TestCase
         $_SERVER['SCRIPT_NAME'] = '/admin/fallback.php';
 
         try {
-            foreach (['javascript:alert(1)', 'data:text/html,x', 'https://evil.test/', '//evil.test/x', "\t/admin/x.php", '/admin/x\\y.php', ''] as $bad) {
+            foreach (['javascript:alert(1)', ' javascript:alert(1)', 'data:text/html,x', 'https://evil.test/', '//evil.test/x', ' //evil.test/x', "\t/admin/x.php", '/admin/x\\y.php', ''] as $bad) {
                 $html = (string) DirectoryChecker::getDirectoryStatus($missing, 0755, $bad);
                 self::assertStringContainsString("<form action='/admin/fallback.php'", $html, 'rejected: ' . $bad);
             }

@@ -136,6 +136,8 @@ class PersistableHandler extends \XoopsPersistableObjectHandler
      * Always adds a key restriction: with no grants (or no module context) the
      * restriction is an empty IN, which XOOPS 2.8 renders as a constant-false
      * predicate, so a caller that ignores the false return still lists nothing.
+     * Conditions already in $criteria are grouped first, so an OR among them
+     * cannot bypass the restriction ("(a OR b) AND key IN (...)").
      */
     public function setGrantedObjectsCriteria(\CriteriaCompo $criteria, string $permissionName): bool
     {
@@ -145,6 +147,15 @@ class PersistableHandler extends \XoopsPersistableObjectHandler
             $user = self::runtimeUser();
             $groups = is_object($user) ? $user->getGroups() : [XOOPS_GROUP_ANONYMOUS];
             $ids = array_map(intval(...), \Xoops\ModuleTools\Permission\ItemPermission::forModule($module)->grantedItems($permissionName, array_map(intval(...), (array) $groups)));
+        }
+        if ([] !== $criteria->criteriaElements) {
+            $existing = new \CriteriaCompo();
+            foreach ($criteria->criteriaElements as $index => $element) {
+                $existing->add($element, (string) ($criteria->conditions[$index] ?? 'AND'));
+            }
+            $criteria->criteriaElements = [];
+            $criteria->conditions = [];
+            $criteria->add($existing);
         }
         $criteria->add(new \Criteria($this->keyName, $ids, 'IN'));
 

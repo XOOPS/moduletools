@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Form;
 
+use Xoops\ModuleTools\Common\Output;
 use Xoops\ModuleTools\Object\DynamicObject;
 
 /** Builds native XOOPS forms from DynamicObject field metadata. */
@@ -51,24 +52,16 @@ final class ObjectFormBuilder
     /**
      * $cancelAction is a local URL the Cancel button navigates to, or "history.back()".
      * It is never executed as JavaScript: the URL is JSON-encoded into a fixed
-     * `location.href = "..."` assignment, and a scheme or host falls back to the current script.
+     * `location.href = "..."` assignment. Anything that is not a local path (see
+     * {@see Output::localPath()}) falls back to the current script, validated the same way.
      */
     public static function cancelHandler(string $cancelAction): string
     {
-        $cancelAction = trim($cancelAction);
-        if (in_array($cancelAction, ['history.back()', 'history.go(-1)'], true)) {
+        if (in_array(trim($cancelAction), ['history.back()', 'history.go(-1)'], true)) {
             return "onclick='history.back()'";
         }
-        if (
-            '' === $cancelAction
-            || str_starts_with($cancelAction, '//')
-            || str_contains($cancelAction, '\\')
-            || 1 === preg_match('/[\x00-\x1F\x7F]/', $cancelAction)
-            || 1 === preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:/', $cancelAction)
-        ) {
-            $cancelAction = (string) xoops_getenv('SCRIPT_NAME');
-        }
-        $href = json_encode($cancelAction, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $target = Output::localPath($cancelAction, (string) xoops_getenv('SCRIPT_NAME'));
+        $href   = json_encode($target, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 
         return "onclick='location.href=" . $href . "'";
     }

@@ -41,10 +41,19 @@ final class ObjectFormBuilderTest extends TestCase
         self::assertSame("onclick='location.href=\"/modules/quotes/admin/quote.php\"'", ObjectFormBuilder::cancelHandler($target), $target);
     }
 
+    #[Test]
+    public function cancelFallbackIsValidatedToo(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = 'javascript:alert(1)';
+        self::assertSame("onclick='location.href=\"index.php\"'", ObjectFormBuilder::cancelHandler('//evil.test/'));
+    }
+
     /** @return iterable<string, array{string}> */
     public static function unsafeTargets(): iterable
     {
         yield 'javascript' => ['javascript:alert(1)'];
+        yield 'leading space' => [' javascript:alert(1)'];
+        yield 'leading newline' => ["\n//evil.test/"];
         yield 'data' => ['data:text/html,x'];
         yield 'absolute' => ['https://evil.test/'];
         yield 'protocol relative' => ['//evil.test/x'];

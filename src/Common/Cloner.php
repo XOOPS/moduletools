@@ -58,7 +58,10 @@ final class Cloner
             throw new \InvalidArgumentException('Source module does not exist: ' . $sourcePath);
         }
         $targetPath = \dirname($sourcePath) . '/' . $newDirname;
-        if (\file_exists($targetPath)) {
+        // Exclusive creation establishes ownership: an existing directory, file or symlink
+        // (even one that appeared after a prior check) makes mkdir() fail, so only a
+        // target this call created is ever cleaned up below.
+        if (\file_exists($targetPath) || \is_link($targetPath) || !@\mkdir($targetPath)) {
             throw new \InvalidArgumentException('Target already exists: ' . $targetPath);
         }
 
@@ -174,7 +177,7 @@ final class Cloner
     /** @param list<string> $search @param list<string> $replace */
     private static function copyTree(string $source, string $target, array $search, array $replace, bool $topLevel): void
     {
-        if (!\mkdir($target) && !\is_dir($target)) {
+        if (!@\mkdir($target) && !\is_dir($target)) {
             throw new \RuntimeException(\sprintf('Directory "%s" was not created', $target));
         }
         $entries = \scandir($source, \SCANDIR_SORT_ASCENDING);

@@ -76,6 +76,22 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function cloneRefusesASymlinkTargetAndLeavesIt(): void
+    {
+        mkdir($this->root . '/elsewhere');
+        if (!@symlink($this->root . '/elsewhere', $this->root . '/linked')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+        try {
+            Cloner::clone($this->root . '/quotes', 'linked');
+            self::fail('a symlink target must be refused');
+        } catch (\InvalidArgumentException) {
+        }
+        self::assertTrue(is_link($this->root . '/linked'));
+        self::assertDirectoryExists($this->root . '/elsewhere');
+    }
+
+    #[Test]
     public function cloneRemovesThePartialTargetWhenCopyingFails(): void
     {
         // A directory "quotes" and a file "sayings" both map onto the target entry "sayings":
@@ -106,6 +122,10 @@ final class ClonerTest extends TestCase
     {
         foreach (array_diff(scandir($dir) ?: [], ['.', '..']) as $entry) {
             $path = $dir . '/' . $entry;
+            if (is_link($path)) {
+                @unlink($path) || rmdir($path); // a directory symlink needs rmdir() on Windows
+                continue;
+            }
             is_dir($path) ? $this->rmdir($path) : unlink($path);
         }
         rmdir($dir);

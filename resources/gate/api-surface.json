@@ -4041,6 +4041,48 @@
                     "throws": [],
                     "documented_false_or_null": true
                 },
+                "isLocalPath": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "path",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        }
+                    ],
+                    "return_type": "bool",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
+                "localPath": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "path",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        },
+                        {
+                            "name": "fallback",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "'index.php'"
+                        }
+                    ],
+                    "return_type": "string",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
                 "metaDescription": {
                     "static": true,
                     "by_ref": false,
