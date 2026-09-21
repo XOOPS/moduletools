@@ -9851,6 +9851,39 @@
             }
         },
         {
+            "symbol": "Xoops\\ModuleTools\\Common\\Output::localPath()",
+            "kind": "method",
+            "disposition": "retain-compat",
+            "qualifier": "until-output-modeled",
+            "coupling": [
+                "xoops-runtime",
+                "presentation-html"
+            ],
+            "target_package": "none",
+            "target_symbol": "none",
+            "target_min_version": "none",
+            "target_owner": "none",
+            "target_status": "not-applicable",
+            "availability": "not-applicable",
+            "migration": [
+                "none-yet"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "Frozen XOOPS 2.x compatibility surface.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
+            }
+        },
+        {
             "symbol": "Xoops\\ModuleTools\\Common\\Output::metaDescription()",
             "kind": "method",
             "disposition": "retain-compat",
@@ -15157,6 +15190,42 @@
         },
         {
             "symbol": "Xoops\\ModuleTools\\Form\\ObjectFormBuilder::build()",
+            "kind": "method",
+            "disposition": "retain-compat",
+            "qualifier": "then-migrate",
+            "coupling": [
+                "xoops-runtime",
+                "xoopsobject-handler",
+                "request-global",
+                "presentation-html"
+            ],
+            "target_package": "xoops/xmf",
+            "target_symbol": "Xmf\\Presentation\\DataTable",
+            "target_min_version": "2.0",
+            "target_owner": "XMF presentation and repository maintainers",
+            "target_status": "experimental",
+            "availability": "migrate-on-4.0",
+            "migration": [
+                "adapter",
+                "manual-recipe"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "Keep frozen until the XMF presentation contract is stable.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
+            }
+        },
+        {
+            "symbol": "Xoops\\ModuleTools\\Form\\ObjectFormBuilder::cancelHandler()",
             "kind": "method",
             "disposition": "retain-compat",
             "qualifier": "then-migrate",

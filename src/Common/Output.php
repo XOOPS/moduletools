@@ -142,7 +142,7 @@ class Output
         return self::isLocalPath($fallback) ? $fallback : 'index.php';
     }
 
-    public static function isLocalPath(string $path): bool
+    private static function isLocalPath(string $path): bool
     {
         return '' !== $path
             && 1 !== \preg_match('/^\s|[\x00-\x1F\x7F]|\\\\/', $path)

@@ -212,6 +212,7 @@
 | `Xoops\ModuleTools\Common\ObjectTree::makeSelBoxOptionsArray()` | method | retain-compat | migrate-on-4.0 | `Xmf\Bridge\HandlerToRepositoryBridge` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Output` | type | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\Output::getEditor()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 0 | `missing` |
+| `Xoops\ModuleTools\Common\Output::localPath()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Output::metaDescription()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\Output::metaKeywords()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\Output::selectSorting()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
@@ -351,6 +352,7 @@
 | `Xoops\ModuleTools\Constants::REDIRECT_DELAY_SHORT` | constant | retain-compat | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Form\ObjectFormBuilder` | type | retain-compat (then-migrate) | migrate-on-4.0 | `Xmf\Presentation\DataTable` | experimental | 0 | `missing` |
 | `Xoops\ModuleTools\Form\ObjectFormBuilder::build()` | method | retain-compat (then-migrate) | migrate-on-4.0 | `Xmf\Presentation\DataTable` | experimental | 0 | `missing` |
+| `Xoops\ModuleTools\Form\ObjectFormBuilder::cancelHandler()` | method | retain-compat (then-migrate) | migrate-on-4.0 | `Xmf\Presentation\DataTable` | experimental | 0 | `missing` |
 | `Xoops\ModuleTools\Module\ConsumerRuntime` | type | retain-compat (reassess) | not-applicable | `—` | not-applicable | 100 | `missing` |
 | `Xoops\ModuleTools\Module\ConsumerRuntime::assertReady()` | method | retain-compat (reassess) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Module\ConsumerRuntime::dependencyError()` | method | retain-compat (reassess) | not-applicable | `—` | not-applicable | 99 | `missing` |
