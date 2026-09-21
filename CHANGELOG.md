@@ -7,9 +7,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Changed
-- `Common\ObjectTree::makeSelBox()` no longer overrides core: it returns the HTML select that
-  `XoopsObjectTree` documents. The value => title array it used to return is
-  `ObjectTree::makeOptionsArray()`.
+- `Common\ObjectTree::makeSelBox()` preserves its 1.x options-array result and delegates to
+  `makeOptionsArray()`. Use core's `XoopsObjectTree` for HTML select rendering.
 - `Form\ObjectFormBuilder::build()` / `Object\DynamicObject::getForm()`: `$cancelAction` is now a
   local URL (or `history.back()`), emitted as a fixed `location.href = "..."` assignment. It is no
   longer executed as a JavaScript statement; a scheme, host or control character falls back to
@@ -35,13 +34,14 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   `DynamicObject::accessGranted()` for the operation and otherwise refuses.
 - `Common\Paginator::$queryStr` is URL-encoded (RFC 3986) instead of entity-encoded; page hrefs
   are HTML-escaped once at emission, so `q=a%26b` survives the round trip.
-- `Common\ObjectTree::makeSelBox()` is an explicit override that delegates to core (HTML), so the
-  public surface keeps the method; the 1.4 array result is `makeOptionsArray()`.
 - `Common\Blocksadmin`: every write path (`orderBlock()`, `updateBlock()`, `isBlockCloned()`,
   `deleteBlock()`) validates the XOOPS token itself and fails closed; the delete link carries a
   token. A dispatcher must not call `$xoopsSecurity->check()` before delegating.
 
 ### Fixed
+- Row cloning preserves SQL NULL; enum metadata is scoped to the active database.
+- HTML truncation recognizes complete entities and counts multibyte offsets correctly.
+- Update checks use GitHub's latest stable release and compare tags with a leading v correctly.
 - `Common\Blocksadmin::isBlockCloned()` casts the request-supplied module and group ids before
   building the INSERT statements; `updateBlock()` deletes only the block's own `block_read`
   permission rows instead of every row sharing the item id.
@@ -149,4 +149,3 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [0.0.1] — 2026-07-22
 
 First internal pre-release. 
-

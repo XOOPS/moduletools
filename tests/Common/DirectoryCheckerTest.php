@@ -119,10 +119,13 @@ final class DirectoryCheckerTest extends TestCase
         $file = $base . '/plain.txt';
         file_put_contents($file, 'x');
         chmod($file, 0600);
+        clearstatcache(true, $file);
+        $permissions = fileperms($file);
 
         try {
             self::assertFalse(DirectoryChecker::setDirectoryPermissions($file, 0775, $base));
-            self::assertSame('600', mb_substr(decoct(fileperms($file)), -3));
+            clearstatcache(true, $file);
+            self::assertSame($permissions, fileperms($file));
         } finally {
             unlink($file);
             rmdir($base);

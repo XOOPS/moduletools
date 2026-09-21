@@ -58,11 +58,9 @@ class ObjectTree extends \XoopsObjectTree
     }
 
     /**
-     * The HTML select that core's XoopsObjectTree::makeSelBox() documents.
+     * Legacy options-array contract retained for ModuleTools 1.x consumers.
      *
-     * The 1.4 override returned the value => title array instead, which broke every caller
-     * written against core; that array is {@see makeOptionsArray()}. Kept as an explicit
-     * override so the public surface still names the method.
+     * Use core's XoopsObjectTree when an HTML select is required.
      *
      * @param string $name           Name of the select element
      * @param string $fieldName      Member variable of the node objects used as the option title
@@ -71,17 +69,18 @@ class ObjectTree extends \XoopsObjectTree
      * @param bool   $addEmptyOption Add an empty option with value "0" at the top
      * @param int    $key            ID of the object to use as the root
      * @param string $extra          Extra attributes for the select element
-     * @return string HTML select box
+     * @return array<int|string, string> Value => indented-title pairs
      */
+    // @phpstan-ignore method.childReturnType (Released ModuleTools 1.x promises an array despite core's HTML contract.)
     public function makeSelBox($name, $fieldName, $prefix = '-', $selected = '', $addEmptyOption = false, $key = 0, $extra = '')
     {
-        return parent::makeSelBox($name, $fieldName, $prefix, $selected, $addEmptyOption, $key, $extra);
+        return $this->makeOptionsArray($fieldName, $prefix, $addEmptyOption, $key);
     }
 
     /**
      * Value => indented-title pairs for the tree, ready for XoopsFormSelect::addOptionArray().
      *
-     * makeSelBox() keeps core's contract and returns HTML.
+     * makeSelBox() retains the same array result for legacy callers.
      *
      * @param string $fieldName      Member variable of the node objects used as the option title
      * @param string $prefix         String to indent deeper levels

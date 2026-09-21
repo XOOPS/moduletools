@@ -120,7 +120,7 @@ final class Db implements DbInterface
         unset($tempTable[$idField]);
         // insert cloned copy of the original  record
         $columns = array_map(static fn ($column): string => '`' . str_replace('`', '``', (string)$column) . '`', array_keys($tempTable));
-        $values  = array_map(static fn ($value): string => $db->quote((string)$value), array_values($tempTable));
+        $values  = array_map(static fn ($value): string => null === $value ? 'NULL' : $db->quote((string)$value), array_values($tempTable));
         $sql     = "INSERT INTO $table (" . \implode(', ', $columns) . ') VALUES (' . \implode(', ', $values) . ')';
         $result  = $db->exec($sql);
         if (!$result) {
@@ -150,7 +150,7 @@ final class Db implements DbInterface
 
         // TABLE_NAME / COLUMN_NAME are string columns in INFORMATION_SCHEMA: bind them as
         // properly escaped string literals via quote() rather than interpolating raw values.
-        $sql    = 'SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '
+        $sql    = 'SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '
             . $db->quote($table) . ' AND COLUMN_NAME = ' . $db->quote($columnName);
         $result = $db->query($sql);
         if (!$db->isResultSet($result) || !($result instanceof \mysqli_result)) {

@@ -65,7 +65,7 @@ final class UpdateChecker
             'mtools_update_' . $moduleDirName . '_' . \substr(\md5($repository . '|' . $moduleVersion), 0, 12),
             3600,
             static function () use ($repository, $moduleVersion): ?array {
-                $infoReleasesUrl = "https://api.github.com/repos/$repository/releases";
+                $infoReleasesUrl = "https://api.github.com/repos/$repository/releases/latest";
 
                 // Transient network read — retry twice before giving up. On
                 // exhausted retries, rescue() emits the cURL error and yields
@@ -108,14 +108,14 @@ final class UpdateChecker
                     return null;
                 }
 
-                $releases = json_decode((string)$curlReturn, false);
-                if (!is_array($releases) || [] === $releases || !isset($releases[0]->tag_name)) {
+                $release = json_decode((string)$curlReturn, false);
+                if (!is_object($release) || !isset($release->tag_name) || !is_string($release->tag_name) || '' === $release->tag_name || !empty($release->draft)) {
                     return null;
                 }
 
-                $latestVersionLink = sprintf("https://github.com/$repository/archive/%s.zip", (string)$releases[0]->tag_name);
-                $latestVersion     = (string)$releases[0]->tag_name;
-                $prerelease        = (bool)($releases[0]->prerelease ?? false);
+                $latestVersionLink = sprintf("https://github.com/$repository/archive/%s.zip", rawurlencode($release->tag_name));
+                $latestVersion     = $release->tag_name;
+                $prerelease        = (bool)($release->prerelease ?? false);
                 $updateLabel       = defined('_CO_MTOOLS_NEW_VERSION')
                     ? constant('_CO_MTOOLS_NEW_VERSION')
                     : 'New version: ';

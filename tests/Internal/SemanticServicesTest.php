@@ -48,6 +48,10 @@ final class SemanticServicesTest extends TestCase
         self::assertTrue($policy->hasStableUpdate('1.0.0_Final', '1.1.0', false));
         self::assertFalse($policy->hasStableUpdate('1.0.0_Final', '1.1.0-beta', true));
         self::assertSame('1.0.0', $policy->normalize('1.0.0_Final'));
+        self::assertTrue($policy->hasStableUpdate('1.0.0', 'v1.1.0', false));
+        self::assertSame('1.1.0', $policy->normalize('V1.1.0'));
+        self::assertFalse($policy->hasStableUpdate('1.1.0', 'v1.1.0', false));
+        self::assertSame('vv1.1.0', $policy->normalize('vv1.1.0'));
     }
 
     public function testInstallationPlanIsTransportFreeData(): void

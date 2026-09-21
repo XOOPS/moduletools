@@ -16,6 +16,7 @@ final class VersionUpdatePolicy
     public function normalize(string $version): string
     {
         $version = str_replace(' ', '', mb_strtolower($version));
+        $version = preg_replace('/^v(?=\d)/', '', $version) ?? $version;
 
         return str_contains($version, 'final') ? str_replace(['_', 'final'], '', $version) : $version;
     }

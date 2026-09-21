@@ -37,10 +37,13 @@ final class FileCheckerTest extends TestCase
         mkdir($base);
         $dir = $base . '/sub';
         mkdir($dir, 0700);
+        clearstatcache(true, $dir);
+        $permissions = fileperms($dir);
 
         try {
             self::assertFalse(FileChecker::setFilePermissions($dir, 0775, $base));
-            self::assertSame('700', mb_substr(decoct(fileperms($dir)), -3));
+            clearstatcache(true, $dir);
+            self::assertSame($permissions, fileperms($dir));
         } finally {
             rmdir($dir);
             rmdir($base);
