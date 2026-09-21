@@ -1,0 +1,21 @@
+# PHPStan — xoops/moduletools (XOOPS 2.8 / PHP 8.4)
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+    phpVersion: 80400
+    paths:
+        - src
+    # XOOPS core classes are not composer-autoloadable during analysis; scanFiles
+    # registers them so extends/implements resolve (stubFiles would not).
+    scanFiles:
+        - stubs/xoops-core.stub
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Language constants (_AM_*, _YES, …) are loaded at runtime by xoops_loadLanguage().
+        - "#^Constant _[A-Z][A-Z0-9_]* not found.$#"
+        # XOOPS_ROOT_PATH is a placeholder during analysis; these requires point into a real core.
+        - identifier: requireOnce.fileNotFound

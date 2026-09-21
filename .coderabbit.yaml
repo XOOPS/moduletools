@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+early_access: false
+tone_instructions: >-
+  Expert PHP code reviewer. Focus on type safety, PSR-12, PHP 8.4+
+  compatibility, and security. This is a utility library requiring PHP 8.4+,
+  so modern language features are fine when they aid clarity within range.
+
+reviews:
+  profile: "assertive"
+  # Keep the reviewed set under CodeRabbit's 100-file limit: skip generated
+  # artifacts, stubs, baselines, docs and repo metadata; review src/ and config.
+  path_filters:
+    - "!resources/**"
+    - "!stubs/**"
+    - "!phpstan-baseline.neon"
+    - "!docs/**"
+    - "!tests/**"
+    - "!scripts/**"
+    - "!.github/**"
+    - "!**/*.md"
+    - "!LICENSE"
+    - "!CODEOWNERS"
+    - "!.editorconfig"
+    - "!.gitattributes"
+    - "!.gitignore"
+    - "!.scrutinizer.yml"
+    - "!sonar-project.properties"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  tools:
+    phpcs:
+      enabled: true
+    phpstan:
+      enabled: true
+    gitleaks:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+  path_instructions:
+    - path: "src/**/*.php"
+      instructions: >-
+        Review for PHP 8.4+ compatibility, type safety, and PSR-12 code style.
+        Modern PHP features are allowed when they improve clarity and remain
+        within the supported version range. Flag any hardcoded 'UTF-8' strings
+        that should use the ENCODING class constant.
+    - path: "tests/**/*.php"
+      instructions: >-
+        Review test code for proper assertions, test isolation, and edge
+        case coverage. Tests must remain compatible with this repository's
+        supported PHPUnit setup.
+
+chat:
+  auto_reply: true

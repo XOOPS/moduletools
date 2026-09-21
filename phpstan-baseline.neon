@@ -1,0 +1,889 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\Export\:\:__construct\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/Export.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\Export\:\:setNotDisplayFields\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/Export.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\Export\:\:setOuptutMethods\(\) has parameter \$methods with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/Export.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Admin\\Export\:\:\$excluded type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/Export.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Admin\\Export\:\:\$outputMethods type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/Export.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\ObjectColumn\:\:__construct\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/ObjectColumn.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\ObjectTable\:\:__construct\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/ObjectTable.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\ObjectTable\:\:setObjects\(\) has parameter \$objects with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/ObjectTable.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Admin\\ObjectTable\:\:\$introButtons type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/ObjectTable.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Admin\\ObjectTable\:\:\$objects type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/ObjectTable.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Admin\\SingleView\:\:__construct\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Admin/SingleView.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Admin\\SingleView\:\:\$userSide is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Admin/SingleView.php
+
+		-
+			message: '#^Instanceof between mysqli_result and mysqli_result will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 3
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 3
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:isBlockCloned\(\) has parameter \$bmodule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:isBlockCloned\(\) has parameter \$groups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:isBlockCloned\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$bcachetime with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$bid with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$bmodule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$groups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldbcachetime with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldbmodule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldgroups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldside with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldtitle with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldvisible with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$oldweight with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$side with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$title with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$visible with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:orderBlock\(\) has parameter \$weight with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:render\(\) has parameter \$block with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:setOrder\(\) has parameter \$bmodule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:updateBlock\(\) has parameter \$bmodule with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:updateBlock\(\) has parameter \$groups with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Blocksadmin\:\:updateBlock\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$helper with type Xmf\\Module\\Helper\|null is not subtype of native type Xmf\\Module\\Helper\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^PHPDoc type for property Xoops\\ModuleTools\\Common\\Blocksadmin\:\:\$helper with type Xmf\\Module\\Helper\|null is not subtype of native type Xmf\\Module\\Helper\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\Blocksadmin\:\:\$db \(XoopsMySQLDatabase\|null\) does not accept XoopsDatabase\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Common/Blocksadmin.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\Breadcrumb\:\:\$bread type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Breadcrumb.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Cloner\:\:copyTree\(\) has parameter \$replace with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Cloner.php
+
+		-
+			message: '#^Instanceof between mysqli_result and mysqli_result will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 3
+			path: src/Common/Db.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: src/Common/Db.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Db\:\:blockAddCatSelect\(\) has parameter \$cats with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Db.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DbInterface\:\:blockAddCatSelect\(\) has parameter \$cats with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/DbInterface.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DbInterface\:\:cloneRecord\(\) has parameter \$tableName with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/DbInterface.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DbInterface\:\:enumerate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/DbInterface.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:createDirectory\(\) has parameter \$target with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:dirExists\(\) has parameter \$dir_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:getDirectoryStatus\(\) has parameter \$path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:getDirectoryStatus\(\) has parameter \$redirectFile with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:normalizeMode\(\) has parameter \$mode with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\DirectoryChecker\:\:setDirectoryPermissions\(\) has parameter \$target with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/DirectoryChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:compareFiles\(\) has parameter \$file1_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:compareFiles\(\) has parameter \$file2_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:copyFile\(\) has parameter \$destination_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:copyFile\(\) has parameter \$source_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:fileExists\(\) has parameter \$file_path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:normalizeMode\(\) has parameter \$mode with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\FileChecker\:\:setFilePermissions\(\) has parameter \$target with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/FileChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\LetterChoice\:\:__construct\(\) has parameter \$alphabet with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\LetterChoice\:\:__construct\(\) has parameter \$modHelper with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$alphabet has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$criteria has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$extra has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$field_name has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$helper has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\LetterChoice\:\:\$url has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/LetterChoice.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Migrate\:\:convertIPAddresses\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: src/Common/Migrate.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Migrate\:\:moveDoColumns\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: src/Common/Migrate.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\Migrate\:\:\$renameTables has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/Migrate.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\ModuleFeedback\:\:\$content has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/ModuleFeedback.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\ModuleFeedback\:\:\$email has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/ModuleFeedback.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\ModuleFeedback\:\:\$name has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/ModuleFeedback.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\ModuleFeedback\:\:\$site has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/ModuleFeedback.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\ModuleFeedback\:\:\$type has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/ModuleFeedback.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\Output\:\:getEditor\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/Output.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:blockAddCatSelect\(\) has parameter \$cats with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:cloneRecord\(\) has parameter \$tableName with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:enumerate\(\) has parameter \$columnName with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:enumerate\(\) has parameter \$tableName with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:enumerate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:getEditor\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:getModuleStats\(\) has parameter \$moduleStats with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:getModuleStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:metaDescription\(\) has parameter \$content with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:metaKeywords\(\) has parameter \$content with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:recurseCopy\(\) has parameter \$dst with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:recurseCopy\(\) has parameter \$src with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:selectSorting\(\) has parameter \$form_sort with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\SysUtility\:\:selectSorting\(\) has parameter \$text with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Common/SysUtility.php
+
+		-
+			message: '#^Cannot call method getConfigs\(\) on object\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Common/TestdataButtons.php
+
+		-
+			message: '#^Cannot call method insertConfig\(\) on object\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Common/TestdataButtons.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$config has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Common/TestdataButtons.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Dead catch \- Throwable is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\TestdataSample\:\:__construct\(\) has parameter \$modHelper with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\TestdataSample\:\:loadTableFromArrayWithReplace\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\TestdataSample\:\:loadTableFromArrayWithReplace\(\) has parameter \$replace with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\TestdataSample\:\:\$language has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\TestdataSample\:\:\$moduleDirName has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\TestdataSample\:\:\$moduleDirNameUpper has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Common\\TestdataSample\:\:\$xoopsConfig has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Common/TestdataSample.php
+
+		-
+			message: '#^Instanceof between XoopsModule and XoopsModule will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 2
+			path: src/Common/UpdateChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Common\\UpdateChecker\:\:checkVerModule\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Common/UpdateChecker.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:classifyTable\(\) has parameter \$table with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:eligibleTables\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:eligibleTables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:generate\(\) has parameter \$allTables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:generate\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:propertyMap\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderDocumentation\(\) has parameter \$allTables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderDocumentation\(\) has parameter \$tables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderEntity\(\) has parameter \$properties with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderEntity\(\) has parameter \$table with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderRepository\(\) has parameter \$table with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:renderSchema\(\) has parameter \$table with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:sampleRow\(\) has parameter \$table with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:sampleRow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: src/Internal/Tools/ConsumerBridgeGenerator.php
+
+		-
+			message: '#^Cannot call method getByDirname\(\) on object\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Module/Dependency.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Module\\Dependency\:\:statusMessage\(\) has parameter \$status with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Module/Dependency.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:getControl\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$displayOnForm with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$formCaption with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$formDescription with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$multilingual with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$persistent with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:initVar\(\) has parameter \$sortBy with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:setControl\(\) has parameter \$control with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:setErrors\(\) has parameter \$error with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:setErrors\(\) has parameter \$prefix with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\DynamicObject\:\:title\(\) has parameter \$format with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/DynamicObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\SeoObject\:\:meta_description\(\) has parameter \$format with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/SeoObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Object\\SeoObject\:\:meta_keywords\(\) has parameter \$format with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Object/SeoObject.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Permission\\ItemPermission\:\:grantedItems\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Permission/ItemPermission.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Permission\\ItemPermission\:\:normalizeIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Permission/ItemPermission.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Permission\\PermissionGatewayInterface\:\:itemIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Permission/PermissionGatewayInterface.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Permission\\XoopsPermissionGateway\:\:itemIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Permission/XoopsPermissionGateway.php
+
+		-
+			message: '#^Cannot call method getConfigsByCat\(\) on object\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:getModuleConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:getObjects2\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:getPermissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Method Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:setUploaderConfig\(\) has parameter \$mimeTypes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:\$_allowedMimeTypes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
+
+		-
+			message: '#^Property Xoops\\ModuleTools\\Persistence\\PersistableHandler\:\:\$permissionsArray type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Persistence/PersistableHandler.php
