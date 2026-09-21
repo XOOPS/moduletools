@@ -71,6 +71,8 @@ final class UpdateChecker
 
                         curl_setopt($curlHandle, CURLOPT_URL, $infoReleasesUrl);
                         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 5);
+                        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 10);
                         curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, true);
                         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, ['User-Agent: XOOPS mtools']);
 

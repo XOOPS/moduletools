@@ -24,6 +24,12 @@ final class NamespaceAutoloaderTest extends TestCase
         self::assertTrue(class_exists('Fixture\\Two\\LegacyName'));
         self::assertFalse(class_exists('Fixture\\OneMore\\Exact'));
 
+        file_put_contents($root . '/Secret.php', "<?php namespace Outside; final class Secret {}\n");
+        // The engine never autoloads a name containing "."; spl_autoload_call() is the direct route.
+        spl_autoload_call('Fixture\\One\\..\\Secret');
+        self::assertFalse(class_exists('Outside\\Secret', false));
+        unlink($root . '/Secret.php');
+
         unlink($root . '/One/Exact.php');
         unlink($root . '/One/legacy.filename.php');
         unlink($root . '/Two/other.php');

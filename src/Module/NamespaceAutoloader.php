@@ -43,7 +43,8 @@ final class NamespaceAutoloader
                 }
 
                 $relativeClass = ltrim(substr($class, strlen($namespacePrefix)), '\\');
-                if ($relativeClass === '') {
+                // Every segment must be a PHP identifier, so "..", "/" and "." never reach the path.
+                if (!preg_match('/^[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*(\\\\[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*)*$/', $relativeClass)) {
                     return;
                 }
 

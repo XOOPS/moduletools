@@ -58,8 +58,13 @@ final readonly class ObjectController
                 $permissions = ItemPermission::forModule($module);
                 foreach ((array) $this->handler->getPermissions() as $definition) {
                     $name = (string) ($definition['perm_name'] ?? '');
-                    if ('' !== $name) {
-                        $permissions->replace($name, (int) $object->getVar($key, 'n'), array_map(intval(...), (array) ($_POST[$name] ?? [])));
+                    if ('' === $name) {
+                        continue;
+                    }
+                    // replace() restores the previous grants on failure; the object stays saved,
+                    // so report the failure instead of redirecting with a success message.
+                    if (!$permissions->replace($name, (int) $object->getVar($key, 'n'), array_map(intval(...), (array) ($_POST[$name] ?? [])))) {
+                        return false;
                     }
                 }
             }

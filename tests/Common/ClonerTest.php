@@ -42,6 +42,20 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function cloneSkipsSymlinksInsteadOfFollowingThem(): void
+    {
+        file_put_contents($this->root . '/outside.txt', 'secret quotes');
+        if (!@symlink($this->root . '/outside.txt', $this->root . '/quotes/link.txt')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        $target = Cloner::clone($this->root . '/quotes', 'Sayings');
+
+        self::assertFileDoesNotExist($target . '/link.txt');
+        self::assertFileExists($target . '/class/SayingsHandler.php');
+    }
+
+    #[Test]
     public function cloneRejectsBadNamesAndExistingTargets(): void
     {
         $this->expectException(\InvalidArgumentException::class);

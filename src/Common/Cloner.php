@@ -176,6 +176,10 @@ final class Cloner
             }
             $from = $source . '/' . $entry;
             $to   = $target . '/' . \str_replace($search, $replace, $entry);
+            if (\is_link($from)) {
+                // A link could point outside the module tree; a clone never dereferences it.
+                continue;
+            }
             if (\is_dir($from)) {
                 self::copyTree($from, $to, $search, $replace, false);
                 continue;
