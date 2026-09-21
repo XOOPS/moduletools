@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-if (!class_exists('XoopsObject', false)) {
+if (!class_exists('XoopsObject')) {
     class XoopsObject
     {
     }
 }
 
-if (!class_exists('XoopsObjectTree', false)) {
+if (!class_exists('XoopsObjectTree')) {
     class XoopsObjectTree
     {
     }
 }
 
-if (!class_exists('XoopsPersistableObjectHandler', false)) {
+if (!class_exists('XoopsPersistableObjectHandler')) {
     class XoopsPersistableObjectHandler
     {
     }

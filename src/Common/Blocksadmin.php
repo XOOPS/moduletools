@@ -382,12 +382,11 @@ class Blocksadmin
         }
 
         foreach ($bmodule as $bmid) {
-            $sql = 'INSERT INTO ' . $this->db->prefix('block_module_link') . ' (block_id, module_id) VALUES (' . $newid . ', ' . $bmid . ')';
+            $sql = 'INSERT INTO ' . $this->db->prefix('block_module_link') . ' (block_id, module_id) VALUES (' . (int) $newid . ', ' . (int) $bmid . ')';
             $this->db->exec($sql);
         }
-        //$groups = &$GLOBALS['xoopsUser']->getGroups();
         foreach ($groups as $iValue) {
-            $sql = 'INSERT INTO ' . $this->db->prefix('group_permission') . ' (gperm_groupid, gperm_itemid, gperm_modid, gperm_name) VALUES (' . $iValue . ', ' . $newid . ", 1, 'block_read')";
+            $sql = 'INSERT INTO ' . $this->db->prefix('group_permission') . ' (gperm_groupid, gperm_itemid, gperm_modid, gperm_name) VALUES (' . (int) $iValue . ', ' . (int) $newid . ", 1, 'block_read')";
             $this->db->exec($sql);
         }
         $this->helper->redirect('admin/blocksadmin.php?op=list', 1, _AM_DBUPDATED);
@@ -512,7 +511,8 @@ class Blocksadmin
                 }
             }
         }
-        $sql = \sprintf('DELETE FROM `%s` WHERE gperm_itemid = %u', $this->db->prefix('group_permission'), $bid);
+        // Scoped like the bulk save below: other modules' permissions can share this item id.
+        $sql = \sprintf("DELETE FROM `%s` WHERE gperm_itemid = %u AND gperm_modid = 1 AND gperm_name = 'block_read'", $this->db->prefix('group_permission'), $bid);
         $this->db->exec($sql);
         if (!empty($groups)) {
             foreach ($groups as $grp) {

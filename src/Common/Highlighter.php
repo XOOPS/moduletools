@@ -18,11 +18,27 @@ final readonly class Highlighter
 
     public function highlight(string $text): string
     {
-        $escaped = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
         if ([] === $this->terms) {
-            return $escaped;
+            return self::escape($text);
         }
+        // Match on the raw text and escape each piece afterwards: a term can never match
+        // inside an entity the escaping produced ("amp" must not split "&amp;").
         $pattern = '/(' . implode('|', array_map(static fn (string $term): string => preg_quote($term, '/'), $this->terms)) . ')/iu';
-        return preg_replace($pattern, '<mark class="' . htmlspecialchars($this->cssClass, ENT_QUOTES | ENT_HTML5) . '">$1</mark>', $escaped) ?? $escaped;
+        $pieces  = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (false === $pieces) {
+            return self::escape($text);
+        }
+        $open = '<mark class="' . htmlspecialchars($this->cssClass, ENT_QUOTES | ENT_HTML5) . '">';
+        $out  = '';
+        foreach ($pieces as $index => $piece) {
+            $out .= 1 === $index % 2 ? $open . self::escape($piece) . '</mark>' : self::escape($piece);
+        }
+
+        return $out;
+    }
+
+    private static function escape(string $text): string
+    {
+        return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 }

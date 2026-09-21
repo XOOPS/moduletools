@@ -29,6 +29,11 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   instead of silently returning a partial clone.
 
 ### Fixed
+- `Common\Blocksadmin::isBlockCloned()` casts the request-supplied module and group ids before
+  building the INSERT statements; `updateBlock()` deletes only the block's own `block_read`
+  permission rows instead of every row sharing the item id.
+- `Common\Highlighter` matches on the raw text and escapes each piece afterwards, so terms
+  containing `&`, quotes or `<` are found, and a term such as `amp` can no longer split an entity.
 - `Common\TestdataSample::loadData()` / `saveData()` / `clearData()` require an administrator
   session and a valid XOOPS token (`TestdataButtons::isAuthorizedRequest()`); a consumer's
   `testdata/index.php` can no longer run them unguarded.
