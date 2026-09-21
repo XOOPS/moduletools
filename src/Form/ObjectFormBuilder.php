@@ -40,14 +40,37 @@ final class ObjectFormBuilder
         $tray->addElement(new \XoopsFormButton('', 'submit', false === $submitCaption ? _SUBMIT : $submitCaption, 'submit'));
         if (false !== $cancelAction) {
             $cancel = new \XoopsFormButton('', 'cancel', _CANCEL, 'button');
-            // $cancelAction is a developer-supplied JavaScript statement (e.g. "location.href='index.php'"),
-            // never request data; it is escaped for the attribute only, callers JS-encode any embedded value.
-            $cancel->setExtra('onclick="' . htmlspecialchars($cancelAction, ENT_QUOTES | ENT_HTML5) . '"');
+            $cancel->setExtra(self::cancelHandler($cancelAction));
             $tray->addElement($cancel);
         }
         $form->addElement($tray);
 
         return $form;
+    }
+
+    /**
+     * $cancelAction is a local URL the Cancel button navigates to, or "history.back()".
+     * It is never executed as JavaScript: the URL is JSON-encoded into a fixed
+     * `location.href = "..."` assignment, and a scheme or host falls back to the current script.
+     */
+    public static function cancelHandler(string $cancelAction): string
+    {
+        $cancelAction = trim($cancelAction);
+        if (in_array($cancelAction, ['history.back()', 'history.go(-1)'], true)) {
+            return "onclick='history.back()'";
+        }
+        if (
+            '' === $cancelAction
+            || str_starts_with($cancelAction, '//')
+            || str_contains($cancelAction, '\\')
+            || 1 === preg_match('/[\x00-\x1F\x7F]/', $cancelAction)
+            || 1 === preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:/', $cancelAction)
+        ) {
+            $cancelAction = (string) xoops_getenv('SCRIPT_NAME');
+        }
+        $href = json_encode($cancelAction, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+        return "onclick='location.href=" . $href . "'";
     }
 
     /** @param array<string, mixed> $metadata */

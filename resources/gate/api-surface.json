@@ -6045,6 +6045,23 @@
                     "return_type": "XoopsThemeForm",
                     "throws": [],
                     "documented_false_or_null": false
+                },
+                "cancelHandler": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "cancelAction",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        }
+                    ],
+                    "return_type": "string",
+                    "throws": [],
+                    "documented_false_or_null": false
                 }
             }
         },
@@ -8464,7 +8481,7 @@
                     ],
                     "return_type": "bool",
                     "throws": [],
-                    "documented_false_or_null": false
+                    "documented_false_or_null": true
                 },
                 "setUploaderConfig": {
                     "static": false,

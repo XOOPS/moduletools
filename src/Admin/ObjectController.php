@@ -48,7 +48,8 @@ final readonly class ObjectController
         $isNew = $object->isNew();
         $this->postDataToObject($object);
         $this->receiveUploads($object);
-        if (!$this->handler->insert($object)) {
+        // A rejected upload records errors on the object; never persist or redirect past it.
+        if ([] !== $object->getErrors() || !$this->handler->insert($object)) {
             return false;
         }
 

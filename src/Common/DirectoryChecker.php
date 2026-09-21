@@ -166,14 +166,25 @@ class DirectoryChecker
             . '</form>';
     }
 
+    /** Only a local path is accepted; anything with a scheme, host or control character falls back. */
     private static function safeRedirect(?string $redirectFile): string
     {
         $redirectFile = (string)($redirectFile ?? '');
-        if ('' === $redirectFile || \str_contains($redirectFile, '://') || \str_starts_with($redirectFile, '//')) {
-            $redirectFile = (string)($_SERVER['SCRIPT_NAME'] ?? 'index.php');
+        if (!self::isLocalPath($redirectFile)) {
+            $fallback     = (string)($_SERVER['SCRIPT_NAME'] ?? 'index.php');
+            $redirectFile = self::isLocalPath($fallback) ? $fallback : 'index.php';
         }
 
         return $redirectFile;
+    }
+
+    private static function isLocalPath(string $path): bool
+    {
+        return '' !== $path
+            && !\str_starts_with($path, '//')
+            && !\str_contains($path, '\\')
+            && 1 !== \preg_match('/[\x00-\x1F\x7F]/', $path)
+            && 1 !== \preg_match('/^[a-zA-Z][a-zA-Z0-9+.-]*:/', $path);
     }
 
     private static function isAllowedPath(string $path, ?string $allowedBasePath): bool

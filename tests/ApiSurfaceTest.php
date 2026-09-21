@@ -36,4 +36,14 @@ final class ApiSurfaceTest extends TestCase
             self::assertTrue($loaded, $legacy);
         }
     }
+
+    public function testLegacyTraitAliasIsUsable(): void
+    {
+        // class_alias() has aliased traits since PHP 5.4.2 (php.net bug #61442).
+        self::assertTrue(trait_exists('XoopsModules\\Mtools\\Common\\ServerStats'));
+        $consumer = new class {
+            use \XoopsModules\Mtools\Common\ServerStats;
+        };
+        self::assertTrue(method_exists($consumer, 'getServerStats'));
+    }
 }

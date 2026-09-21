@@ -130,20 +130,25 @@ class PersistableHandler extends \XoopsPersistableObjectHandler
         return parent::getObjects($criteria, $idAsKey, $asObject);
     }
 
+    /**
+     * Restrict $criteria to the items the current user's groups may see.
+     *
+     * Always adds a key restriction: with no grants (or no module context) the
+     * restriction is an empty IN, which XOOPS 2.8 renders as a constant-false
+     * predicate, so a caller that ignores the false return still lists nothing.
+     */
     public function setGrantedObjectsCriteria(\CriteriaCompo $criteria, string $permissionName): bool
     {
         $module = $this->getModuleInfo();
-        if (!is_object($module)) {
-            return false;
+        $ids = [];
+        if (is_object($module)) {
+            $user = self::runtimeUser();
+            $groups = is_object($user) ? $user->getGroups() : [XOOPS_GROUP_ANONYMOUS];
+            $ids = array_map(intval(...), \Xoops\ModuleTools\Permission\ItemPermission::forModule($module)->grantedItems($permissionName, array_map(intval(...), (array) $groups)));
         }
-        $user = self::runtimeUser();
-        $groups = is_object($user) ? $user->getGroups() : [XOOPS_GROUP_ANONYMOUS];
-        $ids = \Xoops\ModuleTools\Permission\ItemPermission::forModule($module)->grantedItems($permissionName, array_map(intval(...), (array) $groups));
-        if ([] === $ids) {
-            return false;
-        }
-        $criteria->add(new \Criteria($this->keyName, array_map(intval(...), $ids), 'IN'));
-        return true;
+        $criteria->add(new \Criteria($this->keyName, $ids, 'IN'));
+
+        return [] !== $ids;
     }
 
     /** @legacy-global-accessor */

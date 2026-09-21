@@ -35,6 +35,24 @@ final class DirectoryCheckerTest extends TestCase
         rmdir($existing);
     }
 
+    public function testFormActionAcceptsOnlyLocalPaths(): void
+    {
+        $missing = $this->uploadPath() . '/dc-missing';
+        @rmdir($missing);
+        $_SERVER['SCRIPT_NAME'] = '/admin/fallback.php';
+
+        try {
+            foreach (['javascript:alert(1)', 'data:text/html,x', 'https://evil.test/', '//evil.test/x', "\t/admin/x.php", '/admin/x\\y.php', ''] as $bad) {
+                $html = (string) DirectoryChecker::getDirectoryStatus($missing, 0755, $bad);
+                self::assertStringContainsString("<form action='/admin/fallback.php'", $html, 'rejected: ' . $bad);
+            }
+            $html = (string) DirectoryChecker::getDirectoryStatus($missing, 0755, '/admin/index.php?op=list');
+            self::assertStringContainsString("<form action='/admin/index.php?op=list'", $html);
+        } finally {
+            unset($_SERVER['SCRIPT_NAME']);
+        }
+    }
+
     public function testHandleRequestFailsClosedWithoutASecurityService(): void
     {
         $target = $this->uploadPath() . '/dc-csrf-' . uniqid('', true);

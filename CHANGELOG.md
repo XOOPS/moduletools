@@ -7,6 +7,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Changed
+- `Form\ObjectFormBuilder::build()` / `Object\DynamicObject::getForm()`: `$cancelAction` is now a
+  local URL (or `history.back()`), emitted as a fixed `location.href = "..."` assignment. It is no
+  longer executed as a JavaScript statement; a scheme, host or control character falls back to
+  the current script.
 - **Requires PHP 8.4+** (was 8.2). Rector PHP 8.4 + `xoops/rector-xoops` sets applied across `src/`
   (readonly value objects, constructor promotion, first-class callables, typed class constants).
 - `xoops/xmf` constraint widened to `^1.3` — every XMF API the library calls exists in 1.3.1;
@@ -22,6 +26,15 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   instead of silently returning a partial clone.
 
 ### Fixed
+- `Persistence\PersistableHandler::setGrantedObjectsCriteria()` always adds a key restriction: with
+  no grants or no module context the criteria now match nothing instead of every row.
+- `Admin\ObjectController::storeFromDefaultForm()` no longer persists or redirects after a
+  rejected upload, and returns false when a permission update fails.
+- `Common\DirectoryChecker` form action and redirect accept only local paths (`javascript:` and
+  `data:` schemes were passing).
+- `Common\Cloner::clone()` removes its partial target when copying fails, and skips symlinks.
+- `Internal\Tools\ConsumerBridgeGenerator`: generated repositories allow only `ASC`/`DESC` as
+  the ORDER BY direction.
 - `Xmf\Module\Helper::getDirname()` does not exist; every call site now uses `dirname()`
   (Blocksadmin, Cloner, Confirm, LetterChoice, TestdataButtons, TestdataSample).
 - `Object\DynamicObject::setErrors()` called a non-existent `setError()`.

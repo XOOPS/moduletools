@@ -27,3 +27,10 @@ if (!function_exists('redirect_header')) {
         throw new \RuntimeException($message);
     }
 }
+
+if (!function_exists('xoops_getenv')) {
+    function xoops_getenv(string $key): string
+    {
+        return (string) ($_SERVER[$key] ?? '');
+    }
+}

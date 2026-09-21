@@ -96,6 +96,8 @@ SQL;
             self::assertStringContainsString("private const OPERATORS = ['=',", $repository);
             self::assertStringContainsString("in_array(\$connector, ['AND', 'OR'], true)", $repository);
             self::assertStringContainsString('if ($assignments === [])', $repository);
+            self::assertStringContainsString("in_array(\$order, ['ASC', 'DESC'], true)", $repository);
+            self::assertStringNotContainsString('$criteria->sort, $criteria->order)', $repository);
 
             $manifest = file_get_contents($root . '/class/Modern/BridgeManifest.php');
             self::assertIsString($manifest);

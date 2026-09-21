@@ -66,8 +66,34 @@ final class ClonerTest extends TestCase
     public function cloneRefusesToOverwrite(): void
     {
         mkdir($this->root . '/taken');
-        $this->expectException(\InvalidArgumentException::class);
-        Cloner::clone($this->root . '/quotes', 'taken');
+        file_put_contents($this->root . '/taken/keep.txt', 'keep');
+        try {
+            Cloner::clone($this->root . '/quotes', 'taken');
+            self::fail('an existing target must be refused');
+        } catch (\InvalidArgumentException) {
+        }
+        self::assertFileExists($this->root . '/taken/keep.txt');
+    }
+
+    #[Test]
+    public function cloneRemovesThePartialTargetWhenCopyingFails(): void
+    {
+        // A directory "quotes" and a file "sayings" both map onto the target entry "sayings":
+        // whichever is copied second cannot be written, so copyTree() throws mid-tree.
+        mkdir($this->root . '/quotes/quotes');
+        file_put_contents($this->root . '/quotes/quotes/inner.txt', 'x');
+        file_put_contents($this->root . '/quotes/sayings', 'x');
+
+        try {
+            Cloner::clone($this->root . '/quotes', 'Sayings');
+            self::fail('the colliding copy must throw');
+        } catch (\RuntimeException) {
+        }
+        self::assertDirectoryDoesNotExist($this->root . '/sayings');
+
+        unlink($this->root . '/quotes/sayings');
+        self::assertSame($this->root . '/sayings', Cloner::clone($this->root . '/quotes', 'Sayings'));
+        self::assertFileExists($this->root . '/sayings/sayings/inner.txt');
     }
 
     #[Test]

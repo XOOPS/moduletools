@@ -11,6 +11,7 @@ namespace Xoops\ModuleTools\Common;
 */
 
 use Xmf\Request;
+use Xoops\Helpers\Utility\Filesystem;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 
 /**
@@ -66,7 +67,17 @@ final class Cloner
             \mb_strtoupper($oldDirname) => \mb_strtoupper($newDirname),
             \ucfirst(\mb_strtolower($oldDirname)) => \ucfirst($newDirname),
         ];
-        self::copyTree($sourcePath, $targetPath, \array_keys($patterns), \array_values($patterns), true);
+        try {
+            self::copyTree($sourcePath, $targetPath, \array_keys($patterns), \array_values($patterns), true);
+        } catch (\Throwable $e) {
+            // $targetPath did not exist before this call, so it is ours to remove; a partial
+            // tree would otherwise block every retry with "Target already exists".
+            // Filesystem::deleteDirectory() unlinks symlinks without following them.
+            if (\is_dir($targetPath) && !Filesystem::deleteDirectory($targetPath)) {
+                throw new \RuntimeException(\sprintf('Clone failed and the partial target "%s" could not be removed', $targetPath), 0, $e);
+            }
+            throw $e;
+        }
 
         return $targetPath;
     }
@@ -186,13 +197,13 @@ final class Cloner
             }
             $extension = \mb_strtolower(\pathinfo($from, \PATHINFO_EXTENSION));
             if (\in_array($extension, self::BINARY_EXTENSIONS, true)) {
-                if (!\copy($from, $to)) {
+                if (!@\copy($from, $to)) {
                     throw new \RuntimeException(\sprintf('File "%s" could not be copied to "%s"', $from, $to));
                 }
                 continue;
             }
             $content = \file_get_contents($from);
-            if (false === $content || false === \file_put_contents($to, \str_replace($search, $replace, $content))) {
+            if (false === $content || false === @\file_put_contents($to, \str_replace($search, $replace, $content))) {
                 throw new \RuntimeException(\sprintf('File "%s" could not be copied to "%s"', $from, $to));
             }
         }

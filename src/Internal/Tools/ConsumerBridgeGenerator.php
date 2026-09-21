@@ -470,7 +470,11 @@ abstract class SqlBridgeRepository implements EntityRepositoryInterface
         $sql = 'SELECT * FROM `' . $this->table . '`' . $this->whereClause($criteria);
         if ($criteria->sort !== '') {
             $this->assertColumn($criteria->sort);
-            $sql .= sprintf(' ORDER BY `%s` %s', $criteria->sort, $criteria->order);
+            $order = strtoupper(trim($criteria->order));
+            if (!in_array($order, ['ASC', 'DESC'], true)) {
+                throw new \LogicException(sprintf('%s rejects ORDER BY direction "%s".', static::class, $criteria->order));
+            }
+            $sql .= sprintf(' ORDER BY `%s` %s', $criteria->sort, $order);
         }
         if ($criteria->limit > 0) {
             $sql .= sprintf(' LIMIT %d OFFSET %d', $criteria->limit, $criteria->start);
