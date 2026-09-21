@@ -6599,6 +6599,40 @@
             }
         },
         {
+            "symbol": "Xoops\\ModuleTools\\Common\\Db::enumValues()",
+            "kind": "method",
+            "disposition": "retain-compat",
+            "qualifier": "",
+            "coupling": [
+                "xoops-runtime",
+                "xoopsobject-handler"
+            ],
+            "target_package": "xoops/xmf",
+            "target_symbol": "Xmf\\Repository\\RepositoryInterface",
+            "target_min_version": "2.0",
+            "target_owner": "XMF repository maintainers and module domain owners",
+            "target_status": "stable",
+            "availability": "migrate-on-4.0",
+            "migration": [
+                "adapter",
+                "manual-recipe"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "Static database helpers remain compatibility-only; repositories own new persistence.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
+            }
+        },
+        {
             "symbol": "Xoops\\ModuleTools\\Common\\Db::enumerate()",
             "kind": "method",
             "disposition": "retain-compat",
@@ -13720,6 +13754,39 @@
             }
         },
         {
+            "symbol": "Xoops\\ModuleTools\\Common\\TestdataButtons::checkToken()",
+            "kind": "method",
+            "disposition": "migrate-to-target",
+            "qualifier": "await-4.0",
+            "coupling": [
+                "xoops-runtime",
+                "presentation-html"
+            ],
+            "target_package": "xoops/xmf",
+            "target_symbol": "Xmf\\Module\\Testdata",
+            "target_min_version": "2.0",
+            "target_owner": "XMF module tooling maintainers",
+            "target_status": "provisional",
+            "availability": "migrate-on-4.0",
+            "migration": [
+                "manual-recipe"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "The target is absent from XMF 1.5 and must be proven in the PHP 8.4 tree.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
+            }
+        },
+        {
             "symbol": "Xoops\\ModuleTools\\Common\\TestdataButtons::hideButtons()",
             "kind": "method",
             "disposition": "migrate-to-target",
@@ -13866,6 +13933,39 @@
                     "xquiz",
                     "xreview"
                 ]
+            }
+        },
+        {
+            "symbol": "Xoops\\ModuleTools\\Common\\TestdataButtons::isAuthorizedRequest()",
+            "kind": "method",
+            "disposition": "migrate-to-target",
+            "qualifier": "await-4.0",
+            "coupling": [
+                "xoops-runtime",
+                "presentation-html"
+            ],
+            "target_package": "xoops/xmf",
+            "target_symbol": "Xmf\\Module\\Testdata",
+            "target_min_version": "2.0",
+            "target_owner": "XMF module tooling maintainers",
+            "target_status": "provisional",
+            "availability": "migrate-on-4.0",
+            "migration": [
+                "manual-recipe"
+            ],
+            "rector_rules": [],
+            "rector_config_template": "",
+            "migration_safety": "manual",
+            "capability_profile": "",
+            "parity_test": "missing",
+            "upstream_issue": "",
+            "introduced_version": "",
+            "not_before_release": "",
+            "next_review_release": "",
+            "notes": "The target is absent from XMF 1.5 and must be proven in the PHP 8.4 tree.",
+            "consumers": {
+                "usage_count": 0,
+                "modules": []
             }
         },
         {

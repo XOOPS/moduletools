@@ -76,6 +76,9 @@
         "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerPhp/parameters/0/type:value-changed",
         "symbols/Xoops\\ModuleTools\\Common\\VersionChecks/methods/checkVerXoops/parameters/0/type:value-changed",
         "symbols/Xoops\\ModuleTools\\Common\\ObjectTree/methods/makeSelBox:removed",
-        "symbols/Xoops\\ModuleTools\\Common\\ObjectTree/methods/makeOptionsArray:added"
+        "symbols/Xoops\\ModuleTools\\Common\\ObjectTree/methods/makeOptionsArray:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Db/methods/enumValues:added",
+        "symbols/Xoops\\ModuleTools\\Common\\TestdataButtons/methods/checkToken:added",
+        "symbols/Xoops\\ModuleTools\\Common\\TestdataButtons/methods/isAuthorizedRequest:added"
     ]
 }

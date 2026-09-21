@@ -142,7 +142,7 @@ final class Db implements DbInterface
      */
     public static function enumerate(\XoopsMySQLDatabase $db, string $tableName, string $columnName): array
     {
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $columnName)) {
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $tableName) || !preg_match('/^[A-Za-z0-9_]+$/', $columnName)) {
             return [];
         }
 
@@ -161,9 +161,24 @@ final class Db implements DbInterface
         if (false === $row) {
             return [];
         }
-        $enumList = \explode(',', \str_replace("'", '', \mb_substr($row['COLUMN_TYPE'], 5, -6)));
 
-        return $enumList;
+        return self::enumValues((string) $row['COLUMN_TYPE']);
+    }
+
+    /**
+     * The allowed values of an INFORMATION_SCHEMA COLUMN_TYPE such as enum('a','b') or set('x','y').
+     * A doubled quote inside a value is unescaped; anything that is not an ENUM/SET yields [].
+     *
+     * @return list<string>
+     */
+    public static function enumValues(string $columnType): array
+    {
+        if (!preg_match('/^(?:enum|set)\((.*)\)$/is', trim($columnType), $match)) {
+            return [];
+        }
+        preg_match_all("/'((?:[^']|'')*)'/", $match[1], $values);
+
+        return array_map(static fn (string $value): string => str_replace("''", "'", $value), $values[1]);
     }
 
     /**

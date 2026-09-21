@@ -232,11 +232,27 @@ class TestdataButtons
      * GET, so it validates the one-time token carried on the GET toggle links produced by
      * loadButtonConfig().
      */
-    private static function checkToken(): bool
+    public static function checkToken(): bool
     {
         $security = self::runtimeSecurity();
 
         return is_object($security) && $security->check();
+    }
+
+    /**
+     * Whether the current request may run a destructive sample-data action: an
+     * administrator session and a valid one-time token. Used by every state-changing
+     * TestdataSample method, so a consumer's testdata/index.php cannot skip it.
+     */
+    public static function isAuthorizedRequest(): bool
+    {
+        return self::runtimeUserIsAdmin() && self::checkToken();
+    }
+
+    /** @legacy-global-accessor */
+    private static function runtimeUserIsAdmin(): bool
+    {
+        return !empty($GLOBALS['xoopsUserIsAdmin']);
     }
 
     /** @legacy-global-accessor */

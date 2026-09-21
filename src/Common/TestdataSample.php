@@ -52,6 +52,7 @@ class TestdataSample
 
     public function loadData(): void
     {
+        $this->assertAuthorized();
         $utility      = new Utility();
         $configurator = new Configurator($this->modHelper->path());
         $tables       = $this->modHelper->getModule()->getInfo('tables');
@@ -83,6 +84,7 @@ class TestdataSample
 
     public function saveData(): void
     {
+        $this->assertAuthorized();
         global $xoopsConfig;
         $tables = $this->modHelper->getModule()->getInfo('tables');
 
@@ -123,6 +125,7 @@ class TestdataSample
 
     public function clearData(): void
     {
+        $this->assertAuthorized();
         // Load language files
         $this->modHelper->loadLanguage('common');
         $tables = $this->modHelper->getModule()->getInfo('tables');
@@ -131,6 +134,18 @@ class TestdataSample
             \Xmf\Database\TableLoad::truncateTable($table);
         }
         \redirect_header($this->modHelper->url('admin/index.php'), 1, \constant('_CO_' . $this->moduleDirNameUpper . '_' . 'CLEAR_SAMPLEDATA_OK'));
+    }
+
+    /**
+     * Every state-changing action needs an administrator session and the one-time
+     * token that TestdataButtons puts on the links; a consumer's testdata/index.php
+     * dispatch cannot bypass it. redirect_header() exits.
+     */
+    private function assertAuthorized(): void
+    {
+        if (!TestdataButtons::isAuthorizedRequest()) {
+            \redirect_header($this->modHelper->url('admin/index.php'), 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
+        }
     }
 
     /**

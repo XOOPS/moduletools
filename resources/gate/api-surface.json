@@ -2268,6 +2268,23 @@
                     "throws": [],
                     "documented_false_or_null": true
                 },
+                "enumValues": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "columnType",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        }
+                    ],
+                    "return_type": "array",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
                 "enumerate": {
                     "static": true,
                     "by_ref": false,
@@ -5498,6 +5515,14 @@
             "constants": [],
             "properties": [],
             "methods": {
+                "checkToken": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [],
+                    "return_type": "bool",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
                 "hideButtons": {
                     "static": true,
                     "by_ref": false,
@@ -5512,6 +5537,14 @@
                         }
                     ],
                     "return_type": "void",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
+                "isAuthorizedRequest": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [],
+                    "return_type": "bool",
                     "throws": [],
                     "documented_false_or_null": false
                 },

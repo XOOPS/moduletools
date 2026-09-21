@@ -252,9 +252,15 @@ class Paginator
         ];
     }
 
+    /**
+     * Attribute-safe href. toPage (PHP_SELF by default) and urlOther are caller/request
+     * input; queryStr is already entity-encoded, so encode without double-encoding.
+     */
     private function pageHref(int $page, string $loadtime): string
     {
-        return $this->toPage . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
+        $href = $this->toPage . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
+
+        return \htmlspecialchars($href, \ENT_QUOTES, 'UTF-8', false);
     }
 
     private function linkItem(int $page, string $loadtime, string $glyph, string $label): string

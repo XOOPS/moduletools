@@ -29,6 +29,13 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   instead of silently returning a partial clone.
 
 ### Fixed
+- `Common\TestdataSample::loadData()` / `saveData()` / `clearData()` require an administrator
+  session and a valid XOOPS token (`TestdataButtons::isAuthorizedRequest()`); a consumer's
+  `testdata/index.php` can no longer run them unguarded.
+- `Common\Paginator` HTML-escapes the generated page links; `PHP_SELF` and `urlOther` could
+  break out of the `href` attribute.
+- `Common\Db::enumerate()` validates the table name like its siblings and parses ENUM/SET
+  values correctly (`Db::enumValues()`); it previously returned only a fragment of the first value.
 - `Common\VersionChecks` returns `false` when the module cannot be resolved instead of
   dereferencing the `false` from `XoopsModule::getByDirname()`.
 - `Common\VersionChecks::checkVerXoops()` / `checkVerPhp()` accept the legacy `false` from

@@ -125,6 +125,7 @@
 | `Xoops\ModuleTools\Common\Db` | type | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 6 | `missing` |
 | `Xoops\ModuleTools\Common\Db::blockAddCatSelect()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Db::cloneRecord()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 1 | `missing` |
+| `Xoops\ModuleTools\Common\Db::enumValues()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Db::enumerate()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Db::fieldExists()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 10 | `missing` |
 | `Xoops\ModuleTools\Common\Db::queryAndCheck()` | method | retain-compat | migrate-on-4.0 | `Xmf\Repository\RepositoryInterface` | stable | 0 | `missing` |
@@ -319,7 +320,9 @@
 | `Xoops\ModuleTools\Common\SysUtility::tableExists()` | method | retain-compat (split-first-per-method) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\SysUtility::truncateHtml()` | method | retain-compat (split-first-per-method) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\TestdataButtons` | type | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 119 | `missing` |
+| `Xoops\ModuleTools\Common\TestdataButtons::checkToken()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 0 | `missing` |
 | `Xoops\ModuleTools\Common\TestdataButtons::hideButtons()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 119 | `missing` |
+| `Xoops\ModuleTools\Common\TestdataButtons::isAuthorizedRequest()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 0 | `missing` |
 | `Xoops\ModuleTools\Common\TestdataButtons::loadButtonConfig()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 119 | `missing` |
 | `Xoops\ModuleTools\Common\TestdataButtons::renderHtml()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 0 | `missing` |
 | `Xoops\ModuleTools\Common\TestdataButtons::setSampleButtonConfig()` | method | migrate-to-target (await-4.0) | migrate-on-4.0 | `Xmf\Module\Testdata` | provisional | 0 | `missing` |
