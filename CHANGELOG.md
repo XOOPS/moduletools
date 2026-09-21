@@ -7,6 +7,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 ## [Unreleased]
 
 ### Changed
+- `Common\ObjectTree::makeSelBox()` no longer overrides core: it returns the HTML select that
+  `XoopsObjectTree` documents. The value => title array it used to return is
+  `ObjectTree::makeOptionsArray()`.
 - `Form\ObjectFormBuilder::build()` / `Object\DynamicObject::getForm()`: `$cancelAction` is now a
   local URL (or `history.back()`), emitted as a fixed `location.href = "..."` assignment. It is no
   longer executed as a JavaScript statement; a scheme, host or control character falls back to
@@ -26,6 +29,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   instead of silently returning a partial clone.
 
 ### Fixed
+- `Common\VersionChecks` returns `false` when the module cannot be resolved instead of
+  dereferencing the `false` from `XoopsModule::getByDirname()`.
 - `Common\VersionChecks::checkVerXoops()` / `checkVerPhp()` accept the legacy `false` from
   `XoopsModule::getByDirname()` again instead of throwing a `TypeError`.
 - `Common\ObjectTree` no longer installs a placeholder class when loaded before XOOPS is

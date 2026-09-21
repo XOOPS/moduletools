@@ -208,7 +208,7 @@
 | `Xoops\ModuleTools\Common\ModuleStats` | type | retain-compat (find-owner) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\ModuleStats::getModuleStats()` | method | retain-compat (find-owner) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\ObjectTree` | type | retain-compat | migrate-on-4.0 | `Xmf\Bridge\HandlerToRepositoryBridge` | stable | 17 | `missing` |
-| `Xoops\ModuleTools\Common\ObjectTree::makeSelBox()` | method | retain-compat | migrate-on-4.0 | `Xmf\Bridge\HandlerToRepositoryBridge` | stable | 0 | `missing` |
+| `Xoops\ModuleTools\Common\ObjectTree::makeOptionsArray()` | method | retain-compat | migrate-on-4.0 | `Xmf\Bridge\HandlerToRepositoryBridge` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\ObjectTree::makeSelBoxOptionsArray()` | method | retain-compat | migrate-on-4.0 | `Xmf\Bridge\HandlerToRepositoryBridge` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Output` | type | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\Output::getEditor()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 0 | `missing` |

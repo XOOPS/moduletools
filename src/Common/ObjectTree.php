@@ -35,11 +35,11 @@ class ObjectTree extends \XoopsObjectTree
      *
      * @param string       $fieldName    Name of the member variable from the node objects that should be used as the title for the options.
      * @param int          $key          ID of the object to display as the root of select options
-     * @param string|array $optionsArray (reference to a string when called from outside) Result from previous recursions
+     * @param array<int|string, string> $optionsArray Result from previous recursions
      * @param string       $prefix_orig  String to indent items at deeper levels
      * @param string       $prefix_curr  String to indent the current item
      *
-     * @return string
+     * @return array<int|string, string>
      */
     public function makeSelBoxOptionsArray($fieldName, $key, &$optionsArray, $prefix_orig, $prefix_curr = '')
     {
@@ -58,20 +58,17 @@ class ObjectTree extends \XoopsObjectTree
     }
 
     /**
-     * Make a select box with options from the tree
+     * Value => indented-title pairs for the tree, ready for XoopsFormSelect::addOptionArray().
      *
-     * @param string $name
-     * @param string $fieldName       Name of the member variable from the node objects that should be used as the title for the options.
-     * @param string $prefix          String to indent deeper levels
-     * @param string $selected
-     * @param bool   $addEmptyOption  Set TRUE to add an empty option with value "0" at the top of the hierarchy
-     * @param int    $key             ID of the object to display as the root of select options
+     * The inherited makeSelBox() keeps core's contract and returns HTML.
      *
-     * @param string $extra
-     * @return string|array   Associative array of value->name pairs, useful for <a href='psi_element://XoopsFormSelect'>XoopsFormSelect</a>->addOptionArray method
-     *                                addOptionArray method
+     * @param string $fieldName      Member variable of the node objects used as the option title
+     * @param string $prefix         String to indent deeper levels
+     * @param bool   $addEmptyOption Add an empty option with value "0" at the top
+     * @param int    $key            ID of the object to use as the root
+     * @return array<int|string, string>
      */
-    public function makeSelBox($name, $fieldName, $prefix = '-', $selected = '', $addEmptyOption = false, $key = 0, $extra = '')
+    public function makeOptionsArray(string $fieldName, string $prefix = '-', bool $addEmptyOption = false, int $key = 0): array
     {
         $optionsArray = [];
         if ($addEmptyOption) {

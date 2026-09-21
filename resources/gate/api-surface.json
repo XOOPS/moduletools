@@ -3890,21 +3890,13 @@
             "constants": [],
             "properties": [],
             "methods": {
-                "makeSelBox": {
+                "makeOptionsArray": {
                     "static": false,
                     "by_ref": false,
                     "parameters": [
                         {
-                            "name": "name",
-                            "type": null,
-                            "by_ref": false,
-                            "variadic": false,
-                            "has_default": false,
-                            "default": null
-                        },
-                        {
                             "name": "fieldName",
-                            "type": null,
+                            "type": "string",
                             "by_ref": false,
                             "variadic": false,
                             "has_default": false,
@@ -3912,23 +3904,15 @@
                         },
                         {
                             "name": "prefix",
-                            "type": null,
+                            "type": "string",
                             "by_ref": false,
                             "variadic": false,
                             "has_default": true,
                             "default": "'-'"
                         },
                         {
-                            "name": "selected",
-                            "type": null,
-                            "by_ref": false,
-                            "variadic": false,
-                            "has_default": true,
-                            "default": "''"
-                        },
-                        {
                             "name": "addEmptyOption",
-                            "type": null,
+                            "type": "bool",
                             "by_ref": false,
                             "variadic": false,
                             "has_default": true,
@@ -3936,22 +3920,14 @@
                         },
                         {
                             "name": "key",
-                            "type": null,
+                            "type": "int",
                             "by_ref": false,
                             "variadic": false,
                             "has_default": true,
                             "default": "0"
-                        },
-                        {
-                            "name": "extra",
-                            "type": null,
-                            "by_ref": false,
-                            "variadic": false,
-                            "has_default": true,
-                            "default": "''"
                         }
                     ],
-                    "return_type": null,
+                    "return_type": "array",
                     "throws": [],
                     "documented_false_or_null": false
                 },

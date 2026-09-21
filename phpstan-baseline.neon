@@ -463,18 +463,6 @@ parameters:
 			path: src/Common/ModuleFeedback.php
 
 		-
-			message: '#^Method Xoops\\ModuleTools\\Common\\ObjectTree\:\:makeSelBox\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Common/ObjectTree.php
-
-		-
-			message: '#^Method Xoops\\ModuleTools\\Common\\ObjectTree\:\:makeSelBoxOptionsArray\(\) has parameter \$optionsArray with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Common/ObjectTree.php
-
-		-
 			message: '#^Method Xoops\\ModuleTools\\Common\\Output\:\:getEditor\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

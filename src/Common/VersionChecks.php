@@ -34,6 +34,9 @@ trait VersionChecks
     public static function checkVerXoops(\XoopsModule|false|null $module = null, $requiredVer = null): bool
     {
         $module = $module ?: \XoopsModule::getByDirname(self::consumerDirname());
+        if (!$module instanceof \XoopsModule) {
+            return false;
+        }
         $moduleDirName = (string)$module->getVar('dirname');
         $errorConstant = '_CO_MTOOLS_ERROR_BAD_XOOPS';
         \xoops_loadLanguage('admin', $moduleDirName);
@@ -64,6 +67,9 @@ trait VersionChecks
     public static function checkVerPhp(\XoopsModule|false|null $module = null): bool
     {
         $module = $module ?: \XoopsModule::getByDirname(self::consumerDirname());
+        if (!$module instanceof \XoopsModule) {
+            return false;
+        }
         $moduleDirName = (string)$module->getVar('dirname');
         $errorConstant = '_CO_MTOOLS_ERROR_BAD_PHP';
         \xoops_loadLanguage('admin', $moduleDirName);

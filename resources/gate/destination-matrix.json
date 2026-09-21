@@ -9715,7 +9715,7 @@
             }
         },
         {
-            "symbol": "Xoops\\ModuleTools\\Common\\ObjectTree::makeSelBox()",
+            "symbol": "Xoops\\ModuleTools\\Common\\ObjectTree::makeOptionsArray()",
             "kind": "method",
             "disposition": "retain-compat",
             "qualifier": "",
