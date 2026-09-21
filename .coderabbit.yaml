@@ -8,6 +8,24 @@ tone_instructions: >-
 
 reviews:
   profile: "assertive"
+  # Keep the reviewed set under CodeRabbit's 100-file limit: skip generated
+  # artifacts, stubs, baselines, docs and repo metadata; review src/ and config.
+  path_filters:
+    - "!resources/**"
+    - "!stubs/**"
+    - "!phpstan-baseline.neon"
+    - "!docs/**"
+    - "!tests/**"
+    - "!scripts/**"
+    - "!.github/**"
+    - "!**/*.md"
+    - "!LICENSE"
+    - "!CODEOWNERS"
+    - "!.editorconfig"
+    - "!.gitattributes"
+    - "!.gitignore"
+    - "!.scrutinizer.yml"
+    - "!sonar-project.properties"
   request_changes_workflow: true
   high_level_summary: true
   poem: false
