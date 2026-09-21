@@ -20,6 +20,7 @@
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectRow/properties/key:added",
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectRow/properties/valueMethod:added",
         "symbols/Xoops\\ModuleTools\\Bootstrap/constants/API_VERSION/type:type-changed",
+        "symbols/Xoops\\ModuleTools\\Bootstrap/constants/API_VERSION/value:value-changed",
         "symbols/Xoops\\ModuleTools\\Bootstrap/constants/MIN_MODULE_VERSION/type:type-changed",
         "symbols/Xoops\\ModuleTools\\Bootstrap/constants/MODULE_DIRNAME/type:type-changed",
         "symbols/Xoops\\ModuleTools\\Bootstrap/constants/PACKAGE/type:type-changed",

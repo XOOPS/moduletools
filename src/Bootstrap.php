@@ -13,7 +13,7 @@ namespace Xoops\ModuleTools;
 final class Bootstrap
 {
     public const string VERSION = '1.5.0';
-    public const string API_VERSION = '1.0.0';
+    public const string API_VERSION = '1.1.0';
     public const string MIN_MODULE_VERSION = '1.1.0';
     public const string MODULE_DIRNAME = 'mtools';
     public const string PACKAGE = 'xoops/moduletools';

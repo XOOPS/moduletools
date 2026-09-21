@@ -32,6 +32,7 @@ final class Text implements TextInterface
      *
      * @param string $text         String to truncate.
      * @param int    $length       Length of returned string, including ellipsis.
+     *                            Nonpositive limits return ''; an oversized ending is clipped to fit.
      * @param string $ending       Ending to be appended to the trimmed string.
      * @param bool   $exact        If false, $text will not be cut mid-word
      * @param bool   $considerHtml If true, HTML tags would be handled correctly
@@ -47,11 +48,19 @@ final class Text implements TextInterface
     ): string {
         $openTags = [];
         $entityPattern = '/&(?:[a-z][a-z0-9]*|#[0-9]+|#x[0-9a-f]+);/i';
+        if ($length <= 0) {
+            return '';
+        }
+        $plainText = $considerHtml
+            ? (string) preg_replace($entityPattern, ' ', strip_tags($text))
+            : $text;
+        if (mb_strlen($plainText) <= $length) {
+            return $text;
+        }
+        if (mb_strlen($ending) >= $length) {
+            return mb_substr($ending, 0, $length);
+        }
         if ($considerHtml) {
-            // if the plain text is shorter than the maximum length, return the whole text
-            if (mb_strlen((string) \preg_replace('/<.*?' . '>/', '', $text)) <= $length) {
-                return $text;
-            }
             // splits all html-tags to scanable lines
             \preg_match_all('/(<.+?' . '>)?([^<>]*)/s', $text, $lines, \PREG_SET_ORDER);
             $total_length = mb_strlen($ending);
@@ -111,9 +120,6 @@ final class Text implements TextInterface
                 }
             }
         } else {
-            if (mb_strlen($text) <= $length) {
-                return $text;
-            }
             $truncate = mb_substr($text, 0, $length - mb_strlen($ending));
         }
         // if the words shouldn't be cut in the middle...

@@ -39,6 +39,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   token. A dispatcher must not call `$xoopsSecurity->check()` before delegating.
 
 ### Fixed
+- HTML truncation preserves short entity-encoded input and bounds the ending for short limits.
+- ModuleTools 1.5.0 advertises API 1.1.0 so consumers can require its added public surface.
 - API compatibility checks reject stale approvals; accepting a baseline clears approvals only after saving succeeds.
 - CSV export neutralizes line-feed-prefixed cells; dependency review uses the verified v5.0.0 action commit.
 - Row cloning preserves SQL NULL; enum metadata is scoped to the active database.

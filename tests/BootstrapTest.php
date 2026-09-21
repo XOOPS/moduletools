@@ -13,6 +13,15 @@ use Xoops\ModuleTools\Module\Dependency;
 
 final class BootstrapTest extends TestCase
 {
+    public function testExpandedApiVersionSupportsOldAndNewConsumers(): void
+    {
+        self::assertSame('1.1.0', Bootstrap::apiVersion());
+        self::assertTrue(ConsumerRuntime::isReady('1.0.0'));
+        self::assertTrue(ConsumerRuntime::isReady('1.1.0'));
+        self::assertFalse(ConsumerRuntime::isReady('1.2.0'));
+        self::assertSame('1.1.0', Bootstrap::checkRuntime()['api_version']);
+    }
+
     /** @return iterable<string, array{string}> */
     public static function consumerApiClasses(): iterable
     {
