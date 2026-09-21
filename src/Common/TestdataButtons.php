@@ -93,9 +93,11 @@ class TestdataButtons
 
         if (self::SHOW_BUTTONS == $displaySampleButton) {
             \xoops_loadLanguage('admin/modulesadmin', 'system');
-            $adminObject->addItemButton(\constant('_CO_MTOOLS_LOAD_SAMPLEDATA'), $helper->url('testdata/index.php?op=load'), 'add');
-            $adminObject->addItemButton(\constant('_CO_MTOOLS_SAVE_SAMPLEDATA'), $helper->url('testdata/index.php?op=save'), 'add');
-            $adminObject->addItemButton(\constant('_CO_MTOOLS_CLEAR_SAMPLEDATA'), $helper->url('testdata/index.php?op=clear'), 'alert');
+            // The data links carry the token too, so a testdata/index.php may validate it
+            // directly (the reference endpoint additionally confirms load/clear via xoops_confirm()).
+            $adminObject->addItemButton(\constant('_CO_MTOOLS_LOAD_SAMPLEDATA'), $helper->url('testdata/index.php?op=load' . $tokenParam), 'add');
+            $adminObject->addItemButton(\constant('_CO_MTOOLS_SAVE_SAMPLEDATA'), $helper->url('testdata/index.php?op=save' . $tokenParam), 'add');
+            $adminObject->addItemButton(\constant('_CO_MTOOLS_CLEAR_SAMPLEDATA'), $helper->url('testdata/index.php?op=clear' . $tokenParam), 'alert');
             //    $adminObject->addItemButton(constant('_CO_MTOOLS_EXPORT_SCHEMA'), $helper->url( 'testdata/index.php?op=exportschema'), 'add');
             $adminObject->addItemButton(\constant('_CO_MTOOLS_HIDE_SAMPLEDATA_BUTTONS'), '?op=hide_buttons' . $tokenParam, 'delete');
         } else {
@@ -140,9 +142,9 @@ class TestdataButtons
 
         $out = self::sampleDataStyle() . '<div class="xo-sampledata">';
         if ($show) {
-            $out .= $btn(\constant('_CO_MTOOLS_LOAD_SAMPLEDATA'), $helper->url('testdata/index.php?op=load'));
-            $out .= $btn(\constant('_CO_MTOOLS_SAVE_SAMPLEDATA'), $helper->url('testdata/index.php?op=save'));
-            $out .= $btn(\constant('_CO_MTOOLS_CLEAR_SAMPLEDATA'), $helper->url('testdata/index.php?op=clear'), 'danger');
+            $out .= $btn(\constant('_CO_MTOOLS_LOAD_SAMPLEDATA'), $helper->url('testdata/index.php?op=load&amp;XOOPS_TOKEN_REQUEST=' . $token));
+            $out .= $btn(\constant('_CO_MTOOLS_SAVE_SAMPLEDATA'), $helper->url('testdata/index.php?op=save&amp;XOOPS_TOKEN_REQUEST=' . $token));
+            $out .= $btn(\constant('_CO_MTOOLS_CLEAR_SAMPLEDATA'), $helper->url('testdata/index.php?op=clear&amp;XOOPS_TOKEN_REQUEST=' . $token), 'danger');
             $out .= $btn(\constant('_CO_MTOOLS_HIDE_SAMPLEDATA_BUTTONS'), '?op=hide_buttons&amp;XOOPS_TOKEN_REQUEST=' . $token, 'muted');
         } else {
             $out .= $btn(\constant('_CO_MTOOLS_SHOW_SAMPLEDATA_BUTTONS'), '?op=show_buttons&amp;XOOPS_TOKEN_REQUEST=' . $token);

@@ -127,9 +127,12 @@ final class Cloner
             return '<p>' . \_CO_MTOOLS_CLONE_DSC . '</p>' . $form->render();
         }
 
+        // Fail closed: no security service means no token check is possible, so no clone.
         $security = self::runtimeGlobal('xoopsSecurity');
-        if (\is_object($security) && !$security->check()) {
-            \redirect_header('clone.php', 3, \implode('<br>', $security->getErrors()));
+        if (!\is_object($security) || !\method_exists($security, 'check') || !$security->check()) {
+            $errors = (\is_object($security) && \method_exists($security, 'getErrors')) ? \implode('<br>', $security->getErrors()) : '';
+            \redirect_header('clone.php', 3, '' !== $errors ? $errors : 'Security token missing or invalid');
+            exit;
         }
         $clone = \mb_strtolower(Request::getString('clone', '', 'POST'));
         $safe  = \htmlspecialchars($clone, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');

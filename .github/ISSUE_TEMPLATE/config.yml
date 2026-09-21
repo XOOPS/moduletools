@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security report
-    url: https://github.com/xoops/xoops-helpers/security/policy
+    url: https://github.com/XOOPS/moduletools/security/policy
     about: Report security issues privately through the repository security policy.

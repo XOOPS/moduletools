@@ -37,10 +37,7 @@ final readonly class ObjectController
         if ('POST' !== ($_SERVER['REQUEST_METHOD'] ?? 'GET')) {
             return false;
         }
-        $security = self::runtimeSecurity();
-        if (is_object($security) && !$security->check()) {
-            throw new \RuntimeException(defined('_NOPERM') ? _NOPERM : 'Invalid security token.');
-        }
+        self::assertValidToken();
 
         $key = (string) $this->handler->keyName;
         $id = Request::getInt($key, 0, 'POST');
@@ -95,10 +92,7 @@ final readonly class ObjectController
             redirect_header((string) ($_SERVER['HTTP_REFERER'] ?? xoops_getenv('SCRIPT_NAME')), 3, defined('_NOPERM') ? _NOPERM : 'Record not found.');
         }
         if ('POST' === ($_SERVER['REQUEST_METHOD'] ?? 'GET') && Request::getInt('confirm', 0, 'POST')) {
-            $security = self::runtimeSecurity();
-            if (is_object($security) && !$security->check()) {
-                throw new \RuntimeException(defined('_NOPERM') ? _NOPERM : 'Invalid security token.');
-            }
+            self::assertValidToken();
             $redirect = Request::getString('redirect_page', xoops_getenv('SCRIPT_NAME'), 'POST');
             $ok = $this->handler->delete($object);
             redirect_header($redirect, 2, $ok ? (defined('_DELETEDSUCCESS') ? _DELETEDSUCCESS : 'Deleted.') : (defined('_ERRORS') ? _ERRORS : 'Delete failed.'));
@@ -147,5 +141,14 @@ final readonly class ObjectController
     private static function runtimeSecurity(): mixed
     {
         return $GLOBALS['xoopsSecurity'] ?? null;
+    }
+
+    /** Fail closed: without a security service no token can be checked, so no write happens. */
+    private static function assertValidToken(): void
+    {
+        $security = self::runtimeSecurity();
+        if (!is_object($security) || !method_exists($security, 'check') || !$security->check()) {
+            throw new \RuntimeException(defined('_NOPERM') ? _NOPERM : 'Invalid security token.');
+        }
     }
 }

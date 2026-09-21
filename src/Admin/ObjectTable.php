@@ -17,7 +17,10 @@ class ObjectTable
     /** @var list<string> */
     protected array $actions;
     protected array $introButtons = [];
+    /** @var array<string, array{method: string, default: mixed}> */
     protected array $filters = [];
+    /** @var list<string> */
+    protected array $withSelected = [];
     protected string $tableId = 'moduletools-object-table';
     protected bool $showTools = true;
     protected ?array $objects = null;
@@ -47,8 +50,15 @@ class ObjectTable
     {
         $this->actions[] = $operation;
     }
+    /**
+     * Bulk actions: renders a checkbox per row and a "with selected" form that POSTs
+     * `op=<action>`, `<keyName>[]=<id>` and the XOOPS token to the current script.
+     *
+     * @param list<string> $actions operation names the consumer's page handles
+     */
     public function addWithSelectedActions(array $actions = []): void
     {
+        $this->withSelected = array_values(array_map(strval(...), $actions));
     }
     public function addFilter(string $key, string $method, mixed $default = false): void
     {
@@ -111,7 +121,60 @@ class ObjectTable
         if (null !== $this->objects) {
             return array_values(array_filter($this->objects, static fn ($object): bool => $object instanceof \XoopsObject));
         }
-        return array_values($this->handler->getObjects($this->criteria));
+        return array_values($this->handler->getObjects($this->filteredCriteria()));
+    }
+
+    /** The table criteria plus one equality clause per filter that carries a selected value. */
+    protected function filteredCriteria(): ?\CriteriaCompo
+    {
+        if ([] === $this->filters) {
+            return $this->criteria;
+        }
+        $criteria = new \CriteriaCompo();
+        if (null !== $this->criteria) {
+            $criteria->add($this->criteria);
+            $criteria->setSort($this->criteria->getSort());
+            $criteria->setOrder($this->criteria->getOrder());
+            $criteria->setLimit($this->criteria->getLimit());
+            $criteria->setStart($this->criteria->getStart());
+            $criteria->setGroupBy($this->criteria->getGroupby());
+        }
+        foreach ($this->filters as $key => $filter) {
+            $value = $this->filterValue($key, $filter['default']);
+            if ('' !== $value) {
+                $criteria->add(new \Criteria($key, $value));
+            }
+        }
+
+        return $criteria;
+    }
+
+    /**
+     * Selected filter value: the request's `filter_<key>` when the parameter is present
+     * (an explicit '' means "All"), otherwise the configured default; '' applies no clause.
+     */
+    protected function filterValue(string $key, mixed $default): string
+    {
+        if (\Xmf\Request::hasVar('filter_' . $key, 'GET')) {
+            return \Xmf\Request::getString('filter_' . $key, '', 'GET');
+        }
+
+        return (false !== $default && null !== $default) ? (string) $default : '';
+    }
+
+    /**
+     * @param array{method: string, default: mixed} $filter
+     * @return array<string|int, string> option value => label, from the handler method named in addFilter()
+     */
+    protected function filterOptions(array $filter): array
+    {
+        $method = $filter['method'];
+        if (!method_exists($this->handler, $method)) {
+            return [];
+        }
+        $options = $this->handler->{$method}();
+
+        return is_array($options) ? array_map(static fn ($label): string => (string) $label, $options) : [];
     }
 
     protected function buildHtml(): string
@@ -121,7 +184,29 @@ class ObjectTable
         foreach ($this->introButtons as $button) {
             $html .= '<p><a class="btn btn-primary" href="' . $escape($button['location']) . '">' . $escape($button['value']) . '</a></p>';
         }
+        $script = $escape(xoops_getenv('SCRIPT_NAME'));
+        if ([] !== $this->filters && $this->showTools) {
+            $html .= '<form method="get" action="' . $script . '" class="moduletools-filters">';
+            foreach ($this->filters as $key => $filter) {
+                $selected = $this->filterValue($key, $filter['default']);
+                $caption = $this->handler->create()->vars[$key]['form_caption'] ?? $key;
+                $html .= '<label>' . $escape($caption) . ' <select name="filter_' . $escape($key) . '" onchange="this.form.submit()">';
+                $html .= '<option value="">' . $escape(defined('_ALL') ? _ALL : 'All') . '</option>';
+                foreach ($this->filterOptions($filter) as $value => $label) {
+                    $html .= '<option value="' . $escape($value) . '"' . ((string) $value === $selected ? ' selected' : '') . '>' . $escape($label) . '</option>';
+                }
+                $html .= '</select></label> ';
+            }
+            $html .= '<noscript><button type="submit">' . $escape(defined('_SUBMIT') ? _SUBMIT : 'Submit') . '</button></noscript></form>';
+        }
+        $bulk = [] !== $this->withSelected;
+        if ($bulk) {
+            $html .= '<form method="post" action="' . $script . '" class="moduletools-with-selected">';
+        }
         $html .= '<table id="' . $escape($this->tableId) . '" class="outer table table-striped"><thead><tr>';
+        if ($bulk) {
+            $html .= '<th class="center"></th>';
+        }
         foreach ($this->columns as $column) {
             $caption = false !== $column->caption ? $column->caption : ($this->handler->create()->vars[$column->key]['form_caption'] ?? $column->key);
             $html .= '<th class="' . $escape($column->align) . '">' . $escape($caption) . '</th>';
@@ -133,6 +218,9 @@ class ObjectTable
         $key = (string) $this->handler->keyName;
         foreach ($this->fetchObjects() as $index => $object) {
             $html .= '<tr class="' . (0 === $index % 2 ? 'even' : 'odd') . '">';
+            if ($bulk) {
+                $html .= '<td class="center"><input type="checkbox" name="' . $escape($key) . '[]" value="' . (int) $object->getVar($key, 'n') . '"></td>';
+            }
             foreach ($this->columns as $column) {
                 $method = $column->valueMethod;
                 $isCustom = false !== $method && method_exists($object, $method);
@@ -157,6 +245,24 @@ class ObjectTable
             $html .= '</tr>';
         }
         $html .= '</tbody></table>';
+        if ($bulk) {
+            $security = self::runtimeSecurity();
+            $html .= '<p><select name="op">';
+            foreach ($this->withSelected as $action) {
+                $html .= '<option value="' . $escape($action) . '">' . $escape(ucfirst($action)) . '</option>';
+            }
+            $html .= '</select> <button type="submit">' . $escape(defined('_SUBMIT') ? _SUBMIT : 'Submit') . '</button>'
+                . ((is_object($security) && method_exists($security, 'getTokenHTML')) ? $security->getTokenHTML() : '')
+                . '</p></form>';
+        }
         return $html;
+    }
+
+    /** @legacy-global-accessor */
+    private static function runtimeSecurity(): ?object
+    {
+        $security = $GLOBALS['xoopsSecurity'] ?? null;
+
+        return is_object($security) ? $security : null;
     }
 }

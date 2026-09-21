@@ -43,19 +43,7 @@ parameters:
 			path: src/Admin/ObjectTable.php
 
 		-
-			message: '#^Method Xoops\\ModuleTools\\Admin\\ObjectTable\:\:addWithSelectedActions\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Admin/ObjectTable.php
-
-		-
 			message: '#^Method Xoops\\ModuleTools\\Admin\\ObjectTable\:\:setObjects\(\) has parameter \$objects with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Admin/ObjectTable.php
-
-		-
-			message: '#^Property Xoops\\ModuleTools\\Admin\\ObjectTable\:\:\$filters type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Admin/ObjectTable.php

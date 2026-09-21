@@ -16,15 +16,17 @@ final class SmartModulesConsumerTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         $modulesPath = dirname(__DIR__, 5) . '/modules';
-        if (!is_dir($modulesPath . '/smartfaq')) {
-            self::markTestSkipped('Smart modules not present (needs a XOOPS tree five levels up)');
-        }
         self::$modulePaths = [
             'smartfaq'    => $modulesPath . '/smartfaq',
             'smartblocks' => $modulesPath . '/smartblocks',
             'smartmedia'  => $modulesPath . '/smartmedia',
             'smartpartner' => $modulesPath . '/smartpartner',
         ];
+        foreach (self::$modulePaths as $dirname => $path) {
+            if (!is_file($path . '/bootstrap.php')) {
+                self::markTestSkipped($dirname . ' module not present (needs a XOOPS tree five levels up)');
+            }
+        }
 
         require_once self::$modulePaths['smartfaq'] . '/bootstrap.php';
         require_once self::$modulePaths['smartblocks'] . '/bootstrap.php';

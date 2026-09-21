@@ -54,7 +54,7 @@ final class UpdateChecker
         // deterministic given the remote release data, so caching the final
         // ?array preserves the existing return contract.
         return Cache::remember(
-            'mtools_update_' . $moduleDirName,
+            'mtools_update_' . $moduleDirName . '_' . \substr(\md5($repository), 0, 8),
             3600,
             static function () use ($repository, $module, $default): ?array {
                 $infoReleasesUrl = "https://api.github.com/repos/$repository/releases";

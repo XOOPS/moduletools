@@ -111,8 +111,10 @@ final class Db implements DbInterface
         if ($db->isResultSet($result) && $result instanceof \mysqli_result) {
             $tempTable = $db->fetchArray($result);
         }
-        if (!$tempTable) {
+        if (!\is_array($tempTable) || [] === $tempTable) {
             \trigger_error($db->error());
+
+            return false;
         }
         // set the auto-incremented id's value to blank.
         unset($tempTable[$idField]);
