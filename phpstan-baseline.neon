@@ -643,12 +643,6 @@ parameters:
 			path: src/Common/UpdateChecker.php
 
 		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: src/Common/UpdateChecker.php
-
-		-
 			message: '#^Method Xoops\\ModuleTools\\Internal\\Tools\\ConsumerBridgeGenerator\:\:classifyTable\(\) has parameter \$table with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

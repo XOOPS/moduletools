@@ -170,7 +170,7 @@ class ObjectTable
     /** Criteria values are quoted verbatim by core, so escape here; the handler's db is the source of truth. */
     private function escapeForCriteria(string $value): string
     {
-        $db = $this->handler->db ?? null;
+        $db = $this->handler->db;
 
         return \is_object($db) && \method_exists($db, 'escape') ? (string) $db->escape($value) : \addslashes($value);
     }

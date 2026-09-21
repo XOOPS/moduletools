@@ -129,7 +129,7 @@ class Paginator
      */
     public function processQuery(array $usedQuery): string
     {
-        \parse_str($_SERVER['QUERY_STRING'] ?? '', $queryVars);
+        \parse_str((string) ($_SERVER['QUERY_STRING'] ?? ''), $queryVars);
         $filtered = \array_diff_key($queryVars, \array_flip($usedQuery));
 
         return [] === $filtered ? '' : '?' . \http_build_query($filtered, '', '&', \PHP_QUERY_RFC3986);
