@@ -92,6 +92,20 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function aSymlinkedModuleClonesBesideTheLinkNotBesideItsTarget(): void
+    {
+        // modules/quotes -> a checkout elsewhere: XOOPS finds modules under the link's parent.
+        mkdir($this->root . '/site');
+        if (!@symlink($this->root . '/quotes', $this->root . '/site/quotes')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        self::assertSame($this->root . '/site/sayings', Cloner::clone($this->root . '/site/quotes', 'sayings'));
+        self::assertFileExists($this->root . '/site/sayings/class/SayingsHandler.php');
+        self::assertDirectoryDoesNotExist($this->root . '/sayings');
+    }
+
+    #[Test]
     public function cloneRemovesThePartialTargetWhenCopyingFails(): void
     {
         // A directory "quotes" and a file "sayings" both map onto the target entry "sayings":

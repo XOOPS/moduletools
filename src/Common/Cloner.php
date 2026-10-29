@@ -62,10 +62,17 @@ final class Cloner
         if (false === $resolved) {
             throw new \InvalidArgumentException('Source module does not exist: ' . $sourcePath);
         }
-        $sourcePath = \rtrim(\str_replace('\\', '/', $resolved), '/');
+        $resolved = \rtrim(\str_replace('\\', '/', $resolved), '/');
+        // Name and place the clone by the LOGICAL path (a symlinked modules/quotes clones beside the
+        // link, under its name); only a "." / ".." spelling falls back to the resolved path.
+        $logical = (string) \preg_replace('#(?:/\.)+$#', '', \rtrim(\str_replace('\\', '/', $sourcePath), '/'));
+        $sourcePath = 1 === \preg_match('#(?:^|/)\.\.?(?:/|$)#', $logical) ? $resolved : $logical;
         $oldDirname = \basename($sourcePath);
         $targetPath = \dirname($sourcePath) . '/' . $newDirname;
-        if ('' === $oldDirname || \str_starts_with($targetPath . '/', $sourcePath . '/')) {
+        // Containment is decided on resolved paths, whatever the spelling.
+        $resolvedParent = \realpath(\dirname($sourcePath));
+        $resolvedTarget = false === $resolvedParent ? '' : \rtrim(\str_replace('\\', '/', $resolvedParent), '/') . '/' . $newDirname;
+        if ('' === $oldDirname || '' === $resolvedTarget || \str_starts_with($resolvedTarget . '/', $resolved . '/')) {
             throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
         // Exclusive creation establishes ownership: an existing directory, file or symlink

@@ -22,7 +22,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   check failed.
 - `Common\Text::truncateHtml()` matches closing tags case-insensitively (`<B>…</B>` no longer gets an
   extra `</b>`), keeps open tags on a stack instead of `array_unshift()`, and excerpts plain text when
-  the input has more than 2000 tags.
+  the input has more than 2000 tags. That excerpt keeps block elements apart, counts an entity as one
+  character and is HTML-escaped.
 - `Common\TestdataSample::loadData()` reports which sample folders could not be copied instead of
   showing the success message.
 
@@ -32,13 +33,25 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   module-only administrator passed. Sample-data folder copying now needs a webmaster.
 - `Admin\ObjectController` accepts an upload only for a writable field declared as FILE/IMAGE (or with a
   `file`/`image`/`richfile` control), checked before the file is stored. Read-only, hidden and other
-  fields can no longer be overwritten with an uploaded filename.
+  fields can no longer be overwritten with an uploaded filename. A refused upload is reported as an
+  object error, so the save fails instead of dropping the file. A plain `XoopsObject` declares an upload
+  field with `$this->vars['photo']['custom_type'] = XOBJ_DTYPE_IMAGE;` (or `XOBJ_DTYPE_FILE`).
 - `Common\Resizer` refuses images over 50 megapixels (source or target box) before decoding, and cover
   mode crops then resamples once instead of allocating an enlarged intermediate canvas.
 - `Common\Cloner::clone()` resolves the source path first: `quotes/.` cloned into itself and replaced
-  every `.` in the copied files.
+  every `.` in the copied files. A symlinked module still clones beside the link, under the link's name;
+  containment is checked on the resolved paths.
+- `Permission\ItemPermission::isGranted()` with item id 0 requires a grant on item 0 itself (webmasters
+  still pass). Core `checkRight()` drops the item filter for id 0, so a grant on any item answered true;
+  `ObjectController` checks `add` for a new object this way.
 - `Common\Paginator` link targets must be `http(s)://` or a local path; anything else (`javascript:`,
   `data:`, `//host`) falls back to the current script.
+
+### Development
+- `rector/rector` is held below 2.8 and `phpstan/phpstan` below 2.3. Rector 2.8 deprecated
+  `FunctionArgumentDefaultValueReplacerRector`, which `xoops/rector-xoops` 1.0.0-alpha1 still configures,
+  so `rector process` aborts; Rector 2.7.0 crashes on PHPStan 2.3.4 ("Could not process" on every file),
+  so the pair resolves to Rector 2.6 + PHPStan 2.2. Lift both caps once rector-xoops replaces that rule.
 
 ## [1.5.0] — 2026-07-21
 

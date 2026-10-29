@@ -27,6 +27,7 @@ final class Text implements TextInterface
 {
     // ponytail: past this many tags an excerpt falls back to plain text; raise it if real content needs more
     private const int MAX_HTML_TAGS = 2000;
+    private const string ENCODING = 'UTF-8';
 
     /**
      * truncateHtml can truncate a string up to a number of characters while preserving whole words and HTML tags
@@ -66,7 +67,20 @@ final class Text implements TextInterface
         // Tags cost no visible characters, so $length does not bound the tag walk, and closing
         // tags that miss the top of the stack search it. Past the budget, excerpt plain text.
         if ($considerHtml && \substr_count($text, '<') > self::MAX_HTML_TAGS) {
-            return self::truncateHtml(\strip_tags($text), $length, $ending, $exact, false);
+            // Block boundaries become spaces so paragraphs do not run together; entities are
+            // decoded so each counts as one character and is never cut, then the excerpt is re-escaped.
+            $plain = \strip_tags((string) \preg_replace('#<(?:br|/?(?:p|div|li|h[1-6]|tr|td|th|blockquote|ul|ol|table|section|article|header|footer))\b[^>]*>#i', ' ', $text));
+            // Scrubbed first: a /u regex on malformed UTF-8 returns null and the excerpt would be empty.
+            $plain = \mb_scrub(\html_entity_decode($plain, \ENT_QUOTES | \ENT_HTML5 | \ENT_SUBSTITUTE, self::ENCODING), self::ENCODING);
+            $plain = \trim((string) \preg_replace('/\s+/u', ' ', $plain));
+
+            if (mb_strlen($plain) <= $length) {
+                return \htmlspecialchars($plain, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING);
+            }
+            // The text is escaped; $ending is caller markup (e.g. "&hellip;") appended raw, as on the HTML path.
+            $excerpt = self::truncateHtml($plain, $length - mb_strlen($ending), '', $exact, false);
+
+            return \htmlspecialchars($excerpt, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING) . $ending;
         }
         if ($considerHtml) {
             // splits all html-tags to scanable lines

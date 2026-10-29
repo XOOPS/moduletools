@@ -48,6 +48,20 @@ final class ItemPermissionTest extends TestCase
         self::assertTrue($service->isGranted('item_view', 7, [0, 3]));
     }
 
+    public function testItemZeroNeedsAnExactGrantNotAGrantOnAnyItem(): void
+    {
+        // Core checkRight() omits the item filter for id 0: an 'add' grant on item 7 answered true.
+        $gateway = new RecordingPermissionGateway();
+        $gateway->right = true;
+        $service = new ItemPermission(42, $gateway);
+
+        $gateway->groups = [];
+        self::assertFalse($service->isGranted('add', 0, [2]));
+        $gateway->groups = [2, 4];
+        self::assertTrue($service->isGranted('add', 0, [4]));
+        self::assertFalse($service->isGranted('add', 0, [3]));
+    }
+
     public function testReplaceRestoresPreviousGrantsWhenAnAddFails(): void
     {
         $gateway = new RecordingPermissionGateway();

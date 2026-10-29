@@ -52,7 +52,7 @@ final class ConsumerBridgeGenerator
 
             if (preg_match('/^\s*PRIMARY\s+KEY\s*\(([^)]+)\)/i', $line, $match)) {
                 preg_match_all('/`?([A-Za-z_][A-Za-z0-9_]*)`?/', $match[1], $keys);
-                $current['primaryKey'] = array_values($keys[1]);
+                $current['primaryKey'] = $keys[1];
                 continue;
             }
             // A stray CREATE TABLE inside an open table means the previous one never closed.

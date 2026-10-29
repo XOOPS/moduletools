@@ -178,5 +178,11 @@ final class ObjectControllerTest extends TestCase
 
         self::assertSame(['upload_image'], \XoopsMediaUploader::$fetched, 'refused fields never reach the uploader');
         self::assertSame([['image', 'saved-upload_image']], $object->setCalls);
+        // A refused upload is reported, so storeFromDefaultForm() does not save past the lost file.
+        self::assertSame([
+            'logo: this field does not accept uploads.',
+            'banner: this field does not accept uploads.',
+            'uid: this field does not accept uploads.',
+        ], $object->errors);
     }
 }

@@ -50,4 +50,17 @@ final class TextTest extends TestCase
 
         self::assertSame('abc', Text::truncateHtml($flood, 3, '', true));
     }
+
+    public function testTheTagFloodFallbackKeepsParagraphsApartAndEntitiesWhole(): void
+    {
+        $flood = str_repeat('<b></b>', 2_000);
+
+        self::assertSame('Hello wo', Text::truncateHtml('<p>Hello</p><p>world again</p>' . $flood, 8, '', true));
+        self::assertSame('a &amp; b', Text::truncateHtml('a &amp; b &lt;c&gt; d' . $flood, 5, '', true));
+        self::assertSame('&lt;c&gt;', Text::truncateHtml('&lt;c&gt; and more' . $flood, 3, '', true));
+        // Malformed UTF-8 used to make the /u whitespace pass return null: an empty excerpt.
+        self::assertSame('ab?cd', Text::truncateHtml("ab\xFFcd efgh" . $flood, 5, '', true));
+        // The ending is caller markup on both paths: appended once, never re-escaped.
+        self::assertSame('a &amp;<i>…</i>', Text::truncateHtml('a &amp; bcdefghijk' . $flood, 11, '<i>…</i>', true));
+    }
 }

@@ -118,6 +118,8 @@ final readonly class ObjectController
             return true; // admin pages sit behind cp_header(); the token check is the guard
         }
 
+        // A new object has id 0, so 'add' is checked against item 0: the module-wide create right.
+        // No grant on item 0 means refused; a POSTed existing id loads that object and checks 'edit'.
         return $object instanceof DynamicObject && $object->accessGranted($object->isNew() ? 'add' : 'edit');
     }
 
@@ -206,11 +208,13 @@ final readonly class ObjectController
         }
         foreach ($_FILES as $field => $file) {
             $name = str_starts_with((string) $field, 'upload_') ? substr((string) $field, 7) : (string) $field;
+            if (!isset($object->vars[$name], $file['name']) || '' === (string) $file['name']) {
+                continue;
+            }
             // Checked before the uploader runs, so a refused field never leaves a file behind.
-            if (
-                !isset($object->vars[$name], $file['name']) || '' === (string) $file['name']
-                || !self::isWritableField($object->vars[$name]) || !self::isUploadField($object, $name)
-            ) {
+            // Refused loudly: the errors stop the save instead of dropping the selected file.
+            if (!self::isWritableField($object->vars[$name]) || !self::isUploadField($object, $name)) {
+                $object->setErrors(sprintf('%s: this field does not accept uploads.', $name));
                 continue;
             }
             $uploader = new \XoopsMediaUploader(
@@ -241,11 +245,17 @@ final readonly class ObjectController
             && false !== ($metadata['displayOnForm'] ?? true);
     }
 
-    /** The same rule ObjectFormBuilder uses to render a file input: a FILE/IMAGE type or a file control. */
+    /**
+     * The same rule ObjectFormBuilder uses to render a file input: a FILE/IMAGE type or a file control.
+     * A plain XoopsObject declares an upload field with
+     * `$this->vars['photo']['custom_type'] = XOBJ_DTYPE_IMAGE;` (or XOBJ_DTYPE_FILE) after initVar().
+     */
     private static function isUploadField(\XoopsObject $object, string $name): bool
     {
         $type = (int) ($object->vars[$name]['custom_type'] ?? $object->vars[$name]['data_type'] ?? 0);
-        if (\defined('XOBJ_DTYPE_FILE') && \defined('XOBJ_DTYPE_IMAGE') && in_array($type, [XOBJ_DTYPE_FILE, XOBJ_DTYPE_IMAGE], true)) {
+        // DynamicObject defines these as 204/205 when core does not; a plain XoopsObject may not have loaded it.
+        $uploadTypes = [\defined('XOBJ_DTYPE_FILE') ? XOBJ_DTYPE_FILE : 204, \defined('XOBJ_DTYPE_IMAGE') ? XOBJ_DTYPE_IMAGE : 205];
+        if (in_array($type, $uploadTypes, true)) {
             return true;
         }
         $control = method_exists($object, 'getControl') ? $object->getControl($name) : null;
