@@ -234,10 +234,16 @@ class Paginator
     /**
      * Attribute-safe href. toPage (PHP_SELF by default) and urlOther are caller/request
      * input and queryStr is URL-encoded, so the whole href is HTML-escaped exactly once here.
+     * Escaping cannot stop a "javascript:" destination, so toPage must be http(s) or a local
+     * path; it is checked here, not in setToPage(), because the property is public.
      */
     private function pageHref(int $page, string $loadtime): string
     {
-        $href = $this->toPage . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
+        $base = $this->toPage;
+        if ('' !== $base && 1 !== \preg_match('#^https?://#i', $base)) {
+            $base = Output::localPath($base, (string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php'));
+        }
+        $href = $base . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
 
         return \htmlspecialchars($href, \ENT_QUOTES, 'UTF-8');
     }

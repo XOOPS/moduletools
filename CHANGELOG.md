@@ -20,6 +20,25 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - `Common\TestdataButtons` appends the token with a raw `&`: `ModuleAdmin::renderButton()` escapes the
   link, so `&amp;` arrived as an `amp;XOOPS_TOKEN_REQUEST` parameter and every sample-data token
   check failed.
+- `Common\Text::truncateHtml()` matches closing tags case-insensitively (`<B>…</B>` no longer gets an
+  extra `</b>`), keeps open tags on a stack instead of `array_unshift()`, and excerpts plain text when
+  the input has more than 2000 tags.
+- `Common\TestdataSample::loadData()` reports which sample folders could not be copied instead of
+  showing the success message.
+
+### Security
+- `SysUtility::deleteDirectory()`, `rrmdir()`, `rmove()` and `rcopy()` require membership in the
+  webmaster group (`XOOPS_GROUP_ADMIN`). `XoopsUser::isAdmin()` tested the current module, so a
+  module-only administrator passed. Sample-data folder copying now needs a webmaster.
+- `Admin\ObjectController` accepts an upload only for a writable field declared as FILE/IMAGE (or with a
+  `file`/`image`/`richfile` control), checked before the file is stored. Read-only, hidden and other
+  fields can no longer be overwritten with an uploaded filename.
+- `Common\Resizer` refuses images over 50 megapixels (source or target box) before decoding, and cover
+  mode crops then resamples once instead of allocating an enlarged intermediate canvas.
+- `Common\Cloner::clone()` resolves the source path first: `quotes/.` cloned into itself and replaced
+  every `.` in the copied files.
+- `Common\Paginator` link targets must be `http(s)://` or a local path; anything else (`javascript:`,
+  `data:`, `//host`) falls back to the current script.
 
 ## [1.5.0] — 2026-07-21
 

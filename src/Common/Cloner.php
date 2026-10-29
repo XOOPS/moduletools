@@ -52,17 +52,22 @@ final class Cloner
      */
     public static function clone(string $sourcePath, string $newDirname): string
     {
-        $sourcePath = \rtrim(\str_replace('\\', '/', $sourcePath), '/');
-        $oldDirname = \basename($sourcePath);
         $newDirname = \mb_strtolower($newDirname);
-
         if (!self::isValidDirname($newDirname)) {
             throw new \InvalidArgumentException('Invalid module dirname: ' . $newDirname);
         }
-        if (!\is_dir($sourcePath)) {
+        // Resolve before deriving names: "quotes/." would otherwise give the basename "." (rewritten
+        // in every copied file) and a target INSIDE the source, which copyTree() then re-copies.
+        $resolved = \is_dir($sourcePath) ? \realpath($sourcePath) : false;
+        if (false === $resolved) {
             throw new \InvalidArgumentException('Source module does not exist: ' . $sourcePath);
         }
+        $sourcePath = \rtrim(\str_replace('\\', '/', $resolved), '/');
+        $oldDirname = \basename($sourcePath);
         $targetPath = \dirname($sourcePath) . '/' . $newDirname;
+        if ('' === $oldDirname || \str_starts_with($targetPath . '/', $sourcePath . '/')) {
+            throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
+        }
         // Exclusive creation establishes ownership: an existing directory, file or symlink
         // (even one that appeared after a prior check) makes mkdir() fail, so only a
         // target this call created is ever cleaned up below.

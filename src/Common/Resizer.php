@@ -23,6 +23,9 @@ namespace Xoops\ModuleTools\Common;
  */
 final class Resizer implements ImageResizerInterface
 {
+    // ponytail: fixed ~50 MP budget (fits 48 MP phone photos); make it a ResizeRequest field if a module needs more
+    private const int MAX_PIXELS = 50_000_000;
+
     public function resize(ResizeRequest $request): ResizeResult
     {
         $target = $request->targetPath;
@@ -38,6 +41,11 @@ final class Resizer implements ImageResizerInterface
             return ResizeResult::failure($target, 'Not a readable image: ' . $request->sourcePath);
         }
         $mime = (string) $info['mime'];
+        // Decoding materialises the whole raster (4 bytes/px, plus a rotated copy for EXIF
+        // JPEGs), so a small compressed file must not reach the decoder with huge dimensions.
+        if ($info[0] < 1 || $info[1] < 1 || $info[0] * $info[1] > self::MAX_PIXELS || \max(1, $request->maxWidth) * \max(1, $request->maxHeight) > self::MAX_PIXELS) {
+            return ResizeResult::failure($target, 'Image dimensions exceed the pixel budget: ' . $request->sourcePath);
+        }
 
         $image = $this->createImage($request->sourcePath, $mime);
         if (!$image instanceof \GdImage) {
@@ -100,18 +108,31 @@ final class Resizer implements ImageResizerInterface
         $maxH = \max(1, $r->maxHeight);
 
         if (ResizeRequest::FIT_COVER === $r->fit) {
-            // Scale to cover the box, then centre-crop to exactly maxW x maxH.
+            // Scale to cover the box, then centre-crop to exactly maxW x maxH. Only the whole source
+            // pixels under the (sub-pixel) crop are scaled: scaling the entire source would make a
+            // thin image's intermediate (box / thin edge) times larger than either image. This one
+            // stays below (maxW + 2*ratio + 1) x (maxH + 2*ratio + 1), and ratio <= max(maxW, maxH).
             $ratio   = \max($maxW / $srcW, $maxH / $srcH);
-            $resizeW = \max(1, (int) \ceil($srcW * $ratio));
-            $resizeH = \max(1, (int) \ceil($srcH * $ratio));
+            $cropX   = \max(0.0, ($srcW - $maxW / $ratio) / 2); // max(): float error on the fitted edge
+            $cropY   = \max(0.0, ($srcH - $maxH / $ratio) / 2);
+            $x0      = (int) \floor($cropX);
+            $y0      = (int) \floor($cropY);
+            $w       = (int) \min($srcW, \ceil($srcW - $cropX)) - $x0;
+            $h       = (int) \min($srcH, \ceil($srcH - $cropY)) - $y0;
+            $scaledW = \max(1, (int) \ceil($w * $ratio));
+            $scaledH = \max(1, (int) \ceil($h * $ratio));
 
-            $scaled = $this->newCanvas($resizeW, $resizeH, $mime);
-            \imagecopyresampled($scaled, $src, 0, 0, 0, 0, $resizeW, $resizeH, $srcW, $srcH);
-
-            $cropX  = (int) \max(0, \floor(($resizeW - $maxW) / 2));
-            $cropY  = (int) \max(0, \floor(($resizeH - $maxH) / 2));
             $canvas = $this->newCanvas($maxW, $maxH, $mime);
-            \imagecopy($canvas, $scaled, 0, 0, $cropX, $cropY, $maxW, $maxH);
+            if ($scaledW * $scaledH > 4 * $maxW * $maxH) {
+                // ponytail: an extreme box (1x1 source into 10000x1) would need a huge intermediate for
+                // sub-pixel centring; resample the covering pixels directly and accept <1 source px of drift.
+                \imagecopyresampled($canvas, $src, 0, 0, $x0, $y0, $maxW, $maxH, $w, $h);
+
+                return $canvas;
+            }
+            $scaled = $this->newCanvas($scaledW, $scaledH, $mime);
+            \imagecopyresampled($scaled, $src, 0, 0, $x0, $y0, $scaledW, $scaledH, $w, $h);
+            \imagecopy($canvas, $scaled, 0, 0, (int) \floor(($cropX - $x0) * $ratio), (int) \floor(($cropY - $y0) * $ratio), $maxW, $maxH);
 
             return $canvas;
         }

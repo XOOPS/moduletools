@@ -19,14 +19,7 @@ final readonly class ObjectController
     public function postDataToObject(\XoopsObject $object): void
     {
         foreach ($object->vars as $name => $metadata) {
-            // A field the form never shows (hideFieldFromForm) or marks read-only (makeFieldReadOnly)
-            // is not writable from the request either, whatever the POST body carries.
-            if (
-                false === ($metadata['persistent'] ?? true)
-                || true === ($metadata['readonly'] ?? false)
-                || false === ($metadata['displayOnForm'] ?? true)
-                || !array_key_exists($name, $_POST)
-            ) {
+            if (!self::isWritableField($metadata) || !array_key_exists($name, $_POST)) {
                 continue;
             }
             $value = $_POST[$name];
@@ -213,7 +206,11 @@ final readonly class ObjectController
         }
         foreach ($_FILES as $field => $file) {
             $name = str_starts_with((string) $field, 'upload_') ? substr((string) $field, 7) : (string) $field;
-            if (!isset($object->vars[$name], $file['name']) || '' === (string) $file['name']) {
+            // Checked before the uploader runs, so a refused field never leaves a file behind.
+            if (
+                !isset($object->vars[$name], $file['name']) || '' === (string) $file['name']
+                || !self::isWritableField($object->vars[$name]) || !self::isUploadField($object, $name)
+            ) {
                 continue;
             }
             $uploader = new \XoopsMediaUploader(
@@ -229,6 +226,32 @@ final readonly class ObjectController
                 $object->setErrors($uploader->getErrors(false));
             }
         }
+    }
+
+    /**
+     * A field the form never shows (hideFieldFromForm) or marks read-only (makeFieldReadOnly)
+     * is not writable from the request either, whatever the POST body or upload carries.
+     *
+     * @param array<string, mixed> $metadata
+     */
+    private static function isWritableField(array $metadata): bool
+    {
+        return false !== ($metadata['persistent'] ?? true)
+            && true !== ($metadata['readonly'] ?? false)
+            && false !== ($metadata['displayOnForm'] ?? true);
+    }
+
+    /** The same rule ObjectFormBuilder uses to render a file input: a FILE/IMAGE type or a file control. */
+    private static function isUploadField(\XoopsObject $object, string $name): bool
+    {
+        $type = (int) ($object->vars[$name]['custom_type'] ?? $object->vars[$name]['data_type'] ?? 0);
+        if (\defined('XOBJ_DTYPE_FILE') && \defined('XOBJ_DTYPE_IMAGE') && in_array($type, [XOBJ_DTYPE_FILE, XOBJ_DTYPE_IMAGE], true)) {
+            return true;
+        }
+        $control = method_exists($object, 'getControl') ? $object->getControl($name) : null;
+        $controlName = is_array($control) ? (string) ($control['name'] ?? '') : (string) $control;
+
+        return in_array($controlName, ['file', 'image', 'richfile'], true);
     }
 
     /** @legacy-global-accessor */

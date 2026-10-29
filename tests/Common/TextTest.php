@@ -34,4 +34,20 @@ final class TextTest extends TestCase
             self::assertSame($expected, Text::truncateHtml($input, 4, '', true));
         }
     }
+
+    public function testClosingTagsMatchCaseInsensitivelyAndCloseInnermostFirst(): void
+    {
+        // "</B>" used to miss the lowercased "b" on the stack and get a second "</b>" appended.
+        self::assertSame('<B>ab</B><i>cd</i>', Text::truncateHtml('<B>ab</B><i>cdefgh</i>', 4, '', true));
+        self::assertSame('<b><i>abc</i></b>', Text::truncateHtml('<b><i>abcdef</i></b>', 3, '', true));
+        self::assertSame('<b><i>ab</i>c</b>', Text::truncateHtml('<b><i>ab</i>cdef</b>', 3, '', true));
+    }
+
+    public function testATagFloodFallsBackToAPlainTextExcerpt(): void
+    {
+        // Tags cost no visible characters; this input made the old array_unshift walk quadratic.
+        $flood = str_repeat('<a>', 20_000) . 'abcdef' . str_repeat('</b>', 20_000);
+
+        self::assertSame('abc', Text::truncateHtml($flood, 3, '', true));
+    }
 }

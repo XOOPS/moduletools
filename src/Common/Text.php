@@ -25,6 +25,9 @@ namespace Xoops\ModuleTools\Common;
  */
 final class Text implements TextInterface
 {
+    // ponytail: past this many tags an excerpt falls back to plain text; raise it if real content needs more
+    private const int MAX_HTML_TAGS = 2000;
+
     /**
      * truncateHtml can truncate a string up to a number of characters while preserving whole words and HTML tags
      * www.gsdesign.ro/blog/cut-html-string-without-breaking-the-tags
@@ -60,6 +63,11 @@ final class Text implements TextInterface
         if (mb_strlen($ending) >= $length) {
             return mb_substr($ending, 0, $length);
         }
+        // Tags cost no visible characters, so $length does not bound the tag walk, and closing
+        // tags that miss the top of the stack search it. Past the budget, excerpt plain text.
+        if ($considerHtml && \substr_count($text, '<') > self::MAX_HTML_TAGS) {
+            return self::truncateHtml(\strip_tags($text), $length, $ending, $exact, false);
+        }
         if ($considerHtml) {
             // splits all html-tags to scanable lines
             \preg_match_all('/(<.+?' . '>)?([^<>]*)/s', $text, $lines, \PREG_SET_ORDER);
@@ -74,15 +82,16 @@ final class Text implements TextInterface
                         // do nothing
                         // if tag is a closing tag
                     } elseif (\preg_match('/^<\s*\/(\S+?)\s*>$/s', $lineMatchings[1], $tag_matchings)) {
-                        // delete tag from $openTags list
-                        $pos = \array_search($tag_matchings[1], $openTags, true);
-                        if (false !== $pos) {
+                        // close the newest open tag of that name (well-nested HTML: the top of the stack)
+                        $closing = \mb_strtolower($tag_matchings[1]);
+                        if (\end($openTags) === $closing) {
+                            \array_pop($openTags);
+                        } elseif (false !== ($pos = \array_search($closing, \array_reverse($openTags, true), true))) {
                             unset($openTags[$pos]);
                         }
                         // if tag is an opening tag
                     } elseif (\preg_match('/^<\s*([^\s>!]+).*?' . '>$/s', $lineMatchings[1], $tag_matchings)) {
-                        // add tag to the beginning of $openTags list
-                        \array_unshift($openTags, \mb_strtolower($tag_matchings[1]));
+                        $openTags[] = \mb_strtolower($tag_matchings[1]);
                     }
                     // add html-tag to $truncate'd text
                     $truncate .= $lineMatchings[1];
@@ -134,8 +143,8 @@ final class Text implements TextInterface
         // add the defined ending to the text
         $truncate .= $ending;
         if ($considerHtml) {
-            // close all unclosed html-tags
-            foreach ($openTags as $tag) {
+            // close all unclosed html-tags, innermost first
+            foreach (\array_reverse($openTags) as $tag) {
                 $truncate .= '</' . $tag . '>';
             }
         }

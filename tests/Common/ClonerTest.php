@@ -118,6 +118,20 @@ final class ClonerTest extends TestCase
         self::assertFalse(Cloner::createLogo($this->root . '/quotes'));
     }
 
+    #[Test]
+    public function aDotSpelledSourceClonesToTheSiblingNotIntoItself(): void
+    {
+        // "quotes/." used to resolve the target to quotes/sayings, copy it into itself,
+        // and rewrite every "." in the copied files with the new name.
+        foreach (['/quotes/.', '/quotes/class/..'] as $i => $spelling) {
+            $target = Cloner::clone($this->root . $spelling, 'sayings' . $i);
+
+            self::assertSame(str_replace('\\', '/', (string) realpath($this->root)) . '/sayings' . $i, $target);
+            self::assertDirectoryDoesNotExist($this->root . '/quotes/sayings' . $i);
+            self::assertStringEqualsFile($target . '/class/Sayings' . $i . 'Handler.php', "<?php\nnamespace XoopsModules\\Sayings{$i};\ndefine('SAYINGS{$i}_URL', 'sayings{$i}');\n");
+        }
+    }
+
     private function rmdir(string $dir): void
     {
         foreach (array_diff(scandir($dir) ?: [], ['.', '..']) as $entry) {

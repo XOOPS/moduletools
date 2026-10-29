@@ -16,6 +16,8 @@ defined('XOBJ_DTYPE_ARRAY') || define('XOBJ_DTYPE_ARRAY', 6);
 defined('XOBJ_DTYPE_STIME') || define('XOBJ_DTYPE_STIME', 9);
 defined('XOBJ_DTYPE_MTIME') || define('XOBJ_DTYPE_MTIME', 10);
 defined('XOBJ_DTYPE_LTIME') || define('XOBJ_DTYPE_LTIME', 11);
+defined('XOBJ_DTYPE_FILE') || define('XOBJ_DTYPE_FILE', 204);
+defined('XOBJ_DTYPE_IMAGE') || define('XOBJ_DTYPE_IMAGE', 205);
 
 #[CoversClass(ObjectController::class)]
 final class ObjectControllerTest extends TestCase
@@ -23,6 +25,7 @@ final class ObjectControllerTest extends TestCase
     protected function tearDown(): void
     {
         $_POST = [];
+        $_FILES = [];
         unset($_SERVER['REQUEST_METHOD'], $GLOBALS['xoopsSecurity']);
     }
 
@@ -147,5 +150,33 @@ final class ObjectControllerTest extends TestCase
         new ObjectController(new \XoopsPersistableObjectHandler())->postDataToObject($object);
 
         self::assertSame([['title', 'Hello']], $object->setCalls);
+    }
+
+    #[Test]
+    public function uploadsReachOnlyWritableDeclaredUploadFields(): void
+    {
+        $object = new FakeObject()
+            ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
+            ->addVar('logo', XOBJ_DTYPE_TXTBOX, 'old.png', ['custom_type' => XOBJ_DTYPE_IMAGE, 'readonly' => true])
+            ->addVar('banner', XOBJ_DTYPE_TXTBOX, 'old.png', ['custom_type' => XOBJ_DTYPE_FILE, 'displayOnForm' => false])
+            ->addVar('uid', XOBJ_DTYPE_INT, 1);
+        $_FILES = [
+            'upload_image' => ['name' => 'a.png'],
+            'logo'         => ['name' => 'b.png'],
+            'banner'       => ['name' => 'c.png'],
+            'uid'          => ['name' => 'd.png'], // not an upload field: no file may be stored for it
+        ];
+        \XoopsMediaUploader::$fetched = [];
+        $handler = new class extends \XoopsPersistableObjectHandler {
+            public function getImagePath(bool $path = false): string
+            {
+                return sys_get_temp_dir();
+            }
+        };
+
+        new \ReflectionMethod(ObjectController::class, 'receiveUploads')->invoke(new ObjectController($handler), $object);
+
+        self::assertSame(['upload_image'], \XoopsMediaUploader::$fetched, 'refused fields never reach the uploader');
+        self::assertSame([['image', 'saved-upload_image']], $object->setCalls);
     }
 }

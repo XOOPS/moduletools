@@ -17,6 +17,7 @@ namespace Xoops\ModuleTools\Common;
  */
 
 use Xmf\Database\TableLoad;
+use Xoops\ModuleTools\Internal\PackageLanguage;
 use Xoops\ModuleTools\Utility;
 
 /**
@@ -81,11 +82,26 @@ class TestdataSample
 
         //  ---  COPY test folder files ---------------
         if (\is_array($configurator->copyTestFolders) && \count($configurator->copyTestFolders) > 0) {
-            //        $file =  \dirname(__DIR__) . '/testdata/images/';
+            $failed = [];
             foreach (\array_keys($configurator->copyTestFolders) as $i) {
                 $src  = $configurator->copyTestFolders[$i][0];
                 $dest = $configurator->copyTestFolders[$i][1];
-                $utility::rcopy($src, $dest);
+                if (!$utility::rcopy($src, $dest)) {
+                    $failed[] = (string) $dest;
+                }
+            }
+            // rcopy() is webmaster-only: a module-only admin gets the rows but not the files,
+            // and must be told so instead of seeing a success message.
+            if ([] !== $failed) {
+                PackageLanguage::load('common', \rtrim($this->language, '/'));
+                \redirect_header(
+                    $this->modHelper->url('admin/index.php'),
+                    5,
+                    \sprintf(
+                        \defined('_CO_MTOOLS_LOAD_SAMPLEDATA_COPYFAIL') ? \_CO_MTOOLS_LOAD_SAMPLEDATA_COPYFAIL : 'Sample data rows were imported, but these folders could not be copied (copying files requires a webmaster): %s',
+                        \htmlspecialchars(\implode(', ', $failed), \ENT_QUOTES, 'UTF-8'),
+                    ),
+                );
             }
         }
         \redirect_header($this->modHelper->url('admin/index.php'), 1, \constant('_CO_' . $this->moduleDirNameUpper . '_' . 'LOAD_SAMPLEDATA_SUCCESS'));
