@@ -84,7 +84,11 @@ final class Cloner
         // Re-checked on the directory the OS actually created, so a link or junction chain the
         // parent resolution missed cannot put the target inside the tree copyTree() walks.
         $createdTarget = \realpath($targetPath);
-        if (false === $createdTarget || self::isInside(\str_replace('\\', '/', $createdTarget), $resolved)) {
+        if (
+            false === $createdTarget
+            || self::isInside(\str_replace('\\', '/', $createdTarget), $resolved)
+            || self::isInsideByIdentity($createdTarget, $resolved)
+        ) {
             @\rmdir($targetPath);
             throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
@@ -254,6 +258,30 @@ final class Cloner
         return '\\' === \DIRECTORY_SEPARATOR
             ? 0 === \strncasecmp($path, $root, \strlen($root))
             : \str_starts_with($path, $root);
+    }
+
+    /**
+     * Whether the existing directory `$path` is `$root` or below it, by device and inode, so a
+     * case-insensitive filesystem (macOS APFS) cannot hide containment behind another spelling.
+     * `$path` must be resolved (realpath): lexical ancestors of a link can skip the physical root.
+     */
+    private static function isInsideByIdentity(string $path, string $root): bool
+    {
+        $rootStat = @\stat($root);
+        if (false === $rootStat || 0 === $rootStat['ino']) {
+            return false;
+        }
+        $dir = $path;
+        do {
+            $stat = @\stat($dir);
+            if (false !== $stat && $stat['ino'] === $rootStat['ino'] && $stat['dev'] === $rootStat['dev']) {
+                return true;
+            }
+            $parent = $dir;
+            $dir = \dirname($dir);
+        } while ($dir !== $parent);
+
+        return false;
     }
 
     /** @legacy-global-accessor */

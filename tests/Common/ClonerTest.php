@@ -144,6 +144,20 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function identityContainmentFollowsTheFilesystemNotTheSpelling(): void
+    {
+        $byIdentity = new \ReflectionMethod(Cloner::class, 'isInsideByIdentity');
+        $source = $this->root . '/quotes';
+
+        self::assertTrue($byIdentity->invoke(null, $source . '/class', $source));
+        self::assertTrue($byIdentity->invoke(null, $source . '/class/missing', $source));
+        self::assertFalse($byIdentity->invoke(null, $this->root, $source));
+        // On a case-folding filesystem another spelling is the same directory and must count.
+        $caseFolds = is_dir($this->root . '/QUOTES');
+        self::assertSame($caseFolds, $byIdentity->invoke(null, $this->root . '/QUOTES/class', $source));
+    }
+
+    #[Test]
     public function aDotSpelledSourceClonesToTheSiblingNotIntoItself(): void
     {
         // "quotes/." used to resolve the target to quotes/sayings, copy it into itself,
