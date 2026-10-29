@@ -25,6 +25,10 @@ namespace Xoops\ModuleTools\Common;
  */
 final class Text implements TextInterface
 {
+    // ponytail: past this many tags an excerpt falls back to plain text; raise it if real content needs more
+    private const int MAX_HTML_TAGS = 2000;
+    private const string ENCODING = 'UTF-8';
+
     /**
      * truncateHtml can truncate a string up to a number of characters while preserving whole words and HTML tags
      * www.gsdesign.ro/blog/cut-html-string-without-breaking-the-tags
@@ -60,6 +64,27 @@ final class Text implements TextInterface
         if (mb_strlen($ending) >= $length) {
             return mb_substr($ending, 0, $length);
         }
+        // Tags cost no visible characters, so $length does not bound the tag walk, and closing
+        // tags that miss the top of the stack search it. Past the budget, excerpt plain text.
+        if ($considerHtml && \substr_count($text, '<') > self::MAX_HTML_TAGS) {
+            // Block boundaries become spaces so paragraphs do not run together; entities are
+            // decoded so each counts as one character and is never cut, then the excerpt is re-escaped.
+            // Possessive, so a long attribute cannot exhaust the PCRE stack; if PCRE fails anyway,
+            // the tags are still stripped, only without the block spacing.
+            $spaced = \preg_replace('#<(?:br|/?(?:p|div|li|h[1-6]|tr|td|th|blockquote|ul|ol|table|section|article|header|footer))\b(?:[^>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i', ' ', $text);
+            $plain = \strip_tags($spaced ?? $text);
+            // Scrubbed first: a /u regex on malformed UTF-8 returns null and the excerpt would be empty.
+            $plain = \mb_scrub(\html_entity_decode($plain, \ENT_QUOTES | \ENT_HTML5 | \ENT_SUBSTITUTE, self::ENCODING), self::ENCODING);
+            $plain = \trim((string) \preg_replace('/\s+/u', ' ', $plain));
+
+            if (mb_strlen($plain) <= $length) {
+                return \htmlspecialchars($plain, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING);
+            }
+            // The text is escaped; $ending is caller markup (e.g. "&hellip;") appended raw, as on the HTML path.
+            $excerpt = self::truncateHtml($plain, $length - mb_strlen($ending), '', $exact, false);
+
+            return \htmlspecialchars($excerpt, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING) . $ending;
+        }
         if ($considerHtml) {
             // splits all html-tags to scanable lines
             \preg_match_all('/(<.+?' . '>)?([^<>]*)/s', $text, $lines, \PREG_SET_ORDER);
@@ -74,15 +99,16 @@ final class Text implements TextInterface
                         // do nothing
                         // if tag is a closing tag
                     } elseif (\preg_match('/^<\s*\/(\S+?)\s*>$/s', $lineMatchings[1], $tag_matchings)) {
-                        // delete tag from $openTags list
-                        $pos = \array_search($tag_matchings[1], $openTags, true);
-                        if (false !== $pos) {
+                        // close the newest open tag of that name (well-nested HTML: the top of the stack)
+                        $closing = \mb_strtolower($tag_matchings[1]);
+                        if (\end($openTags) === $closing) {
+                            \array_pop($openTags);
+                        } elseif (false !== ($pos = \array_search($closing, \array_reverse($openTags, true), true))) {
                             unset($openTags[$pos]);
                         }
                         // if tag is an opening tag
                     } elseif (\preg_match('/^<\s*([^\s>!]+).*?' . '>$/s', $lineMatchings[1], $tag_matchings)) {
-                        // add tag to the beginning of $openTags list
-                        \array_unshift($openTags, \mb_strtolower($tag_matchings[1]));
+                        $openTags[] = \mb_strtolower($tag_matchings[1]);
                     }
                     // add html-tag to $truncate'd text
                     $truncate .= $lineMatchings[1];
@@ -134,8 +160,8 @@ final class Text implements TextInterface
         // add the defined ending to the text
         $truncate .= $ending;
         if ($considerHtml) {
-            // close all unclosed html-tags
-            foreach ($openTags as $tag) {
+            // close all unclosed html-tags, innermost first
+            foreach (\array_reverse($openTags) as $tag) {
                 $truncate .= '</' . $tag . '>';
             }
         }

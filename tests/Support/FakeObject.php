@@ -40,6 +40,22 @@ final class FakeObject extends \XoopsObject
         return $value;
     }
 
+    /** @var list<string> */
+    public array $errors = [];
+
+    public function setErrors($err_str)
+    {
+        // Core accepts an array of messages as well as one string.
+        foreach ((array) $err_str as $error) {
+            $this->errors[] = (string) $error;
+        }
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
     public function setVar($key, $value, $not_gpc = false)
     {
         $this->setCalls[] = [(string) $key, $value];

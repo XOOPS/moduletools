@@ -92,6 +92,20 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function aSymlinkedModuleClonesBesideTheLinkNotBesideItsTarget(): void
+    {
+        // modules/quotes -> a checkout elsewhere: XOOPS finds modules under the link's parent.
+        mkdir($this->root . '/site');
+        if (!@symlink($this->root . '/quotes', $this->root . '/site/quotes')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        self::assertSame($this->root . '/site/sayings', Cloner::clone($this->root . '/site/quotes', 'sayings'));
+        self::assertFileExists($this->root . '/site/sayings/class/SayingsHandler.php');
+        self::assertDirectoryDoesNotExist($this->root . '/sayings');
+    }
+
+    #[Test]
     public function cloneRemovesThePartialTargetWhenCopyingFails(): void
     {
         // A directory "quotes" and a file "sayings" both map onto the target entry "sayings":
@@ -116,6 +130,45 @@ final class ClonerTest extends TestCase
     public function createLogoFailsGracefullyWithoutAssets(): void
     {
         self::assertFalse(Cloner::createLogo($this->root . '/quotes'));
+    }
+
+    #[Test]
+    public function containmentKeepsTheSeparatorBoundaryAndFollowsThePlatformCase(): void
+    {
+        $isInside = new \ReflectionMethod(Cloner::class, 'isInside');
+
+        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes/sub', 'C:/mods/quotes'));
+        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes', 'C:/mods/quotes/'));
+        self::assertFalse($isInside->invoke(null, 'C:/mods/quotes2', 'C:/mods/quotes'));
+        self::assertSame('\\' === DIRECTORY_SEPARATOR, $isInside->invoke(null, 'c:/MODS/Quotes/sub', 'C:/mods/quotes'));
+    }
+
+    #[Test]
+    public function identityContainmentFollowsTheFilesystemNotTheSpelling(): void
+    {
+        $byIdentity = new \ReflectionMethod(Cloner::class, 'isInsideByIdentity');
+        $source = $this->root . '/quotes';
+
+        self::assertTrue($byIdentity->invoke(null, $source . '/class', $source));
+        self::assertTrue($byIdentity->invoke(null, $source . '/class/missing', $source));
+        self::assertFalse($byIdentity->invoke(null, $this->root, $source));
+        // On a case-folding filesystem another spelling is the same directory and must count.
+        $caseFolds = is_dir($this->root . '/QUOTES');
+        self::assertSame($caseFolds, $byIdentity->invoke(null, $this->root . '/QUOTES/class', $source));
+    }
+
+    #[Test]
+    public function aDotSpelledSourceClonesToTheSiblingNotIntoItself(): void
+    {
+        // "quotes/." used to resolve the target to quotes/sayings, copy it into itself,
+        // and rewrite every "." in the copied files with the new name.
+        foreach (['/quotes/.', '/quotes/class/..'] as $i => $spelling) {
+            $target = Cloner::clone($this->root . $spelling, 'sayings' . $i);
+
+            self::assertSame(str_replace('\\', '/', (string) realpath($this->root)) . '/sayings' . $i, $target);
+            self::assertDirectoryDoesNotExist($this->root . '/quotes/sayings' . $i);
+            self::assertStringEqualsFile($target . '/class/Sayings' . $i . 'Handler.php', "<?php\nnamespace XoopsModules\\Sayings{$i};\ndefine('SAYINGS{$i}_URL', 'sayings{$i}');\n");
+        }
     }
 
     private function rmdir(string $dir): void

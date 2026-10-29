@@ -52,22 +52,45 @@ final class Cloner
      */
     public static function clone(string $sourcePath, string $newDirname): string
     {
-        $sourcePath = \rtrim(\str_replace('\\', '/', $sourcePath), '/');
-        $oldDirname = \basename($sourcePath);
         $newDirname = \mb_strtolower($newDirname);
-
         if (!self::isValidDirname($newDirname)) {
             throw new \InvalidArgumentException('Invalid module dirname: ' . $newDirname);
         }
-        if (!\is_dir($sourcePath)) {
+        // Resolve before deriving names: "quotes/." would otherwise give the basename "." (rewritten
+        // in every copied file) and a target INSIDE the source, which copyTree() then re-copies.
+        $resolved = \is_dir($sourcePath) ? \realpath($sourcePath) : false;
+        if (false === $resolved) {
             throw new \InvalidArgumentException('Source module does not exist: ' . $sourcePath);
         }
+        $resolved = \rtrim(\str_replace('\\', '/', $resolved), '/');
+        // Name and place the clone by the LOGICAL path (a symlinked modules/quotes clones beside the
+        // link, under its name); only a "." / ".." spelling falls back to the resolved path.
+        $logical = (string) \preg_replace('#(?:/\.)+$#', '', \rtrim(\str_replace('\\', '/', $sourcePath), '/'));
+        $sourcePath = 1 === \preg_match('#(?:^|/)\.\.?(?:/|$)#', $logical) ? $resolved : $logical;
+        $oldDirname = \basename($sourcePath);
         $targetPath = \dirname($sourcePath) . '/' . $newDirname;
+        // Containment is decided on resolved paths, whatever the spelling.
+        $resolvedParent = \realpath(\dirname($sourcePath));
+        $resolvedTarget = false === $resolvedParent ? '' : \rtrim(\str_replace('\\', '/', $resolvedParent), '/') . '/' . $newDirname;
+        if ('' === $oldDirname || '' === $resolvedTarget || self::isInside($resolvedTarget, $resolved)) {
+            throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
+        }
         // Exclusive creation establishes ownership: an existing directory, file or symlink
         // (even one that appeared after a prior check) makes mkdir() fail, so only a
         // target this call created is ever cleaned up below.
         if (\file_exists($targetPath) || \is_link($targetPath) || !@\mkdir($targetPath)) {
             throw new \InvalidArgumentException('Target already exists: ' . $targetPath);
+        }
+        // Re-checked on the directory the OS actually created, so a link or junction chain the
+        // parent resolution missed cannot put the target inside the tree copyTree() walks.
+        $createdTarget = \realpath($targetPath);
+        if (
+            false === $createdTarget
+            || self::isInside(\str_replace('\\', '/', $createdTarget), $resolved)
+            || self::isInsideByIdentity($createdTarget, $resolved)
+        ) {
+            @\rmdir($targetPath);
+            throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
 
         $patterns = [
@@ -224,6 +247,41 @@ final class Cloner
                 throw new \RuntimeException(\sprintf('File "%s" could not be copied to "%s"', $from, $to));
             }
         }
+    }
+
+    /** Whether `$path` is `$root` or below it; Windows paths compare case-insensitively. */
+    private static function isInside(string $path, string $root): bool
+    {
+        $path = \rtrim($path, '/') . '/';
+        $root = \rtrim($root, '/') . '/';
+
+        return '\\' === \DIRECTORY_SEPARATOR
+            ? 0 === \strncasecmp($path, $root, \strlen($root))
+            : \str_starts_with($path, $root);
+    }
+
+    /**
+     * Whether the existing directory `$path` is `$root` or below it, by device and inode, so a
+     * case-insensitive filesystem (macOS APFS) cannot hide containment behind another spelling.
+     * `$path` must be resolved (realpath): lexical ancestors of a link can skip the physical root.
+     */
+    private static function isInsideByIdentity(string $path, string $root): bool
+    {
+        $rootStat = @\stat($root);
+        if (false === $rootStat || 0 === $rootStat['ino']) {
+            return false;
+        }
+        $dir = $path;
+        do {
+            $stat = @\stat($dir);
+            if (false !== $stat && $stat['ino'] === $rootStat['ino'] && $stat['dev'] === $rootStat['dev']) {
+                return true;
+            }
+            $parent = $dir;
+            $dir = \dirname($dir);
+        } while ($dir !== $parent);
+
+        return false;
     }
 
     /** @legacy-global-accessor */

@@ -53,6 +53,12 @@ final readonly class ItemPermission
         if ([] === $groups) {
             return false;
         }
+        // Core checkRight() drops the item filter for id 0, so a grant on ANY item would pass.
+        // Item 0 (module-wide, e.g. 'add' on a new object) needs an exact grant; webmasters keep core's bypass.
+        if (0 === $itemId) {
+            return (\defined('XOOPS_GROUP_ADMIN') && \in_array((int) \XOOPS_GROUP_ADMIN, $groups, true))
+                || [] !== \array_intersect($groups, $this->gateway->groupIds($name, 0, $this->moduleId));
+        }
 
         return $this->gateway->checkRight($name, $itemId, $groups, $this->moduleId);
     }

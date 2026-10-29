@@ -28,6 +28,28 @@ stops after step 1 already works on XOOPS 2.8.
 | 2.7.x and 2.8 | Follow this guide **using the `XoopsModules\Mtools\*` names**, and keep the mTools module in your 2.7 install instructions. The aliases resolve to the library on 2.8 and to the module on 2.7. |
 | 2.5.x | Keep your local copies; ModuleTools is PHP 8.4+. |
 
+### 2.8-only recipe
+
+When the module no longer supports XOOPS 2.7, declare the bundled-library floor
+explicitly and remove the separate module dependency:
+
+```php
+// xoops_version.php
+$modversion['min_php'] = '8.4';
+$modversion['min_xoops'] = '2.8.0';
+// Delete: $modversion['min_modules'] = ['mtools' => '...'];
+```
+
+Then use the direct library namespaces throughout the module. For example:
+
+```php
+use Xoops\ModuleTools\Common\Configurator;
+use Xoops\ModuleTools\Module\Installer;
+```
+
+Delete any module-local `mtools` bootstrap or dependency shim. XOOPS 2.8
+autoloads `Xoops\ModuleTools\*`; there is no `mtools` module to install or activate.
+
 ## Step 1 — Drop the mTools module dependency (zero code changes)
 
 If the module already uses `XoopsModules\Mtools\Common\*`, nothing has to change on 2.8: the

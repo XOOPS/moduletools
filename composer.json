@@ -24,6 +24,7 @@
       "Xoops\\ModuleTools\\": "src/"
     },
     "files": [
+      "src/data_types.php",
       "src/legacy_aliases.php"
     ]
   },
@@ -34,9 +35,9 @@
   },
   "require-dev": {
     "nikic/php-parser": "^5.0",
-    "phpstan/phpstan": "^2.0",
+    "phpstan/phpstan": "^2.0 <2.3",
     "phpunit/phpunit": "^11.5",
-    "rector/rector": "^2.0",
+    "rector/rector": "^2.0 <2.8",
     "smarty/smarty": "^5.0",
     "squizlabs/php_codesniffer": "^3.10 || ^4.0",
     "xoops/rector-xoops": "^1.0@alpha"

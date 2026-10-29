@@ -727,12 +727,6 @@ parameters:
 			path: src/Internal/Tools/ConsumerBridgeGenerator.php
 
 		-
-			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: src/Internal/Tools/ConsumerBridgeGenerator.php
-
-		-
 			message: '#^Cannot call method getByDirname\(\) on object\|false\.$#'
 			identifier: method.nonObject
 			count: 1

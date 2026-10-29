@@ -69,6 +69,7 @@ $define('_CO_MTOOLS_' . 'SUPPORT', 'Support');
 $define('_CO_MTOOLS_' . 'LOAD_SAMPLEDATA', 'Import Sample Data (will delete ALL current data)');
 $define('_CO_MTOOLS_' . 'LOAD_SAMPLEDATA_CONFIRM', 'Are you sure to Import Sample Data? (It will delete ALL current data)');
 $define('_CO_MTOOLS_' . 'LOAD_SAMPLEDATA_SUCCESS', 'Sample Date imported  successfully');
+$define('_CO_MTOOLS_' . 'LOAD_SAMPLEDATA_COPYFAIL', 'Sample data rows were imported, but these folders could not be copied (copying files requires a webmaster): %s');
 $define('_CO_MTOOLS_' . 'SAVE_SAMPLEDATA', 'Export Tables to YAML');
 $define('_CO_MTOOLS_' . 'SAVE_SAMPLEDATA_SUCCESS', 'Export Tables to YAML successfully');
 $define('_CO_MTOOLS_' . 'CLEAR_SAMPLEDATA', 'Clear Sample Data');

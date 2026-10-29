@@ -102,4 +102,18 @@ final class BootstrapTest extends TestCase
         self::assertSame(101, $state->rangeEnd());
     }
 
+    public function testExtraDataTypesExistBeforeAnyModuleToolsClassLoads(): void
+    {
+        // A plain XoopsObject may declare `custom_type => XOBJ_DTYPE_IMAGE` before DynamicObject loads.
+        $script = tempnam(sys_get_temp_dir(), 'mt') . '.php';
+        file_put_contents($script, '<?php require ' . var_export(dirname(__DIR__) . '/vendor/autoload.php', true) . ';'
+            . " echo XOBJ_DTYPE_FILE, ',', XOBJ_DTYPE_IMAGE, ',', (int) class_exists(\\Xoops\\ModuleTools\\Object\\DynamicObject::class, false),"
+            // Core defines FLOAT unguarded after Composer has loaded: defining it first would win with the wrong value.
+            . " ',', (int) defined('XOBJ_DTYPE_FLOAT');");
+        try {
+            self::assertSame('204,205,0,0',shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($script) . ' 2>&1'));
+        } finally {
+            unlink($script);
+        }
+    }
 }
