@@ -133,6 +133,17 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function containmentKeepsTheSeparatorBoundaryAndFollowsThePlatformCase(): void
+    {
+        $isInside = new \ReflectionMethod(Cloner::class, 'isInside');
+
+        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes/sub', 'C:/mods/quotes'));
+        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes', 'C:/mods/quotes/'));
+        self::assertFalse($isInside->invoke(null, 'C:/mods/quotes2', 'C:/mods/quotes'));
+        self::assertSame('\\' === DIRECTORY_SEPARATOR, $isInside->invoke(null, 'c:/MODS/Quotes/sub', 'C:/mods/quotes'));
+    }
+
+    #[Test]
     public function aDotSpelledSourceClonesToTheSiblingNotIntoItself(): void
     {
         // "quotes/." used to resolve the target to quotes/sayings, copy it into itself,

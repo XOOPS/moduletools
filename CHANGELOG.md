@@ -23,7 +23,11 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - `Common\Text::truncateHtml()` matches closing tags case-insensitively (`<B>…</B>` no longer gets an
   extra `</b>`), keeps open tags on a stack instead of `array_unshift()`, and excerpts plain text when
   the input has more than 2000 tags. That excerpt keeps block elements apart, counts an entity as one
-  character and is HTML-escaped.
+  character and is HTML-escaped; a `>` inside a quoted attribute no longer ends the tag.
+- The extra `XOBJ_DTYPE_*` constants core does not define (`FILE`, `IMAGE`, `CURRENCY`, …) are defined in
+  `src/data_types.php` through Composer's `files` autoload instead of in `DynamicObject.php`, so a plain
+  `XoopsObject` (and `Form\ObjectFormBuilder`) can use them before `DynamicObject` is loaded instead of
+  failing with an undefined constant. `XOBJ_DTYPE_FLOAT` stays a late fallback: core 2.7 defines it as 13.
 - `Common\TestdataSample::loadData()` reports which sample folders could not be copied instead of
   showing the success message.
 
@@ -34,13 +38,16 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - `Admin\ObjectController` accepts an upload only for a writable field declared as FILE/IMAGE (or with a
   `file`/`image`/`richfile` control), checked before the file is stored. Read-only, hidden and other
   fields can no longer be overwritten with an uploaded filename. A refused upload is reported as an
-  object error, so the save fails instead of dropping the file. A plain `XoopsObject` declares an upload
+  object error, so the save fails instead of dropping the file. Every upload, including core's size,
+  dimension and type checks and its image-content-versus-extension test, is checked before any file is moved, so a refused file no longer leaves
+  another field's file behind; two files for one field (`photo` and `upload_photo`) are refused. A plain `XoopsObject` declares an upload
   field with `$this->vars['photo']['custom_type'] = XOBJ_DTYPE_IMAGE;` (or `XOBJ_DTYPE_FILE`).
 - `Common\Resizer` refuses images over 50 megapixels (source or target box) before decoding, and cover
   mode crops then resamples once instead of allocating an enlarged intermediate canvas.
 - `Common\Cloner::clone()` resolves the source path first: `quotes/.` cloned into itself and replaced
   every `.` in the copied files. A symlinked module still clones beside the link, under the link's name;
-  containment is checked on the resolved paths.
+  containment is checked on the resolved paths (case-insensitively on Windows) and again on the
+  directory actually created, so a link or junction chain cannot place the clone inside its source.
 - `Permission\ItemPermission::isGranted()` with item id 0 requires a grant on item 0 itself (webmasters
   still pass). Core `checkRight()` drops the item filter for id 0, so a grant on any item answered true;
   `ObjectController` checks `add` for a new object this way.

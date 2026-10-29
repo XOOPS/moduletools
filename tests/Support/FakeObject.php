@@ -45,7 +45,10 @@ final class FakeObject extends \XoopsObject
 
     public function setErrors($err_str)
     {
-        $this->errors[] = (string) $err_str;
+        // Core accepts an array of messages as well as one string.
+        foreach ((array) $err_str as $error) {
+            $this->errors[] = (string) $error;
+        }
     }
 
     public function getErrors()

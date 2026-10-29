@@ -206,14 +206,17 @@ final readonly class ObjectController
         if (!method_exists($this->handler, 'getImagePath')) {
             return;
         }
+        // Every upload is checked before any file is moved: a refused field stops the save,
+        // and a file already moved for another field would be left behind (or overwrite one).
+        $accepted = [];
         foreach ($_FILES as $field => $file) {
             $name = str_starts_with((string) $field, 'upload_') ? substr((string) $field, 7) : (string) $field;
             if (!isset($object->vars[$name], $file['name']) || '' === (string) $file['name']) {
                 continue;
             }
-            // Checked before the uploader runs, so a refused field never leaves a file behind.
             // Refused loudly: the errors stop the save instead of dropping the selected file.
-            if (!self::isWritableField($object->vars[$name]) || !self::isUploadField($object, $name)) {
+            // "photo" and "upload_photo" name one field: two files for it are refused, not raced.
+            if (isset($accepted[$name]) || !self::isWritableField($object->vars[$name]) || !self::isUploadField($object, $name)) {
                 $object->setErrors(sprintf('%s: this field does not accept uploads.', $name));
                 continue;
             }
@@ -224,12 +227,58 @@ final readonly class ObjectController
                 (int) ($this->handler->_maxWidth ?? 0),
                 (int) ($this->handler->_maxHeight ?? 0),
             );
-            if ($uploader->fetchMedia((string) $field) && $uploader->upload()) {
-                $object->setVar($name, $uploader->getSavedFileName());
+            if ($uploader->fetchMedia((string) $field) && self::passesUploadChecks($uploader)) {
+                $accepted[$name] = $uploader;
             } else {
                 $object->setErrors($uploader->getErrors(false));
             }
         }
+        if ([] !== $object->getErrors()) {
+            return;
+        }
+        foreach ($accepted as $name => $uploader) {
+            if (!$uploader->upload()) {
+                $object->setErrors($uploader->getErrors(false));
+
+                return;
+            }
+            $object->setVar($name, $uploader->getSavedFileName());
+        }
+    }
+
+    /**
+     * The size, dimension and type checks core's upload() runs just before it moves the file,
+     * run up front so one rejected file cannot follow another that was already moved.
+     */
+    private static function passesUploadChecks(\XoopsMediaUploader $uploader): bool
+    {
+        return array_all(
+            ['checkMaxFileSize', 'checkMaxWidth', 'checkMaxHeight', 'checkMimeType', 'checkImageType'],
+            static fn (string $check): bool => !method_exists($uploader, $check) || $uploader->{$check}(),
+        ) && self::imageMatchesExtension($uploader);
+    }
+
+    /**
+     * Core's _copyFile() compares an image's content with its saved extension only after the
+     * move (then deletes it, possibly after overwriting a same-named file); the same test on the
+     * temporary file refuses it first.
+     */
+    private static function imageMatchesExtension(\XoopsMediaUploader $uploader): bool
+    {
+        $name = (string) ($uploader->targetFileName ?? $uploader->mediaName ?? '');
+        $ext = strtolower((string) pathinfo($name, PATHINFO_EXTENSION));
+        $imageExtensions = (array) ($uploader->imageExtensions ?? []);
+        if (!in_array($ext, $imageExtensions, true)) {
+            return true;
+        }
+        $tmp = (string) $uploader->mediaTmpName;
+        $info = '' === $tmp ? false : @getimagesize($tmp);
+        if (false !== $info && ($imageExtensions[(int) $info[2]] ?? null) === $ext) {
+            return true;
+        }
+        $uploader->setErrors(defined('_ER_UP_SUSPICIOUSREFUSED') ? _ER_UP_SUSPICIOUSREFUSED : 'Suspicious image upload refused');
+
+        return false;
     }
 
     /**
@@ -253,9 +302,7 @@ final readonly class ObjectController
     private static function isUploadField(\XoopsObject $object, string $name): bool
     {
         $type = (int) ($object->vars[$name]['custom_type'] ?? $object->vars[$name]['data_type'] ?? 0);
-        // DynamicObject defines these as 204/205 when core does not; a plain XoopsObject may not have loaded it.
-        $uploadTypes = [\defined('XOBJ_DTYPE_FILE') ? XOBJ_DTYPE_FILE : 204, \defined('XOBJ_DTYPE_IMAGE') ? XOBJ_DTYPE_IMAGE : 205];
-        if (in_array($type, $uploadTypes, true)) {
+        if (in_array($type, [XOBJ_DTYPE_FILE, XOBJ_DTYPE_IMAGE], true)) {
             return true;
         }
         $control = method_exists($object, 'getControl') ? $object->getControl($name) : null;

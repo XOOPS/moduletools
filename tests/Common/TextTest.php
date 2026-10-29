@@ -56,6 +56,10 @@ final class TextTest extends TestCase
         $flood = str_repeat('<b></b>', 2_000);
 
         self::assertSame('Hello wo', Text::truncateHtml('<p>Hello</p><p>world again</p>' . $flood, 8, '', true));
+        // A ">" inside a quoted attribute does not end the tag, or its tail would leak into the text.
+        self::assertSame('Hello wo', Text::truncateHtml('<p title="a>b">Hello</p><div data-x=\'c>d\'>world again</div>' . $flood, 8, '', true));
+        // A long attribute must not exhaust the PCRE stack (the excerpt came back empty).
+        self::assertSame('Hello wo', Text::truncateHtml('<p data-x=' . str_repeat('a', 10_000) . '>Hello</p><div>world again</div>' . $flood, 8, '', true));
         self::assertSame('a &amp; b', Text::truncateHtml('a &amp; b &lt;c&gt; d' . $flood, 5, '', true));
         self::assertSame('&lt;c&gt;', Text::truncateHtml('&lt;c&gt; and more' . $flood, 3, '', true));
         // Malformed UTF-8 used to make the /u whitespace pass return null: an empty excerpt.

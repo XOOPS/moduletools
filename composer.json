@@ -24,6 +24,7 @@
       "Xoops\\ModuleTools\\": "src/"
     },
     "files": [
+      "src/data_types.php",
       "src/legacy_aliases.php"
     ]
   },

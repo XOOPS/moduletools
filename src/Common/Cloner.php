@@ -72,7 +72,7 @@ final class Cloner
         // Containment is decided on resolved paths, whatever the spelling.
         $resolvedParent = \realpath(\dirname($sourcePath));
         $resolvedTarget = false === $resolvedParent ? '' : \rtrim(\str_replace('\\', '/', $resolvedParent), '/') . '/' . $newDirname;
-        if ('' === $oldDirname || '' === $resolvedTarget || \str_starts_with($resolvedTarget . '/', $resolved . '/')) {
+        if ('' === $oldDirname || '' === $resolvedTarget || self::isInside($resolvedTarget, $resolved)) {
             throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
         // Exclusive creation establishes ownership: an existing directory, file or symlink
@@ -80,6 +80,13 @@ final class Cloner
         // target this call created is ever cleaned up below.
         if (\file_exists($targetPath) || \is_link($targetPath) || !@\mkdir($targetPath)) {
             throw new \InvalidArgumentException('Target already exists: ' . $targetPath);
+        }
+        // Re-checked on the directory the OS actually created, so a link or junction chain the
+        // parent resolution missed cannot put the target inside the tree copyTree() walks.
+        $createdTarget = \realpath($targetPath);
+        if (false === $createdTarget || self::isInside(\str_replace('\\', '/', $createdTarget), $resolved)) {
+            @\rmdir($targetPath);
+            throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
 
         $patterns = [
@@ -236,6 +243,17 @@ final class Cloner
                 throw new \RuntimeException(\sprintf('File "%s" could not be copied to "%s"', $from, $to));
             }
         }
+    }
+
+    /** Whether `$path` is `$root` or below it; Windows paths compare case-insensitively. */
+    private static function isInside(string $path, string $root): bool
+    {
+        $path = \rtrim($path, '/') . '/';
+        $root = \rtrim($root, '/') . '/';
+
+        return '\\' === \DIRECTORY_SEPARATOR
+            ? 0 === \strncasecmp($path, $root, \strlen($root))
+            : \str_starts_with($path, $root);
     }
 
     /** @legacy-global-accessor */

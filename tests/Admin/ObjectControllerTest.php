@@ -161,28 +161,88 @@ final class ObjectControllerTest extends TestCase
             ->addVar('banner', XOBJ_DTYPE_TXTBOX, 'old.png', ['custom_type' => XOBJ_DTYPE_FILE, 'displayOnForm' => false])
             ->addVar('uid', XOBJ_DTYPE_INT, 1);
         $_FILES = [
-            'upload_image' => ['name' => 'a.png'],
+            'upload_image' => ['name' => 'a.png', 'tmp_name' => self::png()],
             'logo'         => ['name' => 'b.png'],
             'banner'       => ['name' => 'c.png'],
             'uid'          => ['name' => 'd.png'], // not an upload field: no file may be stored for it
         ];
-        \XoopsMediaUploader::$fetched = [];
+        \XoopsMediaUploader::$fetched = \XoopsMediaUploader::$uploaded = [];
+
+        self::receiveUploads($object);
+
+        self::assertSame(['upload_image'], \XoopsMediaUploader::$fetched, 'refused fields never reach the uploader');
+        // A refused upload is reported, so storeFromDefaultForm() does not save past the lost file,
+        // and the accepted one is not moved, or it would be left behind by the failed save.
+        self::assertSame([
+            'logo: this field does not accept uploads.',
+            'banner: this field does not accept uploads.',
+            'uid: this field does not accept uploads.',
+        ], $object->errors);
+        self::assertSame([], \XoopsMediaUploader::$uploaded);
+        self::assertSame([], $object->setCalls);
+
+        unset($_FILES['logo'], $_FILES['banner'], $_FILES['uid']);
+        $object->errors = [];
+        self::receiveUploads($object);
+
+        self::assertSame(['upload_image'], \XoopsMediaUploader::$uploaded);
+        self::assertSame([['image', 'saved-upload_image']], $object->setCalls);
+
+        // A file core would reject (size, dimensions, type) also stops the move of the accepted one.
+        $object = new FakeObject()
+            ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
+            ->addVar('photo', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
+        $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'photo' => ['name' => 'evil.php']];
+        \XoopsMediaUploader::$uploaded = [];
+        \XoopsMediaUploader::$badType = ['photo'];
+        try {
+            self::receiveUploads($object);
+        } finally {
+            \XoopsMediaUploader::$badType = [];
+        }
+
+        self::assertSame([], \XoopsMediaUploader::$uploaded);
+        self::assertSame([], $object->setCalls);
+        self::assertSame(['photo: type not allowed'], $object->errors);
+
+        // PNG bytes named .jpg: core moves it, then rejects and deletes it. Refused before any move.
+        $object = new FakeObject()
+            ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
+            ->addVar('photo', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
+        $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'photo' => ['name' => 'bad.jpg', 'tmp_name' => self::png()]];
+        \XoopsMediaUploader::$uploaded = [];
+        self::receiveUploads($object);
+
+        self::assertSame([], \XoopsMediaUploader::$uploaded);
+        self::assertSame(['Suspicious image upload refused'], $object->errors);
+
+        // Two files for one field ("image" and "upload_image") are refused, not resolved by order.
+        $object = new FakeObject()->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
+        $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'upload_image' => ['name' => 'b.png']];
+        \XoopsMediaUploader::$uploaded = [];
+        self::receiveUploads($object);
+
+        self::assertSame([], \XoopsMediaUploader::$uploaded);
+        self::assertSame(['image: this field does not accept uploads.'], $object->errors);
+    }
+
+    /** A real 1x1 PNG, as an upload's temporary file. */
+    private static function png(): string
+    {
+        $path = sys_get_temp_dir() . '/moduletools-test-1x1.png';
+        file_put_contents($path, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='));
+
+        return $path;
+    }
+
+    private static function receiveUploads(\XoopsObject $object): void
+    {
         $handler = new class extends \XoopsPersistableObjectHandler {
             public function getImagePath(bool $path = false): string
             {
                 return sys_get_temp_dir();
             }
         };
-
         new \ReflectionMethod(ObjectController::class, 'receiveUploads')->invoke(new ObjectController($handler), $object);
-
-        self::assertSame(['upload_image'], \XoopsMediaUploader::$fetched, 'refused fields never reach the uploader');
-        self::assertSame([['image', 'saved-upload_image']], $object->setCalls);
-        // A refused upload is reported, so storeFromDefaultForm() does not save past the lost file.
-        self::assertSame([
-            'logo: this field does not accept uploads.',
-            'banner: this field does not accept uploads.',
-            'uid: this field does not accept uploads.',
-        ], $object->errors);
     }
 }

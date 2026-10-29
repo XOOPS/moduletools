@@ -7,16 +7,9 @@ namespace Xoops\ModuleTools\Object;
 use Xoops\ModuleTools\Form\ObjectFormBuilder;
 use Xoops\ModuleTools\Permission\ItemPermission;
 
-// Extra data types beyond the core XOBJ_DTYPE_* set (explicit so static analysis can see them).
-defined('XOBJ_DTYPE_SIMPLE_ARRAY') || define('XOBJ_DTYPE_SIMPLE_ARRAY', 101);
-defined('XOBJ_DTYPE_CURRENCY') || define('XOBJ_DTYPE_CURRENCY', 200);
+// The extra XOBJ_DTYPE_* types are defined in src/data_types.php (Composer "files" autoload).
+// FLOAT is core's (13, kernel/object.php, 2.7+); 201 only for an older core, after it has loaded.
 defined('XOBJ_DTYPE_FLOAT') || define('XOBJ_DTYPE_FLOAT', 201);
-defined('XOBJ_DTYPE_TIME_ONLY') || define('XOBJ_DTYPE_TIME_ONLY', 202);
-defined('XOBJ_DTYPE_URLLINK') || define('XOBJ_DTYPE_URLLINK', 203);
-defined('XOBJ_DTYPE_FILE') || define('XOBJ_DTYPE_FILE', 204);
-defined('XOBJ_DTYPE_IMAGE') || define('XOBJ_DTYPE_IMAGE', 205);
-defined('XOBJ_DTYPE_FORM_SECTION') || define('XOBJ_DTYPE_FORM_SECTION', 210);
-defined('XOBJ_DTYPE_FORM_SECTION_CLOSE') || define('XOBJ_DTYPE_FORM_SECTION_CLOSE', 211);
 
 /**
  * XOOPS object with declarative form metadata.
