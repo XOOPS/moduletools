@@ -23,6 +23,92 @@ final class ObjectControllerTest extends TestCase
     protected function tearDown(): void
     {
         $_POST = [];
+        unset($_SERVER['REQUEST_METHOD'], $GLOBALS['xoopsSecurity']);
+    }
+
+    #[Test]
+    public function userSideRefusesWithoutAuthorizationAndNeverReadsItemPermissions(): void
+    {
+        $handler = $this->storingHandler();
+
+        self::assertFalse(new ObjectController($handler)->storeSmartObject(userSide: true), 'no callback, not a DynamicObject');
+        self::assertFalse(new ObjectController($handler)->storeSmartObject(authorize: static fn (): bool => false, userSide: true));
+        self::assertSame(['create', 'create'], $handler->calls, 'nothing stored');
+
+        $handler->calls = [];
+        self::assertInstanceOf(\XoopsObject::class, new ObjectController($handler)->storeSmartObject(authorize: static fn (): bool => true, userSide: true));
+        self::assertSame(['create', 'insert'], $handler->calls, 'stored; the item permissions were not touched');
+    }
+
+    #[Test]
+    public function adminSideStoresWithoutACallbackAndHandlesItemPermissions(): void
+    {
+        $handler = $this->storingHandler();
+
+        self::assertInstanceOf(\XoopsObject::class, new ObjectController($handler)->storeSmartObject());
+        self::assertSame(['create', 'insert', 'getModuleInfo'], $handler->calls);
+    }
+
+    /** A POST with a valid token to a handler that records what the controller asks of it. */
+    private function storingHandler(): \XoopsPersistableObjectHandler
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $GLOBALS['xoopsSecurity'] = new class {
+            public function check(): bool
+            {
+                return true;
+            }
+        };
+
+        return new class extends \XoopsPersistableObjectHandler {
+            public string $keyName = 'id';
+
+            /** @var list<string> */
+            public array $calls = [];
+
+            public function create($isNew = \true): \XoopsObject
+            {
+                $this->calls[] = 'create';
+
+                return new class extends \XoopsObject {
+                    /** @var array<string, array<string, mixed>> */
+                    public array $vars = [];
+
+                    public function isNew(): bool
+                    {
+                        return true;
+                    }
+
+                    /** @return list<string> */
+                    public function getErrors(): array
+                    {
+                        return [];
+                    }
+                };
+            }
+
+            public function insert(\XoopsObject $object, $force = \true): bool
+            {
+                $this->calls[] = 'insert';
+
+                return true;
+            }
+
+            /** @return list<array<string, string>> */
+            public function getPermissions(): array
+            {
+                $this->calls[] = 'getPermissions';
+
+                return [];
+            }
+
+            public function getModuleInfo(): ?object
+            {
+                $this->calls[] = 'getModuleInfo';
+
+                return null;
+            }
+        };
     }
 
     #[Test]

@@ -89,7 +89,9 @@ class TestdataButtons
         // CSRF token appended to the toggle links; validated in hide/showButtons() before
         // the config write. The toggle is a state change, so it must not be forgeable.
         // The request field name is "<tokenName>_REQUEST" (default token name XOOPS_TOKEN).
-        $tokenParam = '&amp;XOOPS_TOKEN_REQUEST=' . self::runtimeSecurity()->createToken();
+        // A raw '&': ModuleAdmin::renderButton() HTML-escapes the link, so '&amp;' here
+        // arrived as an "amp;XOOPS_TOKEN_REQUEST" parameter and every token check failed.
+        $tokenParam = '&XOOPS_TOKEN_REQUEST=' . self::runtimeSecurity()->createToken();
 
         if (self::SHOW_BUTTONS == $displaySampleButton) {
             \xoops_loadLanguage('admin/modulesadmin', 'system');

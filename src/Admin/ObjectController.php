@@ -49,11 +49,15 @@ final readonly class ObjectController
 
     /**
      * @param callable(\XoopsObject): bool|null $authorize Decides whether the current visitor may store
-     *                                                    this object (ownership, permission …). Required
-     *                                                    on user-side pages: the XOOPS token alone only
+     *                                                    this object (ownership, permission …). On the user
+     *                                                    side ($userSide) a missing callback falls back to
+     *                                                    DynamicObject::accessGranted('add'|'edit') and
+     *                                                    otherwise refuses: the XOOPS token alone only
      *                                                    proves the form was ours, not that the id is theirs.
+     * @param bool $userSide true on public (non-admin) pages: authorization becomes mandatory and the
+     *                       handler's item permissions are never rewritten from the POST body.
      */
-    public function storeFromDefaultForm(string $createdMessage, string $modifiedMessage, string|false|null $redirectPage = false, bool $debug = false, bool $extended = false, ?callable $authorize = null): \XoopsObject|false
+    public function storeFromDefaultForm(string $createdMessage, string $modifiedMessage, string|false|null $redirectPage = false, bool $debug = false, bool $extended = false, ?callable $authorize = null, bool $userSide = false): \XoopsObject|false
     {
         if ('POST' !== ($_SERVER['REQUEST_METHOD'] ?? 'GET')) {
             return false;
@@ -66,7 +70,7 @@ final readonly class ObjectController
         if (!$object instanceof \XoopsObject || ($id > 0 && $object->isNew())) {
             return false;
         }
-        if (null !== $authorize && true !== $authorize($object)) {
+        if (!self::mayStore($object, $userSide, $authorize)) {
             return false;
         }
         $isNew = $object->isNew();
@@ -77,7 +81,8 @@ final readonly class ObjectController
             return false;
         }
 
-        if (method_exists($this->handler, 'getPermissions') && method_exists($this->handler, 'getModuleInfo')) {
+        // Item permissions are an admin decision: a public form must not be able to grant itself access.
+        if (!$userSide && method_exists($this->handler, 'getPermissions') && method_exists($this->handler, 'getModuleInfo')) {
             $module = $this->handler->getModuleInfo();
             if (is_object($module)) {
                 $permissions = ItemPermission::forModule($module);
@@ -104,9 +109,23 @@ final readonly class ObjectController
         return $object;
     }
 
-    public function storeSmartObject(bool $debug = false, bool $extended = false): \XoopsObject|false
+    /** @param callable(\XoopsObject): bool|null $authorize see storeFromDefaultForm() */
+    public function storeSmartObject(bool $debug = false, bool $extended = false, ?callable $authorize = null, bool $userSide = false): \XoopsObject|false
     {
-        return $this->storeFromDefaultForm('', '', null, $debug, $extended);
+        return $this->storeFromDefaultForm('', '', null, $debug, $extended, $authorize, $userSide);
+    }
+
+    /** @param callable(\XoopsObject): bool|null $authorize */
+    private static function mayStore(\XoopsObject $object, bool $userSide, ?callable $authorize): bool
+    {
+        if (null !== $authorize) {
+            return true === $authorize($object);
+        }
+        if (!$userSide) {
+            return true; // admin pages sit behind cp_header(); the token check is the guard
+        }
+
+        return $object instanceof DynamicObject && $object->accessGranted($object->isNew() ? 'add' : 'edit');
     }
 
     public function storeSmartObjectD(): \XoopsObject|false

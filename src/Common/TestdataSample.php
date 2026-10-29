@@ -153,8 +153,27 @@ class TestdataSample
     private function assertAuthorized(): void
     {
         if (!TestdataButtons::isAuthorizedRequest()) {
-            \redirect_header($this->modHelper->url('admin/index.php'), 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
+            // An admin with a used or expired token sees why, not a misleading "no permission".
+            $security = self::runtimeSecurity();
+            $errors   = self::runtimeUserIsAdmin() && \is_object($security) ? (array) $security->getErrors() : [];
+            \redirect_header(
+                $this->modHelper->url('admin/index.php'),
+                3,
+                [] !== $errors ? \implode('<br>', $errors) : (\defined('_NOPERM') ? \_NOPERM : 'Permission denied.'),
+            );
         }
+    }
+
+    /** @legacy-global-accessor */
+    private static function runtimeSecurity(): mixed
+    {
+        return $GLOBALS['xoopsSecurity'] ?? null;
+    }
+
+    /** @legacy-global-accessor */
+    private static function runtimeUserIsAdmin(): bool
+    {
+        return !empty($GLOBALS['xoopsUserIsAdmin']);
     }
 
     /**

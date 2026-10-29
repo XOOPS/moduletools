@@ -411,6 +411,14 @@
                             "variadic": false,
                             "has_default": true,
                             "default": "null"
+                        },
+                        {
+                            "name": "userSide",
+                            "type": "bool",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "false"
                         }
                     ],
                     "return_type": "XoopsObject|false",
@@ -436,11 +444,27 @@
                             "variadic": false,
                             "has_default": true,
                             "default": "false"
+                        },
+                        {
+                            "name": "authorize",
+                            "type": "?callable",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "null"
+                        },
+                        {
+                            "name": "userSide",
+                            "type": "bool",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "false"
                         }
                     ],
                     "return_type": "XoopsObject|false",
                     "throws": [],
-                    "documented_false_or_null": false
+                    "documented_false_or_null": true
                 },
                 "storeSmartObjectD": {
                     "static": false,

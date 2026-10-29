@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning where practical.
 
+## [Unreleased]
+
+### Changed
+- `Admin\ObjectController::storeFromDefaultForm()` and `storeSmartObject()` take an optional
+  `$userSide` flag (`storeSmartObject()` also takes `$authorize`). On a public page authorization is
+  mandatory: without an `$authorize` callback it falls back to `DynamicObject::accessGranted('add'|'edit')`
+  and otherwise refuses, and the handler's item permissions are never rewritten from the POST body.
+- `Common\TestdataSample` shows an administrator the token error instead of `_NOPERM` when the
+  token is missing, used or expired. A consumer `testdata/index.php` must not call
+  `$xoopsSecurity->check()` before delegating: that consumes the one-time token and the library's
+  own check then refuses every load, save and clear.
+
+### Fixed
+- `Common\TestdataButtons` appends the token with a raw `&`: `ModuleAdmin::renderButton()` escapes the
+  link, so `&amp;` arrived as an `amp;XOOPS_TOKEN_REQUEST` parameter and every sample-data token
+  check failed.
+
 ## [1.5.0] — 2026-07-21
 
 ### Changed
