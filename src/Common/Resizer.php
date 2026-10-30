@@ -38,7 +38,11 @@ final class Resizer implements ImageResizerInterface
         }
         // getimagesize() parses every format it knows (compressed SWF is inflated in memory),
         // so only the four decodable formats may reach it.
-        if (!self::hasSupportedSignature($request->sourcePath)) {
+        $head = @\file_get_contents($request->sourcePath, false, null, 0, 12);
+        if (false === $head) {
+            return ResizeResult::failure($target, 'Not a readable image: ' . $request->sourcePath);
+        }
+        if (!self::hasSupportedSignature($head)) {
             return ResizeResult::failure($target, 'Unsupported image format: ' . $request->sourcePath);
         }
         $info = @\getimagesize($request->sourcePath);
@@ -72,11 +76,9 @@ final class Resizer implements ImageResizerInterface
         return ResizeResult::success($target, \imagesx($canvas), \imagesy($canvas));
     }
 
-    /** PNG, JPEG, GIF or WebP by magic bytes. */
-    private static function hasSupportedSignature(string $path): bool
+    /** PNG, JPEG, GIF or WebP by the file's first 12 bytes. */
+    private static function hasSupportedSignature(string $head): bool
     {
-        $head = (string) @\file_get_contents($path, false, null, 0, 12);
-
         return \str_starts_with($head, "\x89PNG\r\n\x1A\n")
             || \str_starts_with($head, "\xFF\xD8\xFF")
             || \str_starts_with($head, 'GIF87a')

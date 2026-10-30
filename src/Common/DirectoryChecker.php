@@ -150,7 +150,10 @@ class DirectoryChecker
         }
         return \array_all(
             \array_reverse($missing),
-            static fn (string $dir): bool => Filesystem::mkdir($dir, self::normalizeMode($mode, 0755), false) || \is_dir($dir),
+            // Re-checked per level (its parent now exists, so this is one realpath): a level
+            // swapped for a link after the first check must not carry the next mkdir outside.
+            static fn (string $dir): bool => self::isAllowedPath($dir, $allowedBasePath)
+                && (Filesystem::mkdir($dir, self::normalizeMode($mode, 0755), false) || \is_dir($dir)),
         );
     }
 

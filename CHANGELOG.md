@@ -56,7 +56,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - `SysUtility::recurseCopy()`, `xcopy()`, `rcopy()` and `rmove()` no longer use helpers'
   `Filesystem::copyDirectory()`, which followed nested links and re-copied a destination inside its
   source. A link at any depth, in the source or already in the destination, fails the copy (`rmove()`
-  keeps its source), and a destination inside the source is refused.
+  keeps its source), including a linked source or destination spelled with a trailing `/` or `/.`.
+  A destination inside the source, or one containing it, is refused.
 - `Common\Resizer` accepts only PNG, JPEG, GIF and WebP by magic bytes before `getimagesize()`, which
   inflates compressed SWF in memory. `Common\Cloner::createLogo()` refuses a logo over 1 megapixel
   before decoding it.

@@ -245,8 +245,11 @@ trait FilesManagement
      */
     private static function copyTree(string $source, string $dest): bool
     {
-        $root = \realpath($source);
-        if (false === $root || \is_link($source)) {
+        // is_link() resolves a trailing "/" or "/.", which would hide a linked directory.
+        $source = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $source);
+        $dest   = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $dest);
+        $root   = '' === $source || '' === $dest ? false : \realpath($source);
+        if (false === $root || \is_link($source) || \is_link($dest)) {
             return false;
         }
         $created = !\is_dir($dest);
@@ -254,7 +257,13 @@ trait FilesManagement
             return false;
         }
         $target = \realpath($dest);
-        if (false === $target || PathContainment::isInside($target, $root) || PathContainment::isInsideByIdentity($target, $root)) {
+        // Overlap either way is refused: a destination above the source can receive the source
+        // itself, which rmove() then deletes.
+        if (
+            false === $target
+            || PathContainment::isInside($target, $root) || PathContainment::isInsideByIdentity($target, $root)
+            || PathContainment::isInside($root, $target) || PathContainment::isInsideByIdentity($root, $target)
+        ) {
             if ($created) {
                 @\rmdir($dest);
             }

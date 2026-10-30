@@ -58,8 +58,36 @@ final class FilesManagementTest extends TestCase
 
         self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/src/sub/copy'));
         self::assertDirectoryDoesNotExist($this->dir . '/src/sub/copy');
+        // A destination above the source would receive the source itself, then rmove() deletes it.
+        self::assertFalse(SysUtility::rmove($this->dir . '/src/sub', $this->dir . '/src'));
+        self::assertFileExists($this->dir . '/src/sub/a.txt');
         $this->expectException(\RuntimeException::class);
         SysUtility::xcopy($this->dir . '/src', $this->dir . '/src/copy');
+    }
+
+    public function testALinkedDestinationIsNeverWrittenThrough(): void
+    {
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+        self::assertTrue(Filesystem::mkdir($this->dir . '/elsewhere'));
+        if (!@symlink($this->dir . '/elsewhere', $this->dir . '/dest')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/dest'));
+        self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/dest/.'));
+        self::assertDirectoryDoesNotExist($this->dir . '/elsewhere/sub');
+    }
+
+    public function testATrailingSeparatorCannotHideALinkedMoveSource(): void
+    {
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+        if (!@symlink($this->dir . '/src', $this->dir . '/linked')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        self::assertFalse(SysUtility::rmove($this->dir . '/linked/', $this->dir . '/moved'));
+        self::assertFalse(SysUtility::rmove($this->dir . '/linked/.', $this->dir . '/moved'));
+        self::assertFileExists($this->dir . '/src/sub/a.txt');
     }
 
     public function testANestedLinkFailsTheCopyAndKeepsTheMoveSource(): void
