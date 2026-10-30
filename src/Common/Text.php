@@ -121,9 +121,13 @@ final class Text implements TextInterface
                     $entities_length = 0;
                     // search for html entities
                     if (\preg_match_all($entityPattern, $lineMatchings[2], $entities, \PREG_OFFSET_CAPTURE)) {
-                        // calculate the real length of all entities in the legal range
+                        // calculate the real length of all entities in the legal range;
+                        // each span between entities is counted once, not the whole prefix again
+                        $byteOffset      = 0;
+                        $characterOffset = 0;
                         foreach ($entities[0] as $entity) {
-                            $characterOffset = mb_strlen(substr($lineMatchings[2], 0, $entity[1]));
+                            $characterOffset += mb_strlen(substr($lineMatchings[2], $byteOffset, $entity[1] - $byteOffset));
+                            $byteOffset       = $entity[1];
                             if ($left >= $characterOffset + 1 - $entities_length) {
                                 $left--;
                                 $entities_length += mb_strlen($entity[0]);

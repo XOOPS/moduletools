@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Xoops\ModuleTools\Common\Cloner;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 #[CoversClass(Cloner::class)]
 final class ClonerTest extends TestCase
@@ -127,6 +128,21 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function createLogoRefusesAnOversizedPngBeforeDecoding(): void
+    {
+        if (!\extension_loaded('gd') || !\function_exists('imagefttext')) {
+            self::markTestSkipped('GD with FreeType is required');
+        }
+        $logo = $this->root . '/quotes/assets/images/logoModule.png';
+        mkdir(\dirname($logo), 0777, true);
+        \imagepng(\imagecreatetruecolor(2000, 1000), $logo);
+        $before = (string) \file_get_contents($logo);
+
+        self::assertFalse(Cloner::createLogo($this->root . '/quotes'));
+        self::assertSame($before, \file_get_contents($logo));
+    }
+
+    #[Test]
     public function createLogoFailsGracefullyWithoutAssets(): void
     {
         self::assertFalse(Cloner::createLogo($this->root . '/quotes'));
@@ -135,26 +151,23 @@ final class ClonerTest extends TestCase
     #[Test]
     public function containmentKeepsTheSeparatorBoundaryAndFollowsThePlatformCase(): void
     {
-        $isInside = new \ReflectionMethod(Cloner::class, 'isInside');
-
-        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes/sub', 'C:/mods/quotes'));
-        self::assertTrue($isInside->invoke(null, 'C:/mods/quotes', 'C:/mods/quotes/'));
-        self::assertFalse($isInside->invoke(null, 'C:/mods/quotes2', 'C:/mods/quotes'));
-        self::assertSame('\\' === DIRECTORY_SEPARATOR, $isInside->invoke(null, 'c:/MODS/Quotes/sub', 'C:/mods/quotes'));
+        self::assertTrue(PathContainment::isInside('C:/mods/quotes/sub', 'C:/mods/quotes'));
+        self::assertTrue(PathContainment::isInside('C:/mods/quotes', 'C:/mods/quotes/'));
+        self::assertFalse(PathContainment::isInside('C:/mods/quotes2', 'C:/mods/quotes'));
+        self::assertSame('\\' === DIRECTORY_SEPARATOR, PathContainment::isInside('c:/MODS/Quotes/sub', 'C:/mods/quotes'));
     }
 
     #[Test]
     public function identityContainmentFollowsTheFilesystemNotTheSpelling(): void
     {
-        $byIdentity = new \ReflectionMethod(Cloner::class, 'isInsideByIdentity');
         $source = $this->root . '/quotes';
 
-        self::assertTrue($byIdentity->invoke(null, $source . '/class', $source));
-        self::assertTrue($byIdentity->invoke(null, $source . '/class/missing', $source));
-        self::assertFalse($byIdentity->invoke(null, $this->root, $source));
+        self::assertTrue(PathContainment::isInsideByIdentity($source . '/class', $source));
+        self::assertTrue(PathContainment::isInsideByIdentity($source . '/class/missing', $source));
+        self::assertFalse(PathContainment::isInsideByIdentity($this->root, $source));
         // On a case-folding filesystem another spelling is the same directory and must count.
         $caseFolds = is_dir($this->root . '/QUOTES');
-        self::assertSame($caseFolds, $byIdentity->invoke(null, $this->root . '/QUOTES/class', $source));
+        self::assertSame($caseFolds, PathContainment::isInsideByIdentity($this->root . '/QUOTES/class', $source));
     }
 
     #[Test]

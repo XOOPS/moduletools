@@ -51,4 +51,29 @@ final class FilesManagementTest extends TestCase
         self::assertTrue(SysUtility::rrmdir($this->dir . '/copy'));
         self::assertDirectoryDoesNotExist($this->dir . '/copy');
     }
+
+    public function testACopyIntoItsOwnSourceIsRefused(): void
+    {
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+
+        self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/src/sub/copy'));
+        self::assertDirectoryDoesNotExist($this->dir . '/src/sub/copy');
+        $this->expectException(\RuntimeException::class);
+        SysUtility::xcopy($this->dir . '/src', $this->dir . '/src/copy');
+    }
+
+    public function testANestedLinkFailsTheCopyAndKeepsTheMoveSource(): void
+    {
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+        file_put_contents($this->dir . '/secret.txt', 'secret');
+        if (!@symlink($this->dir . '/secret.txt', $this->dir . '/src/sub/link.txt')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        self::assertFalse(SysUtility::rmove($this->dir . '/src', $this->dir . '/moved'));
+        self::assertTrue(is_link($this->dir . '/src/sub/link.txt'));
+        self::assertFileDoesNotExist($this->dir . '/moved/sub/link.txt');
+        $this->expectException(\RuntimeException::class);
+        SysUtility::xcopy($this->dir . '/src', $this->dir . '/copy');
+    }
 }

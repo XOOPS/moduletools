@@ -17,6 +17,7 @@ namespace Xoops\ModuleTools\Common;
  */
 
 use Xoops\Helpers\Utility\Filesystem;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 /**
  * Filesystem convenience methods mixed into {@see SysUtility}.
@@ -90,7 +91,7 @@ trait FilesManagement
             throw new \RuntimeException('The directory ' . $src . ' could not be opened.');
         }
 
-        if (!Filesystem::copyDirectory((string)$src, (string)$dst)) {
+        if (!self::copyTree((string)$src, (string)$dst)) {
             throw new \RuntimeException('The directory ' . $dst . ' could not be created.');
         }
     }
@@ -123,7 +124,7 @@ trait FilesManagement
 
         if (@\is_dir($source)) {
             // Deep copy the directory and its contents
-            if (!Filesystem::copyDirectory((string)$source, (string)$dest)) {
+            if (!self::copyTree((string)$source, (string)$dest)) {
                 throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dest));
             }
         }
@@ -204,12 +205,8 @@ trait FilesManagement
             return false;
         }
 
-        // If the destination directory does not exist and could not be created stop processing
-        if (!\is_dir($dest) && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
-            return false;
-        }
-
-        return Filesystem::moveDirectory((string)$src, (string)$dest); // move contents & remove the source directory
+        // move contents & remove the source directory
+        return self::copyTree((string)$src, (string)$dest) && Filesystem::deleteDirectory((string)$src);
     }
 
     /**
@@ -238,12 +235,63 @@ trait FilesManagement
             return false;
         }
 
-        // If the destination directory does not exist and could not be created stop processing
-        if (!\is_dir($dest) && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
+        return self::copyTree((string)$src, (string)$dest);
+    }
+
+    /**
+     * Filesystem::copyDirectory() (helpers 1.0) follows nested links and walks a destination
+     * that sits inside the source, copying its own output again; every recursive copy here
+     * goes through this instead. A link at any depth fails the copy; it is never followed.
+     */
+    private static function copyTree(string $source, string $dest): bool
+    {
+        $root = \realpath($source);
+        if (false === $root || \is_link($source)) {
+            return false;
+        }
+        $created = !\is_dir($dest);
+        if ($created && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
+            return false;
+        }
+        $target = \realpath($dest);
+        if (false === $target || PathContainment::isInside($target, $root) || PathContainment::isInsideByIdentity($target, $root)) {
+            if ($created) {
+                @\rmdir($dest);
+            }
+
             return false;
         }
 
-        return Filesystem::copyDirectory((string)$src, (string)$dest);
+        return self::copyEntries($source, $dest);
+    }
+
+    private static function copyEntries(string $source, string $dest): bool
+    {
+        $entries = \scandir($source);
+        if (false === $entries) {
+            return false;
+        }
+        foreach ($entries as $entry) {
+            if ('.' === $entry || '..' === $entry) {
+                continue;
+            }
+            $from = $source . '/' . $entry;
+            $to   = $dest . '/' . $entry;
+            // Refused, not skipped: rmove() deletes the source after a successful copy. A link
+            // already in the destination would be written through, so it is refused too.
+            if (\is_link($from) || \is_link($to)) {
+                return false;
+            }
+            if (\is_dir($from)) {
+                if ((!@\mkdir($to, 0755) && !\is_dir($to)) || !self::copyEntries($from, $to)) {
+                    return false;
+                }
+            } elseif (!@\copy($from, $to)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static function isSafeFilesystemPath(string $path): bool
