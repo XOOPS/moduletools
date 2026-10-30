@@ -285,10 +285,39 @@ trait FilesManagement
             return false;
         }
         if (!\is_dir($from)) {
-            return @\copy($from, $to);
+            return self::copyRegularFile($from, $to);
         }
 
         return (@\mkdir($to, 0755) || \is_dir($to)) && self::copyEntries($from, $to);
+    }
+
+    /**
+     * The link check and the open are separate calls, so a writer could swap the entry for a
+     * link in between: the opened handle must be the regular file lstat() saw (device + inode).
+     * The destination is unlinked and created exclusively ("x" never follows a link), so a link
+     * planted there after the check fails the copy instead of truncating its target.
+     * ponytail: an ancestor directory swapped mid-copy is not covered (PHP has no openat() or
+     * O_NOFOLLOW); source trees must not be writable by lower-trust users while they are copied.
+     */
+    private static function copyRegularFile(string $from, string $to): bool
+    {
+        $checked = @\lstat($from);
+        if (false === $checked || 0o100000 !== ($checked['mode'] & 0o170000) || false === ($in = @\fopen($from, 'rb'))) {
+            return false;
+        }
+        $opened = \fstat($in);
+        $ok     = false !== $opened && $opened['dev'] === $checked['dev'] && $opened['ino'] === $checked['ino'];
+        if ($ok && (\file_exists($to) || \is_link($to))) {
+            @\unlink($to); // removes a link itself, never its target; a failure leaves "x" to refuse
+        }
+        $ok = $ok && false !== ($out = @\fopen($to, 'xb'));
+        if ($ok) {
+            $ok = false !== \stream_copy_to_stream($in, $out);
+            $ok = \fclose($out) && $ok;
+        }
+        \fclose($in);
+
+        return $ok;
     }
 
     private static function isSafeFilesystemPath(string $path): bool

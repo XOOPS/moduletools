@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\ModuleTools\Internal\PngMetadata;
+
 /**
  * Pure GD image resizer — a {@see ResizeRequest} in, a {@see ResizeResult} out.
  *
@@ -54,6 +56,9 @@ final class Resizer implements ImageResizerInterface
         // JPEGs), so a small compressed file must not reach the decoder with huge dimensions.
         if ($info[0] < 1 || $info[1] < 1 || $info[0] * $info[1] > self::MAX_PIXELS || \max(1, $request->maxWidth) * \max(1, $request->maxHeight) > self::MAX_PIXELS) {
             return ResizeResult::failure($target, 'Image dimensions exceed the pixel budget: ' . $request->sourcePath);
+        }
+        if ('image/png' === $mime && !PngMetadata::isWithinBudget($request->sourcePath)) {
+            return ResizeResult::failure($target, 'PNG metadata exceeds the decoding budget: ' . $request->sourcePath);
         }
 
         $image = $this->createImage($request->sourcePath, $mime);

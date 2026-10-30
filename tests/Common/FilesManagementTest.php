@@ -49,6 +49,10 @@ final class FilesManagementTest extends TestCase
 
         self::assertTrue(SysUtility::rcopy($this->dir . '/src', $this->dir . '/copy'));
         self::assertFileExists($this->dir . '/copy/sub/a.txt');
+        // A second copy replaces existing files (the destination is unlinked, then created exclusively).
+        file_put_contents($this->dir . '/src/sub/a.txt', 'changed');
+        self::assertTrue(SysUtility::rcopy($this->dir . '/src', $this->dir . '/copy'));
+        self::assertSame('changed', file_get_contents($this->dir . '/copy/sub/a.txt'));
         self::assertTrue(SysUtility::rrmdir($this->dir . '/copy'));
         self::assertDirectoryDoesNotExist($this->dir . '/copy');
     }

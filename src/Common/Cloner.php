@@ -14,6 +14,7 @@ use Xmf\Request;
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 use Xoops\ModuleTools\Internal\PathContainment;
+use Xoops\ModuleTools\Internal\PngMetadata;
 
 /**
  * Clone a module directory under a new dirname, rewriting the old dirname in
@@ -160,7 +161,8 @@ final class Cloner
         $isPng = \is_file($logo) && "\x89PNG\r\n\x1A\n" === @\file_get_contents($logo, false, null, 0, 8);
         $info  = $isPng ? @\getimagesize($logo) : false;
 
-        return false !== $info && \IMAGETYPE_PNG === $info[2] && $info[0] * $info[1] <= self::MAX_LOGO_PIXELS;
+        return false !== $info && \IMAGETYPE_PNG === $info[2] && $info[0] * $info[1] <= self::MAX_LOGO_PIXELS
+            && PngMetadata::isWithinBudget($logo);
     }
 
     /**
