@@ -62,8 +62,7 @@ final class FilesManagementTest extends TestCase
         // A destination above the source would receive the source itself, then rmove() deletes it.
         self::assertFalse(SysUtility::rmove($this->dir . '/src/sub', $this->dir . '/src'));
         self::assertFileExists($this->dir . '/src/sub/a.txt');
-        $this->expectException(\RuntimeException::class);
-        SysUtility::xcopy($this->dir . '/src', $this->dir . '/src/copy');
+        self::assertFalse(SysUtility::xcopy($this->dir . '/src', $this->dir . '/src/copy'));
     }
 
     public function testALinkedDestinationIsNeverWrittenThrough(): void
@@ -77,6 +76,14 @@ final class FilesManagementTest extends TestCase
         self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/dest'));
         self::assertFalse(SysUtility::rcopy($this->dir . '/src', $this->dir . '/dest/.'));
         self::assertDirectoryDoesNotExist($this->dir . '/elsewhere/sub');
+
+        // The single-file branch of xcopy() must not write through a linked destination either.
+        file_put_contents($this->dir . '/elsewhere/target.txt', 'original');
+        if (!@symlink($this->dir . '/elsewhere/target.txt', $this->dir . '/file-link.txt')) {
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+        self::assertFalse(SysUtility::xcopy($this->dir . '/src/sub/a.txt', $this->dir . '/file-link.txt'));
+        self::assertSame('original', file_get_contents($this->dir . '/elsewhere/target.txt'));
     }
 
     public function testATrailingSeparatorCannotHideALinkedMoveSource(): void
@@ -129,7 +136,6 @@ final class FilesManagementTest extends TestCase
         self::assertFalse(SysUtility::rmove($this->dir . '/src', $this->dir . '/moved'));
         self::assertTrue(is_link($this->dir . '/src/sub/link.txt'));
         self::assertFileDoesNotExist($this->dir . '/moved/sub/link.txt');
-        $this->expectException(\RuntimeException::class);
-        SysUtility::xcopy($this->dir . '/src', $this->dir . '/copy');
+        self::assertFalse(SysUtility::xcopy($this->dir . '/src', $this->dir . '/copy'));
     }
 }

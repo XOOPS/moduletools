@@ -113,7 +113,8 @@ trait FilesManagement
 
         // A link is never recreated: its target is not checked against any base, so a link in a
         // module's testdata/ could point anything (mainfile.php, /etc/passwd) into the upload tree.
-        if (PathContainment::isLink((string)$source)) {
+        // A linked destination would be written through, on the file branch as on the tree one.
+        if (PathContainment::isLink((string)$source) || PathContainment::isLink((string)$dest)) {
             return false;
         }
 
@@ -123,11 +124,7 @@ trait FilesManagement
         }
 
         // Deep copy the directory and its contents
-        if (@\is_dir($source) && !self::copyTree((string)$source, (string)$dest)) {
-            throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dest));
-        }
-
-        return true;
+        return !\is_dir($source) || self::copyTree((string)$source, (string)$dest);
     }
 
     /**
