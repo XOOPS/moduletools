@@ -57,6 +57,27 @@ final class FilesManagementTest extends TestCase
         self::assertDirectoryDoesNotExist($this->dir . '/copy');
     }
 
+    public function testAReplacedFileKeepsItsRestrictiveMode(): void
+    {
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            self::markTestSkipped('POSIX permission bits');
+        }
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+        $previous = umask(0o022);
+
+        try {
+            self::assertTrue(SysUtility::rcopy($this->dir . '/src', $this->dir . '/copy'));
+            chmod($this->dir . '/copy/sub/a.txt', 0o600);
+            file_put_contents($this->dir . '/src/sub/a.txt', 'secret');
+            self::assertTrue(SysUtility::rcopy($this->dir . '/src', $this->dir . '/copy'));
+            clearstatcache();
+            self::assertSame(0o600, fileperms($this->dir . '/copy/sub/a.txt') & 0o777);
+            self::assertSame('secret', file_get_contents($this->dir . '/copy/sub/a.txt'));
+        } finally {
+            umask($previous);
+        }
+    }
+
     public function testACopyIntoItsOwnSourceIsRefused(): void
     {
         $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);

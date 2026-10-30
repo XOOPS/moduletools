@@ -171,6 +171,8 @@ final class ResizerTest extends TestCase
         $truncated = $this->dir . '/truncated.png';
         file_put_contents($truncated, substr($png, 0, 8) . $ihdr . pack('N', 100) . 'tEXt');
         self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+        file_put_contents($truncated, substr($png, 0, -4)); // IEND without its CRC
+        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
 
         // Uncompressed iTXt (XMP) is not inflated, so its size does not count.
         $xmp = $this->dir . '/itxt.png';
