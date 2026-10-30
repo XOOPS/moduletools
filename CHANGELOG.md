@@ -55,10 +55,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   `data:`, `//host`) falls back to the current script.
 
 ### Development
-- `rector/rector` is held below 2.8 and `phpstan/phpstan` below 2.3. Rector 2.8 deprecated
-  `FunctionArgumentDefaultValueReplacerRector`, which `xoops/rector-xoops` 1.0.0-alpha1 still configures,
-  so `rector process` aborts; Rector 2.7.0 crashes on PHPStan 2.3.4 ("Could not process" on every file),
-  so the pair resolves to Rector 2.6 + PHPStan 2.2. Lift both caps once rector-xoops replaces that rule.
+- Requires `xoops/rector-xoops` 1.0.0-alpha2, which no longer configures the rules Rector 2.8
+  deprecated; the temporary `rector/rector` <2.8 and `phpstan/phpstan` <2.3 caps are lifted
+  (`rector/rector` ^2.4, as rector-xoops requires).
 
 ## [1.5.0] — 2026-07-21
 
