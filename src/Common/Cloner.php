@@ -129,13 +129,7 @@ final class Cloner
         if (!\is_file($font)) {
             $font = \dirname(__DIR__, 2) . '/resources/fonts/VeraBd.ttf';
         }
-        if (!\extension_loaded('gd') || !\function_exists('imagefttext') || !\is_file($logo) || !\is_file($font)) {
-            return false;
-        }
-        // A module logo is 92x52: reading the header first keeps a tiny, highly compressed PNG
-        // from decoding into a huge raster.
-        $info = @\getimagesize($logo);
-        if (false === $info || \IMAGETYPE_PNG !== $info[2] || $info[0] * $info[1] > self::MAX_LOGO_PIXELS) {
+        if (!\extension_loaded('gd') || !\function_exists('imagefttext') || !\is_file($font) || !self::isDecodableLogo($logo)) {
             return false;
         }
         $image = @\imagecreatefrompng($logo);
@@ -154,6 +148,19 @@ final class Cloner
         $ok = \imagepng($image, $logo);
 
         return $ok;
+    }
+
+    /**
+     * A module logo is 92x52: reading the header first keeps a tiny, highly compressed PNG
+     * from decoding into a huge raster. The PNG signature comes first: getimagesize() parses every
+     * format it knows (compressed SWF is inflated in memory).
+     */
+    private static function isDecodableLogo(string $logo): bool
+    {
+        $isPng = \is_file($logo) && "\x89PNG\r\n\x1A\n" === @\file_get_contents($logo, false, null, 0, 8);
+        $info  = $isPng ? @\getimagesize($logo) : false;
+
+        return false !== $info && \IMAGETYPE_PNG === $info[2] && $info[0] * $info[1] <= self::MAX_LOGO_PIXELS;
     }
 
     /**

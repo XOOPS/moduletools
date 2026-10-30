@@ -122,11 +122,9 @@ trait FilesManagement
             return Filesystem::copy($source, $dest);
         }
 
-        if (@\is_dir($source)) {
-            // Deep copy the directory and its contents
-            if (!self::copyTree((string)$source, (string)$dest)) {
-                throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dest));
-            }
+        // Deep copy the directory and its contents
+        if (@\is_dir($source) && !self::copyTree((string)$source, (string)$dest)) {
+            throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dest));
         }
 
         return true;
@@ -252,11 +250,9 @@ trait FilesManagement
         if (false === $root || \is_link($source) || \is_link($dest)) {
             return false;
         }
-        $created = !\is_dir($dest);
-        if ($created && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
-            return false;
-        }
-        $target = \realpath($dest);
+        // A failed mkdir (or a file at $dest) leaves $target false, which the refusal below covers.
+        $created = !\is_dir($dest) && Filesystem::mkdir($dest, 0755);
+        $target  = \is_dir($dest) ? \realpath($dest) : false;
         // Overlap either way is refused: a destination above the source can receive the source
         // itself, which rmove() then deletes.
         if (
@@ -277,30 +273,25 @@ trait FilesManagement
     private static function copyEntries(string $source, string $dest): bool
     {
         $entries = \scandir($source);
-        if (false === $entries) {
+
+        return false !== $entries && \array_all(
+            \array_diff($entries, ['.', '..']),
+            static fn (string $entry): bool => self::copyEntry($source . '/' . $entry, $dest . '/' . $entry),
+        );
+    }
+
+    private static function copyEntry(string $from, string $to): bool
+    {
+        // Refused, not skipped: rmove() deletes the source after a successful copy. A link
+        // already in the destination would be written through, so it is refused too.
+        if (\is_link($from) || \is_link($to)) {
             return false;
         }
-        foreach ($entries as $entry) {
-            if ('.' === $entry || '..' === $entry) {
-                continue;
-            }
-            $from = $source . '/' . $entry;
-            $to   = $dest . '/' . $entry;
-            // Refused, not skipped: rmove() deletes the source after a successful copy. A link
-            // already in the destination would be written through, so it is refused too.
-            if (\is_link($from) || \is_link($to)) {
-                return false;
-            }
-            if (\is_dir($from)) {
-                if ((!@\mkdir($to, 0755) && !\is_dir($to)) || !self::copyEntries($from, $to)) {
-                    return false;
-                }
-            } elseif (!@\copy($from, $to)) {
-                return false;
-            }
+        if (!\is_dir($from)) {
+            return @\copy($from, $to);
         }
 
-        return true;
+        return (@\mkdir($to, 0755) || \is_dir($to)) && self::copyEntries($from, $to);
     }
 
     private static function isSafeFilesystemPath(string $path): bool
