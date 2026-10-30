@@ -143,6 +143,25 @@ final class ClonerTest extends TestCase
     }
 
     #[Test]
+    public function createLogoRefusesOversizedCompressedMetadataBeforeDecoding(): void
+    {
+        if (!\extension_loaded('gd') || !\function_exists('imagefttext')) {
+            self::markTestSkipped('GD with FreeType is required');
+        }
+        $logo = $this->root . '/quotes/assets/images/logoModule.png';
+        mkdir(\dirname($logo), 0777, true);
+        \imagepng(\imagecreatetruecolor(92, 52), $logo);
+        $png   = (string) \file_get_contents($logo);
+        $data  = "a\0\0" . \random_bytes(70_000);
+        $chunk = \pack('N', \strlen($data)) . 'zTXt' . $data . \pack('N', \crc32('zTXt' . $data));
+        \file_put_contents($logo, \substr($png, 0, 33) . $chunk . \substr($png, 33));
+        $before = (string) \file_get_contents($logo);
+
+        self::assertFalse(Cloner::createLogo($this->root . '/quotes'));
+        self::assertSame($before, \file_get_contents($logo));
+    }
+
+    #[Test]
     public function createLogoFailsGracefullyWithoutAssets(): void
     {
         self::assertFalse(Cloner::createLogo($this->root . '/quotes'));

@@ -285,10 +285,55 @@ trait FilesManagement
             return false;
         }
         if (!\is_dir($from)) {
-            return @\copy($from, $to);
+            return self::copyRegularFile($from, $to);
         }
 
         return (@\mkdir($to, 0755) || \is_dir($to)) && self::copyEntries($from, $to);
+    }
+
+    /**
+     * The link check and the open are separate calls, so a writer could swap the entry for a
+     * link in between: the opened handle must be the regular file lstat() saw (device + inode).
+     * The destination is unlinked and created exclusively ("x" never follows a link), so a link
+     * planted there after the check fails the copy instead of truncating its target. A replaced
+     * regular file's read/write bits carry over (execute bits, owner and group do not).
+     * ponytail: an ancestor directory swapped mid-copy is not covered (PHP has no openat() or
+     * O_NOFOLLOW); source trees must not be writable by lower-trust users while they are copied.
+     */
+    private static function copyRegularFile(string $from, string $to): bool
+    {
+        $checked = @\lstat($from);
+        if (false === $checked || 0o100000 !== ($checked['mode'] & 0o170000) || false === ($in = @\fopen($from, 'rb'))) {
+            return false;
+        }
+        $opened = \fstat($in);
+        $out    = false;
+        $mode   = null;
+        if (false !== $opened && $opened['dev'] === $checked['dev'] && $opened['ino'] === $checked['ino']) {
+            $replaced = @\lstat($to); // the entry itself: a link's own mode, never its target's
+            if (false !== $replaced) {
+                $mode = 0o100000 === ($replaced['mode'] & 0o170000) ? $replaced['mode'] & 0o777 : null;
+                @\unlink($to); // removes a link itself, never its target; a failure leaves "x" to refuse
+            }
+            // A replaced 0600 file must not reappear as 0644. The mode is applied through the umask at
+            // creation: a chmod() by path would follow a link planted after fopen().
+            // ponytail: umask() is process-wide; under a threaded SAPI a concurrent request can briefly see it.
+            $umask = null === $mode ? null : \umask(~$mode & 0o777);
+            try {
+                $out = @\fopen($to, 'xb');
+            } finally {
+                if (null !== $umask) {
+                    \umask($umask);
+                }
+            }
+        }
+        $ok = false !== $out && false !== \stream_copy_to_stream($in, $out);
+        if (false !== $out) {
+            $ok = \fclose($out) && $ok;
+        }
+        \fclose($in);
+
+        return $ok;
     }
 
     private static function isSafeFilesystemPath(string $path): bool

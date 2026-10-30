@@ -30,6 +30,10 @@ final class SingleView
         $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
         $html = '<dl class="moduletools-single-view">';
         foreach ($this->rows as $row) {
+            // hideFieldFromSingleView() wins over a registered row, before any value is read.
+            if (false === ($this->object->vars[$row->key]['displayOnSingleView'] ?? true)) {
+                continue;
+            }
             $caption = $this->object->vars[$row->key]['form_caption'] ?? $row->key;
             $class = false !== $row->class ? ' class="' . $escape($row->class) . '"' : '';
             if ($row->header) {

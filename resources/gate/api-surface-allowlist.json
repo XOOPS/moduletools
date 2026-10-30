@@ -85,6 +85,7 @@
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeFromDefaultForm/parameters/6:added",
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/parameters/2:added",
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/parameters/3:added",
-        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/documented_false_or_null:value-changed"
+        "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/documented_false_or_null:value-changed",
+        "symbols/Xoops\\ModuleTools\\Common\\Output/methods/navigationTarget:added"
     ]
 }

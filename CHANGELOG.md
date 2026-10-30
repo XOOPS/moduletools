@@ -66,6 +66,18 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   iteratively; each level re-validated the whole remaining ancestry before.
 - `Common\Text::truncateHtml()` counts each span between entities once instead of re-measuring the
   whole prefix per entity (quadratic on entity-heavy input).
+- `FileChecker::copyFile()` and `setFilePermissions()` refuse a path through a dangling link: its
+  existing parent was checked against the base while the write followed the link outside it.
+- The recursive copies open each file once and require the handle to be the regular file that was
+  checked (device and inode), so an entry swapped for a link after the check is not copied; each
+  destination file is unlinked and created exclusively, so a link planted there is never written through. A
+  directory swapped mid-copy is not covered: source trees must not be writable by lower-trust users.
+- `Common\Resizer` and `Cloner::createLogo()` refuse a PNG whose compressed metadata (zTXt, compressed
+  iTXt, iCCP) exceeds 64 KiB, or that ends before IEND; libpng inflates metadata before the pixel
+  budget applies.
+- `Admin\ObjectTable` intro buttons accept only `http(s)://` or local targets, through the new
+  `Common\Output::navigationTarget()` (also used by `Paginator`).
+- `Admin\SingleView` skips fields hidden with `hideFieldFromSingleView()` even when a row is registered.
 
 ### Development
 - Requires `xoops/rector-xoops` 1.0.0-alpha2, which no longer configures the rules Rector 2.8

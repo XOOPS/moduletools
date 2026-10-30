@@ -139,6 +139,47 @@ final class ResizerTest extends TestCase
         self::assertTrue(new Resizer()->resize(new ResizeRequest($this->png(4, 4), $this->dir . '/ok.png', 2, 2))->ok);
     }
 
+    public function testCompressedPngMetadataBeyondTheBudgetIsRefusedBeforeDecoding(): void
+    {
+        $chunk = static fn (string $type, string $data): string => pack('N', strlen($data)) . $type . $data . pack('N', crc32($type . $data));
+        $png   = (string) file_get_contents($this->png(4, 4));
+        $ihdr  = substr($png, 8, 25);
+        $rest  = substr($png, 33);
+        // Incompressible bytes, so the chunks stay large on disk as well as inflated.
+        $noise = random_bytes(40_000);
+
+        $bomb = $this->dir . '/ztxt.png';
+        file_put_contents($bomb, substr($png, 0, 8) . $ihdr . $chunk('zTXt', "a\0\0" . $noise) . $chunk('zTXt', "b\0\0" . $noise) . $rest);
+        $result = new Resizer()->resize(new ResizeRequest($bomb, $this->dir . '/out.png', 2, 2));
+        self::assertFalse($result->ok);
+        self::assertStringContainsString('PNG metadata', (string) $result->error);
+
+        $refused = [
+            'itxt-compressed' => $chunk('iTXt', "k\0\1\0\0\0" . $noise . $noise),
+            'iccp'            => $chunk('iCCP', "icc\0\0" . $noise . $noise),
+            'itxt-empty'      => $chunk('iTXt', ''),
+        ];
+        foreach ($refused as $name => $metadata) {
+            $path = "{$this->dir}/{$name}.png";
+            file_put_contents($path, substr($png, 0, 8) . $ihdr . $metadata . $rest);
+            $result = new Resizer()->resize(new ResizeRequest($path, $this->dir . '/out.png', 2, 2));
+            self::assertFalse($result->ok, $name);
+            self::assertStringContainsString('PNG metadata', (string) $result->error, $name);
+        }
+
+        // A file cut off before IEND is refused: a declared length past EOF must not end the walk "clean".
+        $truncated = $this->dir . '/truncated.png';
+        file_put_contents($truncated, substr($png, 0, 8) . $ihdr . pack('N', 100) . 'tEXt');
+        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+        file_put_contents($truncated, substr($png, 0, -4)); // IEND without its CRC
+        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+
+        // Uncompressed iTXt (XMP) is not inflated, so its size does not count.
+        $xmp = $this->dir . '/itxt.png';
+        file_put_contents($xmp, substr($png, 0, 8) . $ihdr . $chunk('iTXt', "XML:com.adobe.xmp\0\0\0\0\0" . str_repeat('x', 100_000)) . $rest);
+        self::assertTrue(new Resizer()->resize(new ResizeRequest($xmp, $this->dir . '/xmp.png', 2, 2))->ok);
+    }
+
     private function png(int $width, int $height): string
     {
         $path = $this->dir . "/{$width}x{$height}.png";

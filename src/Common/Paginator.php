@@ -240,8 +240,8 @@ class Paginator
     private function pageHref(int $page, string $loadtime): string
     {
         $base = $this->toPage;
-        if ('' !== $base && 1 !== \preg_match('#^https?://#i', $base)) {
-            $base = Output::localPath($base, (string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php'));
+        if ('' !== $base) {
+            $base = Output::navigationTarget($base, (string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php'));
         }
         $href = $base . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
 
