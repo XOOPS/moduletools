@@ -53,6 +53,19 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   `ObjectController` checks `add` for a new object this way.
 - `Common\Paginator` link targets must be `http(s)://` or a local path; anything else (`javascript:`,
   `data:`, `//host`) falls back to the current script.
+- `SysUtility::recurseCopy()`, `xcopy()`, `rcopy()` and `rmove()` no longer use helpers'
+  `Filesystem::copyDirectory()`, which followed nested links and re-copied a destination inside its
+  source. A link or Windows junction at any depth, in the source or already in the destination, fails
+  the copy (`rmove()`
+  keeps its source), including a linked source or destination spelled with a trailing `/` or `/.`.
+  A destination inside the source, or one containing it, is refused.
+- `Common\Resizer` accepts only PNG, JPEG, GIF and WebP by magic bytes before `getimagesize()`, which
+  inflates compressed SWF in memory. `Common\Cloner::createLogo()` refuses a logo over 1 megapixel
+  before decoding it.
+- `DirectoryChecker::createDirectory()` validates the path once and creates at most 32 new levels
+  iteratively; each level re-validated the whole remaining ancestry before.
+- `Common\Text::truncateHtml()` counts each span between entities once instead of re-measuring the
+  whole prefix per entity (quadratic on entity-heavy input).
 
 ### Development
 - Requires `xoops/rector-xoops` 1.0.0-alpha2, which no longer configures the rules Rector 2.8

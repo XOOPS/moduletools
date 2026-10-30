@@ -126,6 +126,19 @@ final class ResizerTest extends TestCase
         self::assertStringContainsString('pixel budget', (string) $result->error);
     }
 
+    public function testANonImageSignatureNeverReachesTheMetadataParser(): void
+    {
+        // "CWS" is a zlib-compressed SWF, which getimagesize() would inflate in memory.
+        $source = $this->dir . '/movie.swf';
+        file_put_contents($source, 'CWS' . chr(10) . pack('V', 1_000_000_000) . gzcompress(str_repeat("\0", 1024)));
+
+        $result = new Resizer()->resize(new ResizeRequest($source, $this->dir . '/out.png', 100, 100));
+
+        self::assertFalse($result->ok);
+        self::assertStringContainsString('Unsupported image format', (string) $result->error);
+        self::assertTrue(new Resizer()->resize(new ResizeRequest($this->png(4, 4), $this->dir . '/ok.png', 2, 2))->ok);
+    }
+
     private function png(int $width, int $height): string
     {
         $path = $this->dir . "/{$width}x{$height}.png";

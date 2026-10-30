@@ -112,6 +112,24 @@ final class DirectoryCheckerTest extends TestCase
         }
     }
 
+    public function testADeepMissingChainIsRefusedAndAShallowOneIsCreated(): void
+    {
+        $base = sys_get_temp_dir() . '/dc-deep-' . uniqid('', true);
+        mkdir($base);
+
+        try {
+            self::assertFalse(DirectoryChecker::createDirectory($base . str_repeat('/d', 33), 0755, $base));
+            self::assertDirectoryDoesNotExist($base . '/d');
+            self::assertTrue(DirectoryChecker::createDirectory($base . '/a/b/c', 0755, $base));
+            self::assertDirectoryExists($base . '/a/b/c');
+        } finally {
+            @rmdir($base . '/a/b/c');
+            @rmdir($base . '/a/b');
+            @rmdir($base . '/a');
+            @rmdir($base);
+        }
+    }
+
     public function testSetDirectoryPermissionsRefusesAFile(): void
     {
         $base = sys_get_temp_dir() . '/dc-file-' . uniqid('', true);

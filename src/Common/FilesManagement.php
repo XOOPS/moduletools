@@ -17,6 +17,7 @@ namespace Xoops\ModuleTools\Common;
  */
 
 use Xoops\Helpers\Utility\Filesystem;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 /**
  * Filesystem convenience methods mixed into {@see SysUtility}.
@@ -90,7 +91,7 @@ trait FilesManagement
             throw new \RuntimeException('The directory ' . $src . ' could not be opened.');
         }
 
-        if (!Filesystem::copyDirectory((string)$src, (string)$dst)) {
+        if (!self::copyTree((string)$src, (string)$dst)) {
             throw new \RuntimeException('The directory ' . $dst . ' could not be created.');
         }
     }
@@ -112,7 +113,8 @@ trait FilesManagement
 
         // A link is never recreated: its target is not checked against any base, so a link in a
         // module's testdata/ could point anything (mainfile.php, /etc/passwd) into the upload tree.
-        if (\is_link($source)) {
+        // A linked destination would be written through, on the file branch as on the tree one.
+        if (PathContainment::isLink((string)$source) || PathContainment::isLink((string)$dest)) {
             return false;
         }
 
@@ -121,14 +123,8 @@ trait FilesManagement
             return Filesystem::copy($source, $dest);
         }
 
-        if (@\is_dir($source)) {
-            // Deep copy the directory and its contents
-            if (!Filesystem::copyDirectory((string)$source, (string)$dest)) {
-                throw new \RuntimeException(\sprintf('Directory "%s" was not created', $dest));
-            }
-        }
-
-        return true;
+        // Deep copy the directory and its contents
+        return !\is_dir($source) || self::copyTree((string)$source, (string)$dest);
     }
 
     /**
@@ -204,12 +200,8 @@ trait FilesManagement
             return false;
         }
 
-        // If the destination directory does not exist and could not be created stop processing
-        if (!\is_dir($dest) && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
-            return false;
-        }
-
-        return Filesystem::moveDirectory((string)$src, (string)$dest); // move contents & remove the source directory
+        // move contents & remove the source directory
+        return self::copyTree((string)$src, (string)$dest) && Filesystem::deleteDirectory((string)$src);
     }
 
     /**
@@ -238,12 +230,65 @@ trait FilesManagement
             return false;
         }
 
-        // If the destination directory does not exist and could not be created stop processing
-        if (!\is_dir($dest) && !Filesystem::mkdir($dest, 0755) && !\is_dir($dest)) {
+        return self::copyTree((string)$src, (string)$dest);
+    }
+
+    /**
+     * Filesystem::copyDirectory() (helpers 1.0) follows nested links and walks a destination
+     * that sits inside the source, copying its own output again; every recursive copy here
+     * goes through this instead. A link at any depth fails the copy; it is never followed.
+     */
+    private static function copyTree(string $source, string $dest): bool
+    {
+        // is_link() resolves a trailing "/" or "/.", which would hide a linked directory.
+        $source = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $source);
+        $dest   = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $dest);
+        $root   = '' === $source || '' === $dest ? false : \realpath($source);
+        if (false === $root || PathContainment::isLink($source) || PathContainment::isLink($dest)) {
+            return false;
+        }
+        // A failed mkdir (or a file at $dest) leaves $target false, which the refusal below covers.
+        $created = !\is_dir($dest) && Filesystem::mkdir($dest, 0755);
+        $target  = \is_dir($dest) ? \realpath($dest) : false;
+        // Overlap either way is refused: a destination above the source can receive the source
+        // itself, which rmove() then deletes.
+        if (
+            false === $target
+            || PathContainment::isInside($target, $root) || PathContainment::isInsideByIdentity($target, $root)
+            || PathContainment::isInside($root, $target) || PathContainment::isInsideByIdentity($root, $target)
+        ) {
+            if ($created) {
+                @\rmdir($dest);
+            }
+
             return false;
         }
 
-        return Filesystem::copyDirectory((string)$src, (string)$dest);
+        return self::copyEntries($source, $dest);
+    }
+
+    private static function copyEntries(string $source, string $dest): bool
+    {
+        $entries = \scandir($source);
+
+        return false !== $entries && \array_all(
+            \array_diff($entries, ['.', '..']),
+            static fn (string $entry): bool => self::copyEntry($source . '/' . $entry, $dest . '/' . $entry),
+        );
+    }
+
+    private static function copyEntry(string $from, string $to): bool
+    {
+        // Refused, not skipped: rmove() deletes the source after a successful copy. A link
+        // already in the destination would be written through, so it is refused too.
+        if (PathContainment::isLink($from) || PathContainment::isLink($to)) {
+            return false;
+        }
+        if (!\is_dir($from)) {
+            return @\copy($from, $to);
+        }
+
+        return (@\mkdir($to, 0755) || \is_dir($to)) && self::copyEntries($from, $to);
     }
 
     private static function isSafeFilesystemPath(string $path): bool

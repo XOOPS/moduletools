@@ -29,6 +29,9 @@ use Xoops\ModuleTools\Internal\PackageLanguage;
  */
 class DirectoryChecker
 {
+    // ponytail: fixed cap on new levels per call; no upload or cache tree nests this deep
+    private const int MAX_NEW_LEVELS = 32;
+
     /**
      * @param     $path
      * @param int $mode
@@ -135,10 +138,23 @@ class DirectoryChecker
             return false;
         }
 
-        // https://www.php.net/manual/en/function.mkdir.php
-        return \is_dir($target)
-            || (self::createDirectory(\dirname($target), $mode, $allowedBasePath)
-                && (Filesystem::mkdir($target, self::normalizeMode($mode, 0755), false) || \is_dir($target)));
+        // The path is validated once: with ".." refused and the nearest existing ancestor inside
+        // the base, every missing component is a plain child of it. Collected once and created
+        // top-down, so a deep path costs one walk, not one full re-validation per level.
+        $missing = [];
+        for ($dir = (string)$target; !\is_dir($dir); $dir = \dirname($dir)) {
+            if (\count($missing) >= self::MAX_NEW_LEVELS || $dir === \dirname($dir)) {
+                return false;
+            }
+            $missing[] = $dir;
+        }
+        return \array_all(
+            \array_reverse($missing),
+            // Re-checked per level (its parent now exists, so this is one realpath): a level
+            // swapped for a link after the first check must not carry the next mkdir outside.
+            static fn (string $dir): bool => self::isAllowedPath($dir, $allowedBasePath)
+                && (Filesystem::mkdir($dir, self::normalizeMode($mode, 0755), false) || \is_dir($dir)),
+        );
     }
 
     /**

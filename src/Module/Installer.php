@@ -86,7 +86,9 @@ final class Installer
     {
         foreach (self::plan($configurator)->testFolderCopies as $pair) {
             [$src, $dest] = $pair;
-            SysUtility::rcopy($src, $dest);
+            if (!SysUtility::rcopy($src, $dest)) {
+                \trigger_error(\sprintf('Test data folder "%s" was not copied to "%s"', $src, $dest), \E_USER_WARNING);
+            }
         }
     }
 

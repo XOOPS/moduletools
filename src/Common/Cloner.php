@@ -13,6 +13,7 @@ namespace Xoops\ModuleTools\Common;
 use Xmf\Request;
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\ModuleTools\Internal\PackageLanguage;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 /**
  * Clone a module directory under a new dirname, rewriting the old dirname in
@@ -33,6 +34,9 @@ final class Cloner
 
     /** Top-level entries never copied into a clone. */
     private const array SKIPPED_ENTRIES = ['node_modules', '.git', '.idea'];
+
+    /** Generous for a 92x52 logo; refuses decompression bombs before decoding. */
+    private const int MAX_LOGO_PIXELS = 1_000_000;
 
     /**
      * A dirname becomes a PHP namespace segment and a constant prefix in the clone, so it
@@ -72,7 +76,7 @@ final class Cloner
         // Containment is decided on resolved paths, whatever the spelling.
         $resolvedParent = \realpath(\dirname($sourcePath));
         $resolvedTarget = false === $resolvedParent ? '' : \rtrim(\str_replace('\\', '/', $resolvedParent), '/') . '/' . $newDirname;
-        if ('' === $oldDirname || '' === $resolvedTarget || self::isInside($resolvedTarget, $resolved)) {
+        if ('' === $oldDirname || '' === $resolvedTarget || PathContainment::isInside($resolvedTarget, $resolved)) {
             throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
         }
         // Exclusive creation establishes ownership: an existing directory, file or symlink
@@ -86,8 +90,8 @@ final class Cloner
         $createdTarget = \realpath($targetPath);
         if (
             false === $createdTarget
-            || self::isInside(\str_replace('\\', '/', $createdTarget), $resolved)
-            || self::isInsideByIdentity($createdTarget, $resolved)
+            || PathContainment::isInside($createdTarget, $resolved)
+            || PathContainment::isInsideByIdentity($createdTarget, $resolved)
         ) {
             @\rmdir($targetPath);
             throw new \InvalidArgumentException('Clone target cannot be inside the source: ' . $targetPath);
@@ -125,7 +129,7 @@ final class Cloner
         if (!\is_file($font)) {
             $font = \dirname(__DIR__, 2) . '/resources/fonts/VeraBd.ttf';
         }
-        if (!\extension_loaded('gd') || !\function_exists('imagefttext') || !\is_file($logo) || !\is_file($font)) {
+        if (!\extension_loaded('gd') || !\function_exists('imagefttext') || !\is_file($font) || !self::isDecodableLogo($logo)) {
             return false;
         }
         $image = @\imagecreatefrompng($logo);
@@ -144,6 +148,19 @@ final class Cloner
         $ok = \imagepng($image, $logo);
 
         return $ok;
+    }
+
+    /**
+     * A module logo is 92x52: reading the header first keeps a tiny, highly compressed PNG
+     * from decoding into a huge raster. The PNG signature comes first: getimagesize() parses every
+     * format it knows (compressed SWF is inflated in memory).
+     */
+    private static function isDecodableLogo(string $logo): bool
+    {
+        $isPng = \is_file($logo) && "\x89PNG\r\n\x1A\n" === @\file_get_contents($logo, false, null, 0, 8);
+        $info  = $isPng ? @\getimagesize($logo) : false;
+
+        return false !== $info && \IMAGETYPE_PNG === $info[2] && $info[0] * $info[1] <= self::MAX_LOGO_PIXELS;
     }
 
     /**
@@ -227,7 +244,7 @@ final class Cloner
             }
             $from = $source . '/' . $entry;
             $to   = $target . '/' . \str_replace($search, $replace, $entry);
-            if (\is_link($from)) {
+            if (PathContainment::isLink($from)) {
                 // A link could point outside the module tree; a clone never dereferences it.
                 continue;
             }
@@ -247,41 +264,6 @@ final class Cloner
                 throw new \RuntimeException(\sprintf('File "%s" could not be copied to "%s"', $from, $to));
             }
         }
-    }
-
-    /** Whether `$path` is `$root` or below it; Windows paths compare case-insensitively. */
-    private static function isInside(string $path, string $root): bool
-    {
-        $path = \rtrim($path, '/') . '/';
-        $root = \rtrim($root, '/') . '/';
-
-        return '\\' === \DIRECTORY_SEPARATOR
-            ? 0 === \strncasecmp($path, $root, \strlen($root))
-            : \str_starts_with($path, $root);
-    }
-
-    /**
-     * Whether the existing directory `$path` is `$root` or below it, by device and inode, so a
-     * case-insensitive filesystem (macOS APFS) cannot hide containment behind another spelling.
-     * `$path` must be resolved (realpath): lexical ancestors of a link can skip the physical root.
-     */
-    private static function isInsideByIdentity(string $path, string $root): bool
-    {
-        $rootStat = @\stat($root);
-        if (false === $rootStat || 0 === $rootStat['ino']) {
-            return false;
-        }
-        $dir = $path;
-        do {
-            $stat = @\stat($dir);
-            if (false !== $stat && $stat['ino'] === $rootStat['ino'] && $stat['dev'] === $rootStat['dev']) {
-                return true;
-            }
-            $parent = $dir;
-            $dir = \dirname($dir);
-        } while ($dir !== $parent);
-
-        return false;
     }
 
     /** @legacy-global-accessor */
