@@ -7,6 +7,7 @@ namespace Xoops\ModuleTools\Tests\Common;
 use PHPUnit\Framework\TestCase;
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\ModuleTools\Common\SysUtility;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 defined('XOOPS_GROUP_ADMIN') || define('XOOPS_GROUP_ADMIN', '1');
 
@@ -88,6 +89,33 @@ final class FilesManagementTest extends TestCase
         self::assertFalse(SysUtility::rmove($this->dir . '/linked/', $this->dir . '/moved'));
         self::assertFalse(SysUtility::rmove($this->dir . '/linked/.', $this->dir . '/moved'));
         self::assertFileExists($this->dir . '/src/sub/a.txt');
+    }
+
+    public function testAWindowsJunctionIsTreatedAsALink(): void
+    {
+        if ('\\' !== DIRECTORY_SEPARATOR) {
+            self::markTestSkipped('Junctions exist only on Windows');
+        }
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['1']);
+        self::assertTrue(Filesystem::mkdir($this->dir . '/outside'));
+        file_put_contents($this->dir . '/outside/secret.txt', 'secret');
+        $junction = str_replace('/', '\\', $this->dir . '/src/sub/junction');
+        exec('cmd /c mklink /J ' . escapeshellarg($junction) . ' ' . escapeshellarg(str_replace('/', '\\', $this->dir . '/outside')), $output, $code);
+        if (0 !== $code) {
+            self::markTestSkipped('mklink /J failed');
+        }
+
+        try {
+            // is_dir() on a junction varies between calls on PHP for Windows, so the detection
+            // itself is pinned; the move below must then refuse whatever is_dir() says.
+            self::assertFalse(is_link($junction));
+            self::assertTrue(PathContainment::isLink($junction));
+            self::assertFalse(SysUtility::rmove($this->dir . '/src', $this->dir . '/moved'));
+            self::assertFileExists($this->dir . '/outside/secret.txt');
+            self::assertFileDoesNotExist($this->dir . '/moved/sub/junction/secret.txt');
+        } finally {
+            @rmdir($junction); // removes the junction only, never its target
+        }
     }
 
     public function testANestedLinkFailsTheCopyAndKeepsTheMoveSource(): void

@@ -12,6 +12,15 @@ namespace Xoops\ModuleTools\Internal;
  */
 final class PathContainment
 {
+    /**
+     * A symlink, or a Windows junction: PHP reports a junction as is_dir() but not is_link(),
+     * and its filetype() as "unknown".
+     */
+    public static function isLink(string $path): bool
+    {
+        return \is_link($path) || 'unknown' === @\filetype($path);
+    }
+
     /** Whether `$path` is `$root` or below it; Windows paths compare case-insensitively. */
     public static function isInside(string $path, string $root): bool
     {

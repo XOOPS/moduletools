@@ -113,7 +113,7 @@ trait FilesManagement
 
         // A link is never recreated: its target is not checked against any base, so a link in a
         // module's testdata/ could point anything (mainfile.php, /etc/passwd) into the upload tree.
-        if (\is_link($source)) {
+        if (PathContainment::isLink((string)$source)) {
             return false;
         }
 
@@ -247,7 +247,7 @@ trait FilesManagement
         $source = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $source);
         $dest   = (string)\preg_replace('#(?:[/\\\\]\.?)+\z#', '', $dest);
         $root   = '' === $source || '' === $dest ? false : \realpath($source);
-        if (false === $root || \is_link($source) || \is_link($dest)) {
+        if (false === $root || PathContainment::isLink($source) || PathContainment::isLink($dest)) {
             return false;
         }
         // A failed mkdir (or a file at $dest) leaves $target false, which the refusal below covers.
@@ -284,7 +284,7 @@ trait FilesManagement
     {
         // Refused, not skipped: rmove() deletes the source after a successful copy. A link
         // already in the destination would be written through, so it is refused too.
-        if (\is_link($from) || \is_link($to)) {
+        if (PathContainment::isLink($from) || PathContainment::isLink($to)) {
             return false;
         }
         if (!\is_dir($from)) {

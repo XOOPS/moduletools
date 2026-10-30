@@ -244,7 +244,7 @@ final class Cloner
             }
             $from = $source . '/' . $entry;
             $to   = $target . '/' . \str_replace($search, $replace, $entry);
-            if (\is_link($from)) {
+            if (PathContainment::isLink($from)) {
                 // A link could point outside the module tree; a clone never dereferences it.
                 continue;
             }
