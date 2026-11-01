@@ -71,6 +71,11 @@ final class TextTest extends TestCase
         self::assertSame('Hello wo', Text::truncateHtml('<p title="a>b">Hello</p><div data-x=\'c>d\'>world again</div>' . $flood, 8, '', true));
         // A long attribute must not exhaust the PCRE stack (the excerpt came back empty).
         self::assertSame('Hello wo', Text::truncateHtml('<p data-x=' . str_repeat('a', 10_000) . '>Hello</p><div>world again</div>' . $flood, 8, '', true));
+        // Unterminated block-tag candidates made every failed attempt rescan the rest: quadratic.
+        self::assertSame('Hello', Text::truncateHtml('Hello world' . str_repeat('<p ', 100_000) . '">', 5, '', true));
+        self::assertSame('Hello', Text::truncateHtml('Hello world' . str_repeat('<br', 100_000) . '">', 5, '', true));
+        // A custom element named like a block tag is inline: it must not split the word.
+        self::assertSame('Helloworld', Text::truncateHtml('Hello<br-widget>world</br-widget> again' . $flood, 10, '', true));
         self::assertSame('a &amp; b', Text::truncateHtml('a &amp; b &lt;c&gt; d' . $flood, 5, '', true));
         self::assertSame('&lt;c&gt;', Text::truncateHtml('&lt;c&gt; and more' . $flood, 3, '', true));
         // Malformed UTF-8 used to make the /u whitespace pass return null: an empty excerpt.

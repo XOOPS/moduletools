@@ -70,6 +70,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   regex that backtracked quadratically on long whitespace runs (a 2.8 MB excerpt took 1.3 s, 22 s
   without PCRE JIT). `< br >` is no longer closed with `</br>`, and the HTML5 void elements `embed`,
   `source`, `track` and `wbr` are recognised.
+- `Common\Text::truncateHtml()` tag-flood fallback: an unquoted `<` now ends a block-tag candidate, so
+  a run of unterminated candidates (`<p <p <p …">`) is no longer rescanned by every failed attempt
+  (quadratic: 350 ms at 60 KB).
 - `FileChecker::copyFile()` and `setFilePermissions()` refuse a path through a dangling link: its
   existing parent was checked against the base while the write followed the link outside it.
 - The recursive copies open each file once and require the handle to be the regular file that was
