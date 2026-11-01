@@ -77,7 +77,7 @@ final class Text implements TextInterface
             // the tags are still stripped, only without the block spacing. An unquoted "<" ends the
             // candidate, so a failed attempt never rescans the next one ("<p <p <p ..." was quadratic).
             $spaced = \preg_replace_callback(
-                '#</?([a-z][a-z0-9]*+)(?:[^<>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i',
+                '#</?([a-z][a-z0-9-]*+)(?:[^<>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i',
                 static fn (array $tag): string => \in_array(\strtolower($tag[1]), self::BLOCK_TAGS, true) ? ' ' : $tag[0],
                 $text
             );
