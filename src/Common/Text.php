@@ -95,12 +95,10 @@ final class Text implements TextInterface
             return HtmlBuilder::escape($excerpt) . $ending;
         }
         if ($considerHtml) {
-            // splits all html-tags to scanable lines
-            \preg_match_all('/(<.+?' . '>)?([^<>]*)/s', $text, $lines, \PREG_SET_ORDER);
             $total_length = mb_strlen($ending);
             $openTags     = [];
             $truncate     = '';
-            foreach ($lines as $lineMatchings) {
+            foreach (self::tokenize($text) as $lineMatchings) {
                 // if there is any html-tag in this line, handle it and add it (uncounted) to the output
                 if (!empty($lineMatchings[1])) {
                     // if it's an "empty element" with or without xhtml-conform closing slash
@@ -180,6 +178,37 @@ final class Text implements TextInterface
         }
 
         return $truncate;
+    }
+
+    /**
+     * Splits HTML into [1 => tag, 2 => text] pieces as `/(<.+?>)?([^<>]*)/s` did, in one forward pass
+     * that stops when the caller stops. The regex rescanned the rest of the text for every `<` with no
+     * later `>` (a 900 KB tail took 33 s), and past PCRE's backtrack limit it cut the excerpt short.
+     * A stray `<` or `>` is dropped, as before.
+     *
+     * @return \Generator<int, array{1: string, 2: string}>
+     */
+    private static function tokenize(string $html): \Generator
+    {
+        $size      = \strlen($html);
+        $lastClose = \strrpos($html, '>');
+        $offset    = 0;
+        while ($offset < $size) {
+            $tag = '';
+            // A tag needs one character before its ">"; past the last ">" nothing can close.
+            if ('<' === $html[$offset] && false !== $lastClose && $offset + 2 <= $lastClose) {
+                $end    = (int) \strpos($html, '>', $offset + 2);
+                $tag    = \substr($html, $offset, $end - $offset + 1);
+                $offset = $end + 1;
+            }
+            $textLength = \strcspn($html, '<>', $offset);
+            if ('' === $tag && 0 === $textLength) {
+                ++$offset;
+                continue;
+            }
+            yield [1 => $tag, 2 => \substr($html, $offset, $textLength)];
+            $offset += $textLength;
+        }
     }
 
     /**

@@ -54,6 +54,15 @@ final class TextTest extends TestCase
         self::assertSame(str_repeat($tag, 50) . 'ab' . str_repeat('</b>', 50), Text::truncateHtml(str_repeat($tag, 50) . 'abcdef', 2, '', true));
     }
 
+    public function testUnterminatedTagCandidatesDoNotRescanTheRest(): void
+    {
+        // Each "<" with no later ">" made the tokenizer search the whole tail (a 900 KB tail took 33 s);
+        // past PCRE's backtrack limit it failed and the excerpt was cut to "Hi <b>yo</b> w ".
+        $text = 'Hi <b>yo</b> ' . str_repeat('w < ', 1_000) . str_repeat('a ', 600_000);
+
+        self::assertSame('Hi <b>yo</b> w  w  w  ', Text::truncateHtml($text, 15, '', true));
+    }
+
     public function testATagFloodFallsBackToAPlainTextExcerpt(): void
     {
         // Tags cost no visible characters; this input made the old array_unshift walk quadratic.

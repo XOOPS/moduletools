@@ -73,6 +73,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 - `Common\Text::truncateHtml()` tag-flood fallback: an unquoted `<` now ends a block-tag candidate, so
   a run of unterminated candidates (`<p <p <p …">`) is no longer rescanned by every failed attempt
   (quadratic: 350 ms at 60 KB).
+- `Common\Text::truncateHtml()` splits tags from text in one forward pass that stops at the excerpt
+  length. The old regex searched the whole remaining text for every `<` with no later `>` (a 900 KB
+  tail took 33 s, 50 s without PCRE JIT), and past PCRE's backtrack limit it cut the excerpt short.
 - `FileChecker::copyFile()` and `setFilePermissions()` refuse a path through a dangling link: its
   existing parent was checked against the base while the write followed the link outside it.
 - The recursive copies open each file once and require the handle to be the regular file that was
