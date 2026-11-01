@@ -17,6 +17,7 @@ namespace Xoops\ModuleTools\Common;
  */
 
 use Xmf\Database\TableLoad;
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 use Xoops\ModuleTools\Utility;
 
@@ -99,7 +100,7 @@ class TestdataSample
                     5,
                     \sprintf(
                         \defined('_CO_MTOOLS_LOAD_SAMPLEDATA_COPYFAIL') ? \_CO_MTOOLS_LOAD_SAMPLEDATA_COPYFAIL : 'Sample data rows were imported, but these folders could not be copied (copying files requires a webmaster): %s',
-                        \htmlspecialchars(\implode(', ', $failed), \ENT_QUOTES, 'UTF-8'),
+                        HtmlBuilder::escape(\implode(', ', $failed)),
                     ),
                 );
             }

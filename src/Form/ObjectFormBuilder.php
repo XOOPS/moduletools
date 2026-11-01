@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Form;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Common\Output;
 use Xoops\ModuleTools\Object\DynamicObject;
 
@@ -76,7 +77,7 @@ final class ObjectFormBuilder
         // value to option controls (an escaped value never matches an option key with & ' " <).
         $raw = $object->getVar($name, 'n');
         $value = \is_scalar($raw) ? (string) $raw : '';
-        $text = \htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        $text = HtmlBuilder::escape($value);
         $selected = \is_array($raw) ? $raw : $value; // multi-value controls keep their array
         $control = $object->getControl($name);
         $controlName = is_array($control) ? (string) ($control['name'] ?? '') : (string) $control;
@@ -116,7 +117,7 @@ final class ObjectFormBuilder
             return $element;
         }
         if (XOBJ_DTYPE_FORM_SECTION === $type) {
-            return new \XoopsFormLabel('', '<h3>' . htmlspecialchars($caption, ENT_QUOTES | ENT_HTML5) . '</h3>');
+            return new \XoopsFormLabel('', '<h3>' . HtmlBuilder::escape($caption) . '</h3>');
         }
         if (XOBJ_DTYPE_FORM_SECTION_CLOSE === $type) {
             return null;

@@ -17,6 +17,7 @@ namespace Xoops\ModuleTools\Common;
  */
 
 use Xmf\Yaml;
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 
 /**
@@ -139,7 +140,7 @@ class TestdataButtons
         $btn   = static function (string $label, string $href, string $variant = ''): string {
             $cls = 'xo-sd-btn' . ('' !== $variant ? ' xo-sd-btn--' . $variant : '');
             return '<a class="' . $cls . '" href="' . $href . '">'
-                . \htmlspecialchars($label, \ENT_QUOTES, 'UTF-8') . '</a>';
+                . HtmlBuilder::escape($label) . '</a>';
         };
 
         $out = self::sampleDataStyle() . '<div class="xo-sampledata">';

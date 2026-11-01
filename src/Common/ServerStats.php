@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -97,7 +99,7 @@ trait ServerStats
 
     private static function escapeServerStat(string $value): string
     {
-        return \htmlspecialchars($value, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
+        return HtmlBuilder::escape($value);
     }
 
     /** @legacy-global-accessor */

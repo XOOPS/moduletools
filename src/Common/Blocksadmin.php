@@ -227,7 +227,7 @@ class Blocksadmin
                      </a>";
             }
             echo "
-            <input type='hidden' name='oldtitle[" . $i->getVar('bid') . "]' value='" . \htmlspecialchars((string) $i->getVar('title', 'n'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "'>
+            <input type='hidden' name='oldtitle[" . $i->getVar('bid') . "]' value='" . HtmlBuilder::escape((string) $i->getVar('title', 'n')) . "'>
             <input type='hidden' name='oldside[" . $i->getVar('bid') . "]' value='" . $i->getVar('side') . "'>
             <input type='hidden' name='oldweight[" . $i->getVar('bid') . "]' value='" . $i->getVar('weight') . "'>
             <input type='hidden' name='oldvisible[" . $i->getVar('bid') . "]' value='" . $i->getVar('visible') . "'>

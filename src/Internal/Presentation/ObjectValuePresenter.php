@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Internal\Presentation;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /**
  * One rule for turning a stored object field into presentable text, shared by the admin
  * table, the single view and the CSV export so the three never drift apart.
@@ -43,7 +45,7 @@ final class ObjectValuePresenter
     /** Anything a value method or caller hands over, HTML-escaped once. */
     public static function escape(string $value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        return HtmlBuilder::escape($value);
     }
 
     private static function isTextType(\XoopsObject $object, string $key): bool

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -245,7 +247,7 @@ class Paginator
         }
         $href = $base . $this->queryStr . $this->glue . $this->urlPage . '=' . $page . $loadtime;
 
-        return \htmlspecialchars($href, \ENT_QUOTES, 'UTF-8');
+        return HtmlBuilder::escape($href);
     }
 
     private function linkItem(int $page, string $loadtime, string $glyph, string $label): string
@@ -253,7 +255,7 @@ class Paginator
         return \sprintf(
             '<li class="page-item"><a class="page-link" href="%s" aria-label="%s"><span aria-hidden="true">%s</span></a></li>',
             $this->pageHref($page, $loadtime),
-            \htmlspecialchars($label, \ENT_QUOTES, 'UTF-8'),
+            HtmlBuilder::escape($label),
             $glyph
         );
     }
@@ -262,7 +264,7 @@ class Paginator
     {
         return \sprintf(
             '<li class="page-item disabled"><span class="page-link" aria-disabled="true" aria-label="%s">%s</span></li>',
-            \htmlspecialchars($label, \ENT_QUOTES, 'UTF-8'),
+            HtmlBuilder::escape($label),
             $glyph
         );
     }

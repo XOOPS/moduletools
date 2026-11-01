@@ -41,7 +41,7 @@ final class ObjectValuePresenterTest extends TestCase
     {
         $object = $this->object();
 
-        self::assertSame('http://x&apos; onfocus=&apos;alert(1)', ObjectValuePresenter::html($object, 'url'));
+        self::assertSame('http://x&#039; onfocus=&#039;alert(1)', ObjectValuePresenter::html($object, 'url'));
         self::assertSame('a&amp;b, c', ObjectValuePresenter::html($object, 'tags'));
         self::assertSame('', ObjectValuePresenter::html($object, 'missing'));
     }

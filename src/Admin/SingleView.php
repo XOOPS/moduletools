@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
 
 final class SingleView
@@ -27,7 +28,7 @@ final class SingleView
 
     public function render(bool $fetchOnly = false, bool $debug = false): ?string
     {
-        $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        $escape = static fn (mixed $value): string => HtmlBuilder::escape((string) $value);
         $html = '<dl class="moduletools-single-view">';
         foreach ($this->rows as $row) {
             // hideFieldFromSingleView() wins over a registered row, before any value is read.
