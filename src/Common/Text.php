@@ -30,6 +30,7 @@ final class Text implements TextInterface
     // ponytail: past this many tags an excerpt falls back to plain text; raise it if real content needs more
     private const int MAX_HTML_TAGS = 2000;
     private const string ENCODING = 'UTF-8';
+    private const array VOID_TAGS = ['img', 'br', 'input', 'hr', 'area', 'base', 'basefont', 'col', 'frame', 'isindex', 'link', 'meta', 'param', 'embed', 'source', 'track', 'wbr'];
 
     /**
      * truncateHtml can truncate a string up to a number of characters while preserving whole words and HTML tags
@@ -97,7 +98,7 @@ final class Text implements TextInterface
                 // if there is any html-tag in this line, handle it and add it (uncounted) to the output
                 if (!empty($lineMatchings[1])) {
                     // if it's an "empty element" with or without xhtml-conform closing slash
-                    if (\preg_match('/^<(\s*.+?\/\s*|\s*(img|br|input|hr|area|base|basefont|col|frame|isindex|link|meta|param)(\s.+?)?)>$/is', $lineMatchings[1])) {
+                    if (self::isEmptyElement($lineMatchings[1])) {
                         // do nothing
                         // if tag is a closing tag
                     } elseif (\preg_match('/^<\s*\/(\S+?)\s*>$/s', $lineMatchings[1], $tag_matchings)) {
@@ -173,5 +174,23 @@ final class Text implements TextInterface
         }
 
         return $truncate;
+    }
+
+    /**
+     * A self-closing tag (`<x ... />`) or a void element (`<br>`, `<img src=...>`).
+     * String checks, not a regex: overlapping repetitions made each long tag cost quadratic time.
+     */
+    private static function isEmptyElement(string $tag): bool
+    {
+        $whitespace = " \t\n\r\v\f";
+        $inner = \trim(\substr($tag, 1, -1), $whitespace);
+        if (\strlen($inner) > 1 && \str_ends_with($inner, '/')) {
+            return true;
+        }
+        $nameLength = \strspn(\strtolower($inner), 'abcdefghijklmnopqrstuvwxyz');
+        $next = \substr($inner, $nameLength, 1);
+
+        return \in_array(\strtolower(\substr($inner, 0, $nameLength)), self::VOID_TAGS, true)
+            && ('' === $next || \str_contains($whitespace, $next));
     }
 }
