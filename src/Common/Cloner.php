@@ -12,6 +12,7 @@ namespace Xoops\ModuleTools\Common;
 
 use Xmf\Request;
 use Xoops\Helpers\Utility\Filesystem;
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 use Xoops\ModuleTools\Internal\PathContainment;
 use Xoops\ModuleTools\Internal\PngMetadata;
@@ -203,7 +204,7 @@ final class Cloner
             exit;
         }
         $clone = \mb_strtolower(Request::getString('clone', '', 'POST'));
-        $safe  = \htmlspecialchars($clone, \ENT_QUOTES | \ENT_SUBSTITUTE, 'UTF-8');
+        $safe  = HtmlBuilder::escape($clone);
         if (!self::isValidDirname($clone)) {
             \redirect_header('clone.php', 3, \_CO_MTOOLS_CLONE_INVALIDNAME);
             exit;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /*
  You may not change or alter any portion of this comment or credits
  of supporting developers from this source code or any supporting source code
@@ -54,7 +56,7 @@ final class SocialBookmarks
             'email'    => ['Email',       'mailto:?subject=' . $t . '&body=' . $u,                       'fa-envelope', '#ea4335'],
         ];
 
-        $esc = static fn(string $s): string => \htmlspecialchars($s, \ENT_QUOTES, 'UTF-8');
+        $esc = static fn(string $s): string => HtmlBuilder::escape($s);
 
         // Pronounced circular brand buttons with white glyphs.
         $circle = 'display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;'

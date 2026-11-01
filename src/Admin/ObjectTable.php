@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Common\Output;
 use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
 
@@ -193,7 +194,7 @@ class ObjectTable
 
     protected function buildHtml(): string
     {
-        $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        $escape = static fn (mixed $value): string => HtmlBuilder::escape((string) $value);
         $html = '';
         foreach ($this->introButtons as $button) {
             $html .= '<p><a class="btn btn-primary" href="' . $escape(Output::navigationTarget($button['location'])) . '">' . $escape($button['value']) . '</a></p>';

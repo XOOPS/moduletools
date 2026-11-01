@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /** Highlights user-supplied search terms in text while escaping the input. */
 final readonly class Highlighter
 {
@@ -31,7 +33,7 @@ final readonly class Highlighter
         if (false === $pieces) {
             return self::escape($text);
         }
-        $open = '<mark class="' . htmlspecialchars($this->cssClass, ENT_QUOTES | ENT_HTML5) . '">';
+        $open = '<mark class="' . HtmlBuilder::escape($this->cssClass) . '">';
         $out  = '';
         foreach ($pieces as $index => $piece) {
             $out .= 1 === $index % 2 ? $open . self::escape($piece) . '</mark>' : self::escape($piece);
@@ -42,6 +44,6 @@ final readonly class Highlighter
 
     private static function escape(string $text): string
     {
-        return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        return HtmlBuilder::escape($text);
     }
 }

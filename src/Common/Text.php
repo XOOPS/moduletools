@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\Helpers\Utility\HtmlBuilder;
+
 /**
  * @category     Module
  * @package      mtools
@@ -78,12 +80,12 @@ final class Text implements TextInterface
             $plain = \trim((string) \preg_replace('/\s+/u', ' ', $plain));
 
             if (mb_strlen($plain) <= $length) {
-                return \htmlspecialchars($plain, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING);
+                return HtmlBuilder::escape($plain);
             }
             // The text is escaped; $ending is caller markup (e.g. "&hellip;") appended raw, as on the HTML path.
             $excerpt = self::truncateHtml($plain, $length - mb_strlen($ending), '', $exact, false);
 
-            return \htmlspecialchars($excerpt, \ENT_QUOTES | \ENT_SUBSTITUTE, self::ENCODING) . $ending;
+            return HtmlBuilder::escape($excerpt) . $ending;
         }
         if ($considerHtml) {
             // splits all html-tags to scanable lines
