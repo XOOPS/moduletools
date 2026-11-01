@@ -73,6 +73,7 @@ final class FilesManagementTest extends TestCase
             clearstatcache();
             self::assertSame(0o600, fileperms($this->dir . '/copy/sub/a.txt') & 0o777);
             self::assertSame('secret', file_get_contents($this->dir . '/copy/sub/a.txt'));
+            self::assertSame([], glob($this->dir . '/copy/sub/.mt*')); // no temporary file left
         } finally {
             umask($previous);
         }

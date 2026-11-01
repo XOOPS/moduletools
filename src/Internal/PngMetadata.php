@@ -41,7 +41,7 @@ final class PngMetadata
         while (8 === \strlen($header = (string) \fread($handle, 8))) {
             ['length' => $length, 'type' => $type] = (array) \unpack('Nlength/a4type', $header);
             if ('IEND' === $type) {
-                return 0 === $length && 4 === \strlen((string) \fread($handle, 4)); // empty, CRC present
+                return 0 === $length && "\xAE\x42\x60\x82" === \fread($handle, 4); // empty, crc32('IEND')
             }
             $bytes = $length > 0x7FFFFFFF ? false : self::compressedBytes($handle, (string) $type, (int) $length);
             if (false === $bytes || ($compressed += $bytes) > self::MAX_COMPRESSED_BYTES) {
