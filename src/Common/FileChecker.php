@@ -19,6 +19,7 @@ namespace Xoops\ModuleTools\Common;
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
+use Xoops\ModuleTools\Internal\PathContainment;
 
 /**
  * Class FileChecker
@@ -180,6 +181,11 @@ class FileChecker
             $resolved = realpath($current);
             if (false !== $resolved) {
                 return $resolved;
+            }
+            // A dangling link fails realpath() but is still followed by the write: falling back
+            // to its parent would approve a target outside the base.
+            if (PathContainment::isLink($current)) {
+                return false;
             }
             $current = \dirname($current);
         }

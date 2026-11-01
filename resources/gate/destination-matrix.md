@@ -217,6 +217,7 @@
 | `Xoops\ModuleTools\Common\Output::localPath()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Output::metaDescription()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\Output::metaKeywords()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
+| `Xoops\ModuleTools\Common\Output::navigationTarget()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\Output::selectSorting()` | method | retain-compat (until-output-modeled) | not-applicable | `—` | not-applicable | 1 | `missing` |
 | `Xoops\ModuleTools\Common\PaginationState` | type | migrate-to-target (parity-blocked) | delegate-now | `Xmf\Pagination\PaginatedResult` | stable | 0 | `missing` |
 | `Xoops\ModuleTools\Common\PaginationState::__construct()` | method | migrate-to-target (parity-blocked) | delegate-now | `Xmf\Pagination\PaginatedResult` | stable | 0 | `missing` |

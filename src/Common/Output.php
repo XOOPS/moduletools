@@ -142,6 +142,15 @@ class Output
         return self::isLocalPath($fallback) ? $fallback : 'index.php';
     }
 
+    /**
+     * A link target that cannot run script: an http(s) URL or a local path (see localPath()),
+     * else $fallback. Escaping the href does not stop a "javascript:" destination; this does.
+     */
+    public static function navigationTarget(string $url, string $fallback = 'index.php'): string
+    {
+        return 1 === \preg_match('#^https?://#i', $url) ? $url : self::localPath($url, $fallback);
+    }
+
     private static function isLocalPath(string $path): bool
     {
         return '' !== $path

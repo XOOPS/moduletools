@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Admin;
 
+use Xoops\ModuleTools\Common\Output;
 use Xoops\ModuleTools\Internal\Presentation\ObjectValuePresenter;
 
 /**
@@ -195,7 +196,7 @@ class ObjectTable
         $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
         $html = '';
         foreach ($this->introButtons as $button) {
-            $html .= '<p><a class="btn btn-primary" href="' . $escape($button['location']) . '">' . $escape($button['value']) . '</a></p>';
+            $html .= '<p><a class="btn btn-primary" href="' . $escape(Output::navigationTarget($button['location'])) . '">' . $escape($button['value']) . '</a></p>';
         }
         $script = $escape(xoops_getenv('SCRIPT_NAME'));
         if ([] !== $this->filters && $this->showTools) {

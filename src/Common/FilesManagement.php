@@ -285,10 +285,76 @@ trait FilesManagement
             return false;
         }
         if (!\is_dir($from)) {
-            return @\copy($from, $to);
+            return self::copyRegularFile($from, $to);
         }
 
         return (@\mkdir($to, 0755) || \is_dir($to)) && self::copyEntries($from, $to);
+    }
+
+    /**
+     * ponytail: an ancestor directory swapped mid-copy is not covered (PHP has no openat() or
+     * O_NOFOLLOW); source trees must not be writable by lower-trust users while they are copied.
+     */
+    private static function copyRegularFile(string $from, string $to): bool
+    {
+        $in = self::openRegularFile($from);
+        if (false === $in) {
+            return false;
+        }
+        $ok = self::replaceWithStream($in, $to);
+        \fclose($in);
+
+        return $ok;
+    }
+
+    /**
+     * The link check and the open are separate calls, so a writer could swap the entry for a
+     * link in between: the opened handle must be the regular file lstat() saw (device + inode).
+     *
+     * @return resource|false
+     */
+    private static function openRegularFile(string $path)
+    {
+        $checked = @\lstat($path);
+        if (false === $checked || 0o100000 !== ($checked['mode'] & 0o170000) || false === ($in = @\fopen($path, 'rb'))) {
+            return false;
+        }
+        $opened = \fstat($in);
+        if (false !== $opened && $opened['dev'] === $checked['dev'] && $opened['ino'] === $checked['ino']) {
+            return $in;
+        }
+        \fclose($in);
+
+        return false;
+    }
+
+    /**
+     * The copy goes to a new, randomly named file beside the destination ("x" never follows a
+     * link) and is renamed over it only once complete, so a failed copy leaves the old file intact
+     * and rename() replaces a link planted at the destination instead of writing through it.
+     * A replaced regular file's read/write bits carry over (execute bits, owner and group do not).
+     *
+     * @param resource $in
+     */
+    private static function replaceWithStream($in, string $to): bool
+    {
+        $replaced = @\lstat($to); // the entry itself: a link's own mode, never its target's
+        $mode     = false !== $replaced && 0o100000 === ($replaced['mode'] & 0o170000) ? $replaced['mode'] & 0o777 : null;
+        $tmp      = \dirname($to) . '/.mt' . \bin2hex(\random_bytes(8)) . '.tmp';
+        $out      = @\fopen($tmp, 'xb');
+        if (false === $out) {
+            return false;
+        }
+        // Restricted while still empty, so the data is never readable under the default mode. The name
+        // is unguessable: only a writer of the destination directory (who could replace the destination
+        // anyway) could swap it for a link before this chmod().
+        $copied = (null === $mode || @\chmod($tmp, $mode)) && false !== \stream_copy_to_stream($in, $out);
+        $ok     = \fclose($out) && $copied && @\rename($tmp, $to);
+        if (!$ok) {
+            @\unlink($tmp);
+        }
+
+        return $ok;
     }
 
     private static function isSafeFilesystemPath(string $path): bool

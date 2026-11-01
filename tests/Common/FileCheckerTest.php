@@ -31,6 +31,29 @@ final class FileCheckerTest extends TestCase
         }
     }
 
+    public function testADanglingDestinationLinkIsNotApprovedThroughItsParent(): void
+    {
+        $base    = sys_get_temp_dir() . '/fc-link-' . uniqid('', true);
+        $outside = sys_get_temp_dir() . '/fc-link-target-' . uniqid('', true) . '.txt';
+        mkdir($base);
+        file_put_contents($base . '/source.txt', 'x');
+        if (!@symlink($outside, $base . '/dangling.txt')) {
+            unlink($base . '/source.txt');
+            rmdir($base);
+            self::markTestSkipped('symlink() is not permitted here');
+        }
+
+        try {
+            self::assertFalse(FileChecker::copyFile($base . '/source.txt', $base . '/dangling.txt', $base));
+            self::assertFileDoesNotExist($outside);
+        } finally {
+            @unlink($outside);
+            unlink($base . '/dangling.txt');
+            unlink($base . '/source.txt');
+            rmdir($base);
+        }
+    }
+
     public function testSetFilePermissionsRefusesADirectory(): void
     {
         $base = sys_get_temp_dir() . '/fc-dir-' . uniqid('', true);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xoops\ModuleTools\Common;
 
+use Xoops\ModuleTools\Internal\PngMetadata;
+
 /**
  * Pure GD image resizer — a {@see ResizeRequest} in, a {@see ResizeResult} out.
  *
@@ -25,6 +27,7 @@ final class Resizer implements ImageResizerInterface
 {
     // ponytail: fixed ~50 MP budget (fits 48 MP phone photos); make it a ResizeRequest field if a module needs more
     private const int MAX_PIXELS = 50_000_000;
+    private const string PNG_MIME = 'image/png';
 
     public function resize(ResizeRequest $request): ResizeResult
     {
@@ -54,6 +57,9 @@ final class Resizer implements ImageResizerInterface
         // JPEGs), so a small compressed file must not reach the decoder with huge dimensions.
         if ($info[0] < 1 || $info[1] < 1 || $info[0] * $info[1] > self::MAX_PIXELS || \max(1, $request->maxWidth) * \max(1, $request->maxHeight) > self::MAX_PIXELS) {
             return ResizeResult::failure($target, 'Image dimensions exceed the pixel budget: ' . $request->sourcePath);
+        }
+        if (self::PNG_MIME === $mime && !PngMetadata::isWithinBudget($request->sourcePath)) {
+            return ResizeResult::failure($target, 'PNG metadata exceeds the decoding budget: ' . $request->sourcePath);
         }
 
         $image = $this->createImage($request->sourcePath, $mime);
@@ -89,7 +95,7 @@ final class Resizer implements ImageResizerInterface
     private function createImage(string $path, string $mime): ?\GdImage
     {
         $image = match ($mime) {
-            'image/png'  => @\imagecreatefrompng($path),
+            self::PNG_MIME  => @\imagecreatefrompng($path),
             'image/jpeg' => @\imagecreatefromjpeg($path) ?: @\imagecreatefromstring((string) @\file_get_contents($path)),
             'image/gif'  => @\imagecreatefromgif($path),
             'image/webp' => \function_exists('imagecreatefromwebp') ? @\imagecreatefromwebp($path) : false,
@@ -177,7 +183,7 @@ final class Resizer implements ImageResizerInterface
     private function newCanvas(int $width, int $height, string $mime): \GdImage
     {
         $canvas = \imagecreatetruecolor(\max(1, $width), \max(1, $height));
-        if (\in_array($mime, ['image/png', 'image/gif', 'image/webp'], true)) {
+        if (\in_array($mime, [self::PNG_MIME, 'image/gif', 'image/webp'], true)) {
             \imagealphablending($canvas, false);
             \imagesavealpha($canvas, true);
             $transparent = \imagecolorallocatealpha($canvas, 0, 0, 0, 127);
@@ -194,7 +200,7 @@ final class Resizer implements ImageResizerInterface
         $quality = \max(0, \min(100, $quality));
 
         return match ($mime) {
-            'image/png'  => \imagepng($image, $path, $this->pngLevel($quality)),
+            self::PNG_MIME  => \imagepng($image, $path, $this->pngLevel($quality)),
             'image/jpeg' => \imagejpeg($image, $path, $quality),
             'image/gif'  => \imagegif($image, $path),
             'image/webp' => \function_exists('imagewebp') && \imagewebp($image, $path, $quality),

@@ -4207,6 +4207,31 @@
                     "throws": [],
                     "documented_false_or_null": false
                 },
+                "navigationTarget": {
+                    "static": true,
+                    "by_ref": false,
+                    "parameters": [
+                        {
+                            "name": "url",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": false,
+                            "default": null
+                        },
+                        {
+                            "name": "fallback",
+                            "type": "string",
+                            "by_ref": false,
+                            "variadic": false,
+                            "has_default": true,
+                            "default": "'index.php'"
+                        }
+                    ],
+                    "return_type": "string",
+                    "throws": [],
+                    "documented_false_or_null": false
+                },
                 "selectSorting": {
                     "static": true,
                     "by_ref": false,
