@@ -43,6 +43,17 @@ final class TextTest extends TestCase
         self::assertSame('<b><i>ab</i>c</b>', Text::truncateHtml('<b><i>ab</i>cdef</b>', 3, '', true));
     }
 
+    public function testEmptyElementsAreNotClosedAndOtherTagsAre(): void
+    {
+        // Void and self-closing tags stay open-free; look-alike names are ordinary opening tags.
+        self::assertSame('<br><img src="a.png"><x/><hr />ab', Text::truncateHtml('<br><img src="a.png"><x/><hr />abcdef', 2, '', true));
+        self::assertSame("<IMG\tsrc=a>< br ><wbr><source src=a>ab", Text::truncateHtml("<IMG\tsrc=a>< br ><wbr><source src=a>abcdef", 2, '', true));
+        self::assertSame('<imgx><img-x>ab</img-x></imgx>', Text::truncateHtml('<imgx><img-x>abcdef', 2, '', true));
+        // Long whitespace runs made the old classifier regex backtrack quadratically per tag.
+        $tag = '<' . str_repeat(' ', 1_500) . 'b>';
+        self::assertSame(str_repeat($tag, 50) . 'ab' . str_repeat('</b>', 50), Text::truncateHtml(str_repeat($tag, 50) . 'abcdef', 2, '', true));
+    }
+
     public function testATagFloodFallsBackToAPlainTextExcerpt(): void
     {
         // Tags cost no visible characters; this input made the old array_unshift walk quadratic.

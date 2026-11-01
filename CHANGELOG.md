@@ -66,6 +66,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   iteratively; each level re-validated the whole remaining ancestry before.
 - `Common\Text::truncateHtml()` counts each span between entities once instead of re-measuring the
   whole prefix per entity (quadratic on entity-heavy input).
+- `Common\Text::truncateHtml()` classifies void and self-closing tags with string checks instead of a
+  regex that backtracked quadratically on long whitespace runs (a 2.8 MB excerpt took 1.3 s, 22 s
+  without PCRE JIT). `< br >` is no longer closed with `</br>`, and the HTML5 void elements `embed`,
+  `source`, `track` and `wbr` are recognised.
 - `FileChecker::copyFile()` and `setFilePermissions()` refuse a path through a dangling link: its
   existing parent was checked against the base while the write followed the link outside it.
 - The recursive copies open each file once and require the handle to be the regular file that was
