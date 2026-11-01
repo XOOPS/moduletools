@@ -73,8 +73,9 @@ final class Text implements TextInterface
             // Block boundaries become spaces so paragraphs do not run together; entities are
             // decoded so each counts as one character and is never cut, then the excerpt is re-escaped.
             // Possessive, so a long attribute cannot exhaust the PCRE stack; if PCRE fails anyway,
-            // the tags are still stripped, only without the block spacing.
-            $spaced = \preg_replace('#<(?:br|/?(?:p|div|li|h[1-6]|tr|td|th|blockquote|ul|ol|table|section|article|header|footer))\b(?:[^>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i', ' ', $text);
+            // the tags are still stripped, only without the block spacing. An unquoted "<" ends the
+            // candidate, so a failed attempt never rescans the next one ("<p <p <p ..." was quadratic).
+            $spaced = \preg_replace('#<(?:br|/?(?:p|div|li|h[1-6]|tr|td|th|blockquote|ul|ol|table|section|article|header|footer))\b(?:[^<>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i', ' ', $text);
             $plain = \strip_tags($spaced ?? $text);
             // Scrubbed first: a /u regex on malformed UTF-8 returns null and the excerpt would be empty.
             $plain = \mb_scrub(\html_entity_decode($plain, \ENT_QUOTES | \ENT_HTML5 | \ENT_SUBSTITUTE, self::ENCODING), self::ENCODING);
