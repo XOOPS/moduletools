@@ -30,6 +30,7 @@ final class Text implements TextInterface
     // ponytail: past this many tags an excerpt falls back to plain text; raise it if real content needs more
     private const int MAX_HTML_TAGS = 2000;
     private const string ENCODING = 'UTF-8';
+    private const array BLOCK_TAGS = ['br', 'hr', 'p', 'div', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'tr', 'td', 'th', 'blockquote', 'ul', 'ol', 'table', 'section', 'article', 'header', 'footer'];
     private const array VOID_TAGS = ['img', 'br', 'input', 'hr', 'area', 'base', 'basefont', 'col', 'frame', 'isindex', 'link', 'meta', 'param', 'embed', 'source', 'track', 'wbr'];
 
     /**
@@ -75,7 +76,11 @@ final class Text implements TextInterface
             // Possessive, so a long attribute cannot exhaust the PCRE stack; if PCRE fails anyway,
             // the tags are still stripped, only without the block spacing. An unquoted "<" ends the
             // candidate, so a failed attempt never rescans the next one ("<p <p <p ..." was quadratic).
-            $spaced = \preg_replace('#<(?:br|/?(?:p|div|li|h[1-6]|tr|td|th|blockquote|ul|ol|table|section|article|header|footer))\b(?:[^<>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i', ' ', $text);
+            $spaced = \preg_replace_callback(
+                '#</?([a-z][a-z0-9]*+)(?:[^<>"\']++|"[^"]*+"|\'[^\']*+\')*+>#i',
+                static fn (array $tag): string => \in_array(\strtolower($tag[1]), self::BLOCK_TAGS, true) ? ' ' : $tag[0],
+                $text
+            );
             $plain = \strip_tags($spaced ?? $text);
             // Scrubbed first: a /u regex on malformed UTF-8 returns null and the excerpt would be empty.
             $plain = \mb_scrub(\html_entity_decode($plain, \ENT_QUOTES | \ENT_HTML5 | \ENT_SUBSTITUTE, self::ENCODING), self::ENCODING);
