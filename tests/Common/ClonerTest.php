@@ -203,6 +203,52 @@ final class ClonerTest extends TestCase
         }
     }
 
+    #[Test]
+    public function onlyAWebmasterClonesThroughTheAdminHandlerEvenWithAValidToken(): void
+    {
+        defined('XOOPS_URL') || define('XOOPS_URL', 'http://localhost');
+        defined('XOOPS_GROUP_ADMIN') || define('XOOPS_GROUP_ADMIN', '1');
+        $helper = new class ($this->root) extends \Xmf\Module\Helper {
+            public function __construct(private readonly string $root)
+            {
+                $this->dirname = 'quotes';
+            }
+
+            public function path($path = '')
+            {
+                return $this->root . '/quotes/' . $path;
+            }
+        };
+        $_POST = ['op' => 'submit', 'clone' => 'sayings'];
+        $GLOBALS['xoopsSecurity'] = new class {
+            public function check(): bool
+            {
+                return true;
+            }
+        };
+
+        try {
+            // isAdmin() is true for the CURRENT module's admin; a new module tree needs a webmaster.
+            foreach ([null, new \XoopsUser(false), new \XoopsUser(true, ['2', '4'])] as $user) {
+                $GLOBALS['xoopsUser'] = $user;
+                try {
+                    Cloner::handleAdminRequest($helper);
+                    self::fail('a non-webmaster must be refused');
+                } catch (\RuntimeException $e) {
+                    self::assertStringContainsString('Permission denied', $e->getMessage());
+                }
+                self::assertDirectoryDoesNotExist($this->root . '/sayings');
+            }
+
+            $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['2', '1']);
+            Cloner::handleAdminRequest($helper);
+            self::assertFileExists($this->root . '/sayings/class/SayingsHandler.php');
+        } finally {
+            $_POST = [];
+            unset($GLOBALS['xoopsUser'], $GLOBALS['xoopsSecurity']);
+        }
+    }
+
     private function rmdir(string $dir): void
     {
         foreach (array_diff(scandir($dir) ?: [], ['.', '..']) as $entry) {
