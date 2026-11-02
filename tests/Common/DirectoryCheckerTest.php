@@ -8,6 +8,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Xoops\ModuleTools\Common\DirectoryChecker;
 
+defined('XOOPS_GROUP_ADMIN') || define('XOOPS_GROUP_ADMIN', '1');
+
 #[CoversClass(DirectoryChecker::class)]
 final class DirectoryCheckerTest extends TestCase
 {
@@ -58,7 +60,7 @@ final class DirectoryCheckerTest extends TestCase
         $target = $this->uploadPath() . '/dc-csrf-' . uniqid('', true);
         $_POST  = ['op' => 'mtools_createdir', 'path' => $target, 'mode' => '0755'];
         unset($GLOBALS['xoopsSecurity']);
-        $GLOBALS['xoopsUser'] = new \XoopsUser(true);
+        $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['2', '1']); // a webmaster
 
         try {
             DirectoryChecker::handleRequest('/admin/index.php');
@@ -92,6 +94,46 @@ final class DirectoryCheckerTest extends TestCase
         unset($GLOBALS['xoopsUser']);
 
         self::assertDirectoryDoesNotExist($target);
+    }
+
+    public function testOnlyAWebmasterActsEvenWithAValidToken(): void
+    {
+        $target = $this->uploadPath() . '/dc-scope-' . uniqid('', true);
+        $_POST  = ['op' => 'mtools_createdir', 'path' => $target, 'mode' => '0755'];
+        $GLOBALS['xoopsSecurity'] = new class {
+            public function check(): bool
+            {
+                return true;
+            }
+        };
+
+        try {
+            // isAdmin() is true for the CURRENT module's admin; that is not a webmaster. A
+            // caller-chosen base does not help: the shared upload root holds other modules' dirs.
+            $GLOBALS['xoopsUser'] = new \XoopsUser(true, ['2', '4']);
+            foreach ([null, $this->uploadPath()] as $base) {
+                try {
+                    DirectoryChecker::handleRequest('/admin/index.php', $base);
+                    self::fail('a module admin must be refused');
+                } catch (\RuntimeException $e) {
+                    self::assertStringContainsString('Permission denied', $e->getMessage());
+                }
+            }
+            self::assertDirectoryDoesNotExist($target);
+
+            $GLOBALS['xoopsUser'] = new \XoopsUser(false, ['2', '1']);
+            try {
+                DirectoryChecker::handleRequest('/admin/index.php');
+                self::fail('handleRequest() redirects after acting');
+            } catch (\RuntimeException $e) {
+                self::assertStringNotContainsString('Permission denied', $e->getMessage());
+            }
+            self::assertDirectoryExists($target);
+        } finally {
+            $_POST = [];
+            unset($GLOBALS['xoopsUser'], $GLOBALS['xoopsSecurity']);
+            @rmdir($target);
+        }
     }
 
     public function testExplicitBaseRejectsTraversalInANonExistentTail(): void

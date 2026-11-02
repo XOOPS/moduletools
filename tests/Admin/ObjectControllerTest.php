@@ -22,8 +22,13 @@ defined('XOBJ_DTYPE_IMAGE') || define('XOBJ_DTYPE_IMAGE', 205);
 #[CoversClass(ObjectController::class)]
 final class ObjectControllerTest extends TestCase
 {
+    /** @var list<string> */
+    private static array $tempFiles = [];
+
     protected function tearDown(): void
     {
+        array_map(static fn (string $f): bool => @unlink($f), self::$tempFiles);
+        self::$tempFiles = [];
         $_POST = [];
         $_FILES = [];
         unset($_SERVER['REQUEST_METHOD'], $GLOBALS['xoopsSecurity']);
@@ -226,11 +231,16 @@ final class ObjectControllerTest extends TestCase
         self::assertSame(['image: this field does not accept uploads.'], $object->errors);
     }
 
-    /** A real 1x1 PNG, as an upload's temporary file. */
+    /**
+     * A real 1x1 PNG, as an upload's temporary file. tempnam() creates it exclusively under a
+     * fresh name, so a planted link at a fixed name cannot redirect the write.
+     */
     private static function png(): string
     {
-        $path = sys_get_temp_dir() . '/moduletools-test-1x1.png';
-        file_put_contents($path, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='));
+        $path = tempnam(sys_get_temp_dir(), 'mtpng');
+        self::assertIsString($path);
+        self::$tempFiles[] = $path;
+        self::assertNotFalse(file_put_contents($path, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')));
 
         return $path;
     }

@@ -18,6 +18,7 @@ namespace Xoops\ModuleTools\Common;
 
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\ModuleTools\Internal\PathContainment;
+use Xoops\ModuleTools\Internal\Webmaster;
 
 /**
  * Filesystem convenience methods mixed into {@see SysUtility}.
@@ -143,7 +144,7 @@ trait FilesManagement
             return false;
         }
 
-        if (!self::isGlobalAdmin()) {
+        if (!Webmaster::isCurrentUser()) {
             return false;
         }
 
@@ -165,7 +166,7 @@ trait FilesManagement
             return false;
         }
 
-        if (!self::isGlobalAdmin()) {
+        if (!Webmaster::isCurrentUser()) {
             return false;
         }
 
@@ -191,7 +192,7 @@ trait FilesManagement
             return false;
         }
 
-        if (!self::isGlobalAdmin()) {
+        if (!Webmaster::isCurrentUser()) {
             return false;
         }
 
@@ -221,7 +222,7 @@ trait FilesManagement
             return false;
         }
 
-        if (!self::isGlobalAdmin()) {
+        if (!Webmaster::isCurrentUser()) {
             return false;
         }
 
@@ -363,26 +364,5 @@ trait FilesManagement
             && !str_contains($path, "\0")
             && !str_contains($path, '://')
             && !str_contains($path, '..');
-    }
-
-    /**
-     * Recursive delete/move/copy on arbitrary paths is a webmaster action. XoopsUser::isAdmin()
-     * without an id tests the CURRENT module, so a module-only admin would pass it.
-     */
-    private static function isGlobalAdmin(): bool
-    {
-        $user = self::runtimeUser();
-        if (!$user instanceof \XoopsUser || !\defined('XOOPS_GROUP_ADMIN')) {
-            return false;
-        }
-        $groups = $user->getGroups();
-
-        return \is_array($groups) && \in_array((int) \XOOPS_GROUP_ADMIN, \array_map(\intval(...), $groups), true);
-    }
-
-    /** @legacy-global-accessor */
-    private static function runtimeUser(): mixed
-    {
-        return $GLOBALS['xoopsUser'] ?? null;
     }
 }
