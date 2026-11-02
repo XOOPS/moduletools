@@ -48,9 +48,10 @@ Until it is announced, the period is open-ended and nothing is removed.
 
 ## Versioning
 
-ModuleTools 1.5.0 provides API 1.1.0. Consumers needing its added public surface
-must explicitly request `minimumApiVersion: '1.1.0'` in `ConsumerRuntime::guard()`.
-Existing consumers requiring API 1.0.0 remain supported.
+ModuleTools 1.6.0 provides API 1.2.0. Consumers needing its added public surface
+(such as `Common\Output::navigationTarget()`) must explicitly request
+`minimumApiVersion: '1.2.0'` in `ConsumerRuntime::guard()`.
+Existing consumers requiring API 1.0.0 or 1.1.0 remain supported.
 
 - **1.x** — XOOPS 2.8 line. Minor releases add; they do not remove. PHP floor: 8.4 since 1.5.0.
 - The library's `Bootstrap::API_VERSION` is the compatibility contract a module can assert
