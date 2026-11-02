@@ -16,6 +16,7 @@ use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
 use Xoops\ModuleTools\Internal\PathContainment;
 use Xoops\ModuleTools\Internal\PngMetadata;
+use Xoops\ModuleTools\Internal\Webmaster;
 
 /**
  * Clone a module directory under a new dirname, rewriting the old dirname in
@@ -189,10 +190,10 @@ final class Cloner
             return '<p>' . \_CO_MTOOLS_CLONE_DSC . '</p>' . $form->render();
         }
 
-        // Only an administrator may write a new module tree; the page normally sits behind
-        // cp_header(), but the shared handler must not depend on that.
-        $user = self::runtimeGlobal('xoopsUser');
-        if (!$user instanceof \XoopsUser || !$user->isAdmin()) {
+        // Only a webmaster may write a new module tree under modules/ (a module admin's rights
+        // stop at their own module); the page normally sits behind cp_header(), but the shared
+        // handler must not depend on that.
+        if (!Webmaster::isCurrentUser()) {
             \redirect_header('clone.php', 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
             exit;
         }

@@ -15,6 +15,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   token is missing, used or expired. A consumer `testdata/index.php` must not call
   `$xoopsSecurity->check()` before delegating: that consumes the one-time token and the library's
   own check then refuses every load, save and clear.
+- `Common\DirectoryChecker::handleRequest()` and `Common\Cloner` require a webmaster (Webmasters
+  group). `XoopsUser::isAdmin()` without an id only checks the current module, so a module admin
+  could create or chmod another module's directories, or write a new module tree. A base path the
+  page passes does not change this: a shared base such as `XOOPS_UPLOAD_PATH` holds every module.
 
 ### Fixed
 - `Common\TestdataButtons` appends the token with a raw `&`: `ModuleAdmin::renderButton()` escapes the

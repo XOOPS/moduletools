@@ -19,6 +19,7 @@ namespace Xoops\ModuleTools\Common;
 use Xoops\Helpers\Utility\Filesystem;
 use Xoops\Helpers\Utility\HtmlBuilder;
 use Xoops\ModuleTools\Internal\PackageLanguage;
+use Xoops\ModuleTools\Internal\Webmaster;
 
 /**
  * Class DirectoryChecker
@@ -100,9 +101,10 @@ class DirectoryChecker
         $mode         = (int)\octdec((string)($_POST['mode'] ?? '0755'));
         $redirectFile = self::safeRedirect($redirectFile);
 
-        // Only an administrator may create directories or change modes on the server.
-        $user = self::runtimeGlobal('xoopsUser');
-        if (!$user instanceof \XoopsUser || !$user->isAdmin()) {
+        // Only a webmaster may create directories or change modes on the server. A module admin is
+        // not enough even with a caller-chosen base: a shared base such as XOOPS_UPLOAD_PATH still
+        // holds every other module's directories.
+        if (!Webmaster::isCurrentUser()) {
             \redirect_header($redirectFile, 3, \defined('_NOPERM') ? \_NOPERM : 'Permission denied.');
             exit;
         }
