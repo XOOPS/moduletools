@@ -9,6 +9,11 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 1.7.1 is the first release with the changes below. The `v1.7.0` tag was first created on the
 1.6.0 commit and Packagist kept that copy, so 1.7.0 is withdrawn: do not require `1.7.0`.
 
+Known issue: the `v1.7.1` tag was created before this entry was merged, so its
+`Bootstrap::VERSION` still reports `1.7.0`. Check `Bootstrap::API_VERSION` (`1.2.0`) through
+`ConsumerRuntime::guard()` rather than a minimum module version of `1.7.1`. The next release
+corrects the constant.
+
 ### Changed
 - **Requires PHP 8.2+** (was 8.4), so XOOPS 2.7.x can bundle the library. Typed class constants,
   `new Foo()->bar()` without parentheses and `array_all()` are replaced by their PHP 8.2 forms.
