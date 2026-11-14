@@ -13,6 +13,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   replaced `array_all()` still stop at the first failure: `ItemPermission` stops adding groups,
   `FilesManagement` stops copying, and upload checks stop at the first rejected check.
 - Rector targets PHP 8.2, PHPStan analyses as PHP 8.2, and CI runs on PHP 8.2–8.5.
+- The README and guides name XOOPS 2.7.5+ as a bundling platform; the separate mTools module is
+  only needed on XOOPS 2.7.0–2.7.4.
 
 ## [1.6.0] — 2026-11-02
 
