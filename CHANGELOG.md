@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning where practical.
 
-## [1.7.0] — 2026-11-14
+## [1.7.1] — 2026-11-14
+
+1.7.1 is the first release with the changes below. The `v1.7.0` tag was first created on the
+1.6.0 commit and Packagist kept that copy, so 1.7.0 is withdrawn: do not require `1.7.0`.
 
 ### Changed
 - **Requires PHP 8.2+** (was 8.4), so XOOPS 2.7.x can bundle the library. Typed class constants,
