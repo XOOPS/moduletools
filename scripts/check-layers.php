@@ -25,7 +25,7 @@ foreach ($matrix['records'] as $record) {
     }
 }
 
-$parser = new ParserFactory()->createForNewestSupportedVersion();
+$parser = (new ParserFactory())->createForNewestSupportedVersion();
 $finder = new NodeFinder();
 $errors = [];
 $iterator = new RecursiveIteratorIterator(

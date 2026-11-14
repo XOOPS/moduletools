@@ -12,7 +12,7 @@ $autoload = is_file(dirname(__DIR__) . '/vendor/autoload.php')
 require $autoload;
 
 $packageRoot = dirname(__DIR__);
-$parser = new ParserFactory()->createForNewestSupportedVersion();
+$parser = (new ParserFactory())->createForNewestSupportedVersion();
 $errors = [];
 $count = 0;
 $iterator = new RecursiveIteratorIterator(

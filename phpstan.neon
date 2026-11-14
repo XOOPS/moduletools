@@ -1,10 +1,10 @@
-# PHPStan — xoops/moduletools (XOOPS 2.8 / PHP 8.4)
+# PHPStan — xoops/moduletools (XOOPS 2.7 / 2.8, PHP 8.2+)
 includes:
     - phpstan-baseline.neon
 
 parameters:
     level: 6
-    phpVersion: 80400
+    phpVersion: 80200
     paths:
         - src
     # XOOPS core classes are not composer-autoloadable during analysis; scanFiles

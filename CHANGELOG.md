@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning where practical.
 
+## [1.7.0] — 2026-11-14
+
+### Changed
+- **Requires PHP 8.2+** (was 8.4), so XOOPS 2.7.x can bundle the library. Typed class constants,
+  `new Foo()->bar()` without parentheses and `array_all()` are replaced by their PHP 8.2 forms.
+  Constant values, method signatures and the public API (still 1.2.0) are unchanged. Loops that
+  replaced `array_all()` still stop at the first failure: `ItemPermission` stops adding groups,
+  `FilesManagement` stops copying, and upload checks stop at the first rejected check.
+- Rector targets PHP 8.2, PHPStan analyses as PHP 8.2, and CI runs on PHP 8.2–8.5.
+- The README and guides name XOOPS 2.7.5+ as a bundling platform; the separate mTools module is
+  only needed on XOOPS 2.7.0–2.7.4.
+
 ## [1.6.0] — 2026-11-02
 
 ### Changed

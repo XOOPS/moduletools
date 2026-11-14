@@ -26,15 +26,15 @@ final class HighlighterTest extends TestCase
     #[Test]
     public function termsNeverMatchInsideEntitiesTheEscapingProduced(): void
     {
-        self::assertSame('a &amp; b', new Highlighter('amp')->highlight('a & b'));
-        self::assertSame('&quot;x&quot;', new Highlighter('quot')->highlight('"x"'));
-        self::assertSame('<mark class="moduletools-highlight">amp</mark> &amp; &lt;', new Highlighter('amp')->highlight('amp & <'));
+        self::assertSame('a &amp; b', (new Highlighter('amp'))->highlight('a & b'));
+        self::assertSame('&quot;x&quot;', (new Highlighter('quot'))->highlight('"x"'));
+        self::assertSame('<mark class="moduletools-highlight">amp</mark> &amp; &lt;', (new Highlighter('amp'))->highlight('amp & <'));
     }
 
     #[Test]
     public function longerTermsWinOverTheirOwnPrefixes(): void
     {
-        self::assertSame('<mark class="moduletools-highlight">abc</mark>', new Highlighter('ab abc')->highlight('abc'));
+        self::assertSame('<mark class="moduletools-highlight">abc</mark>', (new Highlighter('ab abc'))->highlight('abc'));
     }
 
     #[Test]

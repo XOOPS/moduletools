@@ -20,7 +20,7 @@ final class ObjectValuePresenterTest extends TestCase
 {
     private function object(): FakeObject
     {
-        return new FakeObject()
+        return (new FakeObject())
             ->addVar('title', XOBJ_DTYPE_TXTBOX, "O'Brien & <Sons>")
             ->addVar('body', XOBJ_DTYPE_TXTAREA, "line one\nline two")
             ->addVar('url', XOBJ_DTYPE_URL, "http://x' onfocus='alert(1)")

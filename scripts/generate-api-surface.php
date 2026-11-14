@@ -19,7 +19,7 @@ require $autoload;
 $packageRoot = dirname(__DIR__);
 $outputFile  = $packageRoot . '/resources/gate/api-surface.json';
 $checkOnly   = in_array('--check', $argv, true);
-$parser      = new ParserFactory()->createForNewestSupportedVersion();
+$parser      = (new ParserFactory())->createForNewestSupportedVersion();
 $printer     = new Standard();
 $finder      = new NodeFinder();
 $surface     = [
