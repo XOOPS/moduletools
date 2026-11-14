@@ -17,7 +17,7 @@ final class SingleViewTest extends TestCase
 {
     public function testAFieldHiddenFromSingleViewIsNotRenderedEvenWhenRegistered(): void
     {
-        $object = new FakeObject()
+        $object = (new FakeObject())
             ->addVar('title', XOBJ_DTYPE_TXTBOX, 'Visible title')
             ->addVar('secret', XOBJ_DTYPE_TXTBOX, 'hidden-value', ['displayOnSingleView' => false]);
         $view = new SingleView($object);

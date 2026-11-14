@@ -39,12 +39,12 @@ final class ObjectControllerTest extends TestCase
     {
         $handler = $this->storingHandler();
 
-        self::assertFalse(new ObjectController($handler)->storeSmartObject(userSide: true), 'no callback, not a DynamicObject');
-        self::assertFalse(new ObjectController($handler)->storeSmartObject(authorize: static fn (): bool => false, userSide: true));
+        self::assertFalse((new ObjectController($handler))->storeSmartObject(userSide: true), 'no callback, not a DynamicObject');
+        self::assertFalse((new ObjectController($handler))->storeSmartObject(authorize: static fn (): bool => false, userSide: true));
         self::assertSame(['create', 'create'], $handler->calls, 'nothing stored');
 
         $handler->calls = [];
-        self::assertInstanceOf(\XoopsObject::class, new ObjectController($handler)->storeSmartObject(authorize: static fn (): bool => true, userSide: true));
+        self::assertInstanceOf(\XoopsObject::class, (new ObjectController($handler))->storeSmartObject(authorize: static fn (): bool => true, userSide: true));
         self::assertSame(['create', 'insert'], $handler->calls, 'stored; the item permissions were not touched');
     }
 
@@ -53,7 +53,7 @@ final class ObjectControllerTest extends TestCase
     {
         $handler = $this->storingHandler();
 
-        self::assertInstanceOf(\XoopsObject::class, new ObjectController($handler)->storeSmartObject());
+        self::assertInstanceOf(\XoopsObject::class, (new ObjectController($handler))->storeSmartObject());
         self::assertSame(['create', 'insert', 'getModuleInfo'], $handler->calls);
     }
 
@@ -122,7 +122,7 @@ final class ObjectControllerTest extends TestCase
     #[Test]
     public function postDataSkipsHiddenReadOnlyAndNonPersistentFieldsAndArraysForScalars(): void
     {
-        $object = new FakeObject()
+        $object = (new FakeObject())
             ->addVar('title', XOBJ_DTYPE_TXTBOX, '')
             ->addVar('uid', XOBJ_DTYPE_INT, 1, ['displayOnForm' => false])
             ->addVar('counter', XOBJ_DTYPE_INT, 0, ['readonly' => true])
@@ -138,7 +138,7 @@ final class ObjectControllerTest extends TestCase
             'created' => ['date' => '2026-01-02', 'time' => '60'],
         ];
 
-        new ObjectController(new \XoopsPersistableObjectHandler())->postDataToObject($object);
+        (new ObjectController(new \XoopsPersistableObjectHandler()))->postDataToObject($object);
 
         self::assertSame(
             [['tags', ['a', 'b']], ['created', strtotime('2026-01-02') + 60]],
@@ -149,10 +149,10 @@ final class ObjectControllerTest extends TestCase
     #[Test]
     public function postDataWritesPlainScalars(): void
     {
-        $object = new FakeObject()->addVar('title', XOBJ_DTYPE_TXTBOX, '');
+        $object = (new FakeObject())->addVar('title', XOBJ_DTYPE_TXTBOX, '');
         $_POST = ['title' => 'Hello'];
 
-        new ObjectController(new \XoopsPersistableObjectHandler())->postDataToObject($object);
+        (new ObjectController(new \XoopsPersistableObjectHandler()))->postDataToObject($object);
 
         self::assertSame([['title', 'Hello']], $object->setCalls);
     }
@@ -160,7 +160,7 @@ final class ObjectControllerTest extends TestCase
     #[Test]
     public function uploadsReachOnlyWritableDeclaredUploadFields(): void
     {
-        $object = new FakeObject()
+        $object = (new FakeObject())
             ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
             ->addVar('logo', XOBJ_DTYPE_TXTBOX, 'old.png', ['custom_type' => XOBJ_DTYPE_IMAGE, 'readonly' => true])
             ->addVar('banner', XOBJ_DTYPE_TXTBOX, 'old.png', ['custom_type' => XOBJ_DTYPE_FILE, 'displayOnForm' => false])
@@ -194,7 +194,7 @@ final class ObjectControllerTest extends TestCase
         self::assertSame([['image', 'saved-upload_image']], $object->setCalls);
 
         // A file core would reject (size, dimensions, type) also stops the move of the accepted one.
-        $object = new FakeObject()
+        $object = (new FakeObject())
             ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
             ->addVar('photo', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
         $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'photo' => ['name' => 'evil.php']];
@@ -211,7 +211,7 @@ final class ObjectControllerTest extends TestCase
         self::assertSame(['photo: type not allowed'], $object->errors);
 
         // PNG bytes named .jpg: core moves it, then rejects and deletes it. Refused before any move.
-        $object = new FakeObject()
+        $object = (new FakeObject())
             ->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE])
             ->addVar('photo', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
         $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'photo' => ['name' => 'bad.jpg', 'tmp_name' => self::png()]];
@@ -222,7 +222,7 @@ final class ObjectControllerTest extends TestCase
         self::assertSame(['Suspicious image upload refused'], $object->errors);
 
         // Two files for one field ("image" and "upload_image") are refused, not resolved by order.
-        $object = new FakeObject()->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
+        $object = (new FakeObject())->addVar('image', XOBJ_DTYPE_TXTBOX, '', ['custom_type' => XOBJ_DTYPE_IMAGE]);
         $_FILES = ['image' => ['name' => 'a.png', 'tmp_name' => self::png()], 'upload_image' => ['name' => 'b.png']];
         \XoopsMediaUploader::$uploaded = [];
         self::receiveUploads($object);
@@ -253,6 +253,6 @@ final class ObjectControllerTest extends TestCase
                 return sys_get_temp_dir();
             }
         };
-        new \ReflectionMethod(ObjectController::class, 'receiveUploads')->invoke(new ObjectController($handler), $object);
+        (new \ReflectionMethod(ObjectController::class, 'receiveUploads'))->invoke(new ObjectController($handler), $object);
     }
 }

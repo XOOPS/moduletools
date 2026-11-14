@@ -14,7 +14,7 @@ final class SemanticServicesTest extends TestCase
 {
     public function testConfirmationResolverReturnsDataWithoutRendering(): void
     {
-        $model = new ConfirmationResolver()->resolve(
+        $model = (new ConfirmationResolver())->resolve(
             hiddens: ['id' => 42],
             action: '',
             requestUri: '/delete.php?id=42',
@@ -32,7 +32,7 @@ final class SemanticServicesTest extends TestCase
 
     public function testSortBuilderReturnsSemanticLinksAndSelection(): void
     {
-        $model = new SortControlBuilder()->build('/items', '/items.php', 20, 'asc', 'title', 'title');
+        $model = (new SortControlBuilder())->build('/items', '/items.php', 20, 'asc', 'title', 'title');
 
         self::assertSame('/items', $model->formAction);
         self::assertSame('/items.php?start=20&sort=title&order=asc', $model->ascendingUrl);

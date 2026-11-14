@@ -35,7 +35,7 @@ final class ResizerTest extends TestCase
         memory_reset_peak_usage();
         $before = memory_get_peak_usage();
 
-        $result = new Resizer()->resize(new ResizeRequest($source, $this->dir . '/out.png', 200, 200, ResizeRequest::FIT_COVER));
+        $result = (new Resizer())->resize(new ResizeRequest($source, $this->dir . '/out.png', 200, 200, ResizeRequest::FIT_COVER));
 
         self::assertTrue($result->ok, (string) $result->error);
         self::assertSame([200, 200], [$result->width, $result->height]);
@@ -50,7 +50,7 @@ final class ResizerTest extends TestCase
         imagefilledrectangle($image, 0, 0, 99, 199, (int) imagecolorallocate($image, 0, 0, 255));
         imagepng($image, $source = $this->dir . '/wide.png');
 
-        $result = new Resizer()->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 100, 100, ResizeRequest::FIT_COVER));
+        $result = (new Resizer())->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 100, 100, ResizeRequest::FIT_COVER));
 
         self::assertSame([100, 100], [$result->width, $result->height]);
         $out = imagecreatefrompng($target);
@@ -68,7 +68,7 @@ final class ResizerTest extends TestCase
         imagesetpixel($image, 0, 1, (int) imagecolorallocate($image, 0, 0, 255));
         imagepng($image, $source = $this->dir . '/tiny.png');
 
-        new Resizer()->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 200, 100, ResizeRequest::FIT_COVER));
+        (new Resizer())->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 200, 100, ResizeRequest::FIT_COVER));
 
         $out = imagecreatefrompng($target);
         self::assertInstanceOf(\GdImage::class, $out);
@@ -85,7 +85,7 @@ final class ResizerTest extends TestCase
         imagefilledrectangle($image, 50, 0, 99, 99, (int) imagecolorallocate($image, 255, 0, 0));
         imagepng($image, $source = $this->dir . '/halves.png');
 
-        new Resizer()->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 1, 2, ResizeRequest::FIT_COVER));
+        (new Resizer())->resize(new ResizeRequest($source, $target = $this->dir . '/out.png', 1, 2, ResizeRequest::FIT_COVER));
         $out = imagecreatefrompng($target);
         self::assertInstanceOf(\GdImage::class, $out);
         $red = imagecolorsforindex($out, imagecolorat($out, 0, 0))['red'];
@@ -95,7 +95,7 @@ final class ResizerTest extends TestCase
         // 1 x 1 into 10000 x 1 would need a 10000 x 10000 intermediate (~400 MB) for sub-pixel centring.
         memory_reset_peak_usage();
         $before = memory_get_peak_usage();
-        $result = new Resizer()->resize(new ResizeRequest($this->png(1, 1), $this->dir . '/wide.png', 10_000, 1, ResizeRequest::FIT_COVER));
+        $result = (new Resizer())->resize(new ResizeRequest($this->png(1, 1), $this->dir . '/wide.png', 10_000, 1, ResizeRequest::FIT_COVER));
         self::assertSame([10_000, 1], [$result->width, $result->height]);
         self::assertLessThan(16 * 1024 * 1024, memory_get_peak_usage() - $before);
     }
@@ -105,7 +105,7 @@ final class ResizerTest extends TestCase
         // Rendering clamps each edge to 1, so 2147483648 x 0 is a 2147483648 x 1 canvas.
         $source = $this->png(10, 10);
         foreach ([[2_147_483_648, 0], [2_147_483_648, -1], [0, 2_147_483_648]] as [$w, $h]) {
-            $result = new Resizer()->resize(new ResizeRequest($source, $this->dir . '/out.png', $w, $h));
+            $result = (new Resizer())->resize(new ResizeRequest($source, $this->dir . '/out.png', $w, $h));
 
             self::assertFalse($result->ok, "{$w}x{$h}");
             self::assertStringContainsString('pixel budget', (string) $result->error);
@@ -120,7 +120,7 @@ final class ResizerTest extends TestCase
         $source = $this->dir . '/bomb.png';
         file_put_contents($source, "\x89PNG\r\n\x1a\n" . $chunk('IHDR', $ihdr) . $chunk('IEND', ''));
 
-        $result = new Resizer()->resize(new ResizeRequest($source, $this->dir . '/out.png', 100, 100));
+        $result = (new Resizer())->resize(new ResizeRequest($source, $this->dir . '/out.png', 100, 100));
 
         self::assertFalse($result->ok);
         self::assertStringContainsString('pixel budget', (string) $result->error);
@@ -132,11 +132,11 @@ final class ResizerTest extends TestCase
         $source = $this->dir . '/movie.swf';
         file_put_contents($source, 'CWS' . chr(10) . pack('V', 1_000_000_000) . gzcompress(str_repeat("\0", 1024)));
 
-        $result = new Resizer()->resize(new ResizeRequest($source, $this->dir . '/out.png', 100, 100));
+        $result = (new Resizer())->resize(new ResizeRequest($source, $this->dir . '/out.png', 100, 100));
 
         self::assertFalse($result->ok);
         self::assertStringContainsString('Unsupported image format', (string) $result->error);
-        self::assertTrue(new Resizer()->resize(new ResizeRequest($this->png(4, 4), $this->dir . '/ok.png', 2, 2))->ok);
+        self::assertTrue((new Resizer())->resize(new ResizeRequest($this->png(4, 4), $this->dir . '/ok.png', 2, 2))->ok);
     }
 
     public function testCompressedPngMetadataBeyondTheBudgetIsRefusedBeforeDecoding(): void
@@ -150,7 +150,7 @@ final class ResizerTest extends TestCase
 
         $bomb = $this->dir . '/ztxt.png';
         file_put_contents($bomb, substr($png, 0, 8) . $ihdr . $chunk('zTXt', "a\0\0" . $noise) . $chunk('zTXt', "b\0\0" . $noise) . $rest);
-        $result = new Resizer()->resize(new ResizeRequest($bomb, $this->dir . '/out.png', 2, 2));
+        $result = (new Resizer())->resize(new ResizeRequest($bomb, $this->dir . '/out.png', 2, 2));
         self::assertFalse($result->ok);
         self::assertStringContainsString('PNG metadata', (string) $result->error);
 
@@ -162,7 +162,7 @@ final class ResizerTest extends TestCase
         foreach ($refused as $name => $metadata) {
             $path = "{$this->dir}/{$name}.png";
             file_put_contents($path, substr($png, 0, 8) . $ihdr . $metadata . $rest);
-            $result = new Resizer()->resize(new ResizeRequest($path, $this->dir . '/out.png', 2, 2));
+            $result = (new Resizer())->resize(new ResizeRequest($path, $this->dir . '/out.png', 2, 2));
             self::assertFalse($result->ok, $name);
             self::assertStringContainsString('PNG metadata', (string) $result->error, $name);
         }
@@ -170,16 +170,16 @@ final class ResizerTest extends TestCase
         // A file cut off before IEND is refused: a declared length past EOF must not end the walk "clean".
         $truncated = $this->dir . '/truncated.png';
         file_put_contents($truncated, substr($png, 0, 8) . $ihdr . pack('N', 100) . 'tEXt');
-        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+        self::assertFalse((new Resizer())->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
         file_put_contents($truncated, substr($png, 0, -4)); // IEND without its CRC
-        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+        self::assertFalse((new Resizer())->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
         file_put_contents($truncated, substr($png, 0, -4) . "\0\0\0\0"); // IEND with a wrong CRC
-        self::assertFalse(new Resizer()->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
+        self::assertFalse((new Resizer())->resize(new ResizeRequest($truncated, $this->dir . '/out.png', 2, 2))->ok);
 
         // Uncompressed iTXt (XMP) is not inflated, so its size does not count.
         $xmp = $this->dir . '/itxt.png';
         file_put_contents($xmp, substr($png, 0, 8) . $ihdr . $chunk('iTXt', "XML:com.adobe.xmp\0\0\0\0\0" . str_repeat('x', 100_000)) . $rest);
-        self::assertTrue(new Resizer()->resize(new ResizeRequest($xmp, $this->dir . '/xmp.png', 2, 2))->ok);
+        self::assertTrue((new Resizer())->resize(new ResizeRequest($xmp, $this->dir . '/xmp.png', 2, 2))->ok);
     }
 
     private function png(int $width, int $height): string

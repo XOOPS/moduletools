@@ -70,19 +70,19 @@ CREATE TABLE `b_items` (
 ) AUTO_INCREMENT=1;
 SQL;
 
-        $tables = new ConsumerBridgeGenerator()->parseSql($sql);
+        $tables = (new ConsumerBridgeGenerator())->parseSql($sql);
 
         self::assertSame(['a_items', 'b_items'], array_keys($tables));
         self::assertSame(['id', 'title'], array_keys($tables['a_items']['columns']));
         self::assertFalse($tables['a_items']['columns']['id']['nullable'], 'a primary key is never nullable');
         self::assertSame(['bid'], $tables['b_items']['primaryKey']);
-        self::assertSame(['a_items', 'b_items'], array_keys(new ConsumerBridgeGenerator()->eligibleTables($tables)));
+        self::assertSame(['a_items', 'b_items'], array_keys((new ConsumerBridgeGenerator())->eligibleTables($tables)));
     }
 
     public function testRefusesModuleNamesThatAreNotIdentifiers(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new ConsumerBridgeGenerator()->generate(sys_get_temp_dir() . '/never-created', "x'); system('id'); //", 'Ok', [], []);
+        (new ConsumerBridgeGenerator())->generate(sys_get_temp_dir() . '/never-created', "x'); system('id'); //", 'Ok', [], []);
     }
 
     public function testGeneratesAnExactRoundTripManifest(): void

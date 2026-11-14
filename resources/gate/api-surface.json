@@ -1176,24 +1176,24 @@
             "implements": [],
             "constants": {
                 "API_VERSION": {
-                    "type": "string",
+                    "type": null,
                     "value": "'1.2.0'"
                 },
                 "MIN_MODULE_VERSION": {
-                    "type": "string",
+                    "type": null,
                     "value": "'1.1.0'"
                 },
                 "MODULE_DIRNAME": {
-                    "type": "string",
+                    "type": null,
                     "value": "'mtools'"
                 },
                 "PACKAGE": {
-                    "type": "string",
+                    "type": null,
                     "value": "'xoops/moduletools'"
                 },
                 "VERSION": {
-                    "type": "string",
-                    "value": "'1.6.0'"
+                    "type": null,
+                    "value": "'1.7.0'"
                 }
             },
             "properties": [],
@@ -4825,15 +4825,15 @@
             "implements": [],
             "constants": {
                 "FIT_COVER": {
-                    "type": "string",
+                    "type": null,
                     "value": "'cover'"
                 },
                 "FIT_INSIDE": {
-                    "type": "string",
+                    "type": null,
                     "value": "'inside'"
                 },
                 "FIT_STRETCH": {
-                    "type": "string",
+                    "type": null,
                     "value": "'stretch'"
                 }
             },
@@ -5173,7 +5173,7 @@
             "implements": [],
             "constants": {
                 "DEFAULT_NETWORKS": {
-                    "type": "array",
+                    "type": null,
                     "value": "['x', 'facebook', 'linkedin', 'whatsapp', 'email', 'copy']"
                 }
             },
