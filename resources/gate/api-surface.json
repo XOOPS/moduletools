@@ -1193,7 +1193,7 @@
                 },
                 "VERSION": {
                     "type": null,
-                    "value": "'1.7.0'"
+                    "value": "'1.7.1'"
                 }
             },
             "properties": [],

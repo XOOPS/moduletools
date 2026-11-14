@@ -49,7 +49,7 @@ final class BootstrapTest extends TestCase
         $status = Bootstrap::checkRuntime('1.0.0', '1.2.0');
 
         self::assertTrue($status['ok']);
-        self::assertSame('1.7.0', $status['module_version']);
+        self::assertSame('1.7.1', $status['module_version']);
     }
 
     public function testLegacyBootstrapConstantsRemainAvailable(): void
