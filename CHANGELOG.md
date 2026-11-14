@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning where practical.
 
+## [Unreleased]
+
+### Changed
+- **Requires `xoops/helpers` ^1.1 and `xoops/xmf` ^1.3.4** (were ^1.0 and ^1.3), so Composer can
+  no longer install the older releases without their security fixes. With helpers 1.0,
+  `Filesystem::deleteDirectory()` emptied the target of a linked root, and `Cloner` and
+  `FilesManagement` delete through it. Until XMF 1.3.4 final is out, the project must allow RC
+  stability for `xoops/xmf` (for example `"xoops/xmf": "^1.3.4@RC"`), as XOOPS 2.7.5 does.
+
 ## [1.7.1] — 2026-11-14
 
 1.7.1 is the first release with the changes below. The `v1.7.0` tag was first created on the
