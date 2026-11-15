@@ -12,6 +12,9 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   `Filesystem::deleteDirectory()` emptied the target of a linked root, and `Cloner` and
   `FilesManagement` delete through it. XMF 1.3.2 fixes `FilterInput` (GHSA-8j4x-8r8r-5jgw,
   GHSA-pf53-59r5-mhjv) and 1.3.3 fixes `proxy_env` IP spoofing.
+- `ConsumerBridgeGenerator` adds a comment to each generated file that imports `Xmf\Bridge`
+  (`*Schema`, `Bridged*Handler`, `SqlBridgeRepository`) saying it requires `xoops/xmf` ^2.0.
+  ModuleTools itself still runs on XMF 1.3.
 
 ## [1.7.1] — 2026-11-14
 

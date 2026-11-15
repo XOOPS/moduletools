@@ -131,6 +131,12 @@ SQL;
             self::assertStringContainsString("in_array(\$order, ['ASC', 'DESC'], true)", $repository);
             self::assertStringNotContainsString('$criteria->sort, $criteria->order)', $repository);
 
+            foreach (['SampleItemsSchema', 'BridgedSampleItemsHandler', 'SqlBridgeRepository'] as $bridgeFile) {
+                $source = file_get_contents($root . '/class/Modern/' . $bridgeFile . '.php');
+                self::assertIsString($source);
+                self::assertStringContainsString('// Requires xoops/xmf ^2.0 (Xmf\\Bridge)', $source, $bridgeFile);
+            }
+
             $manifest = file_get_contents($root . '/class/Modern/BridgeManifest.php');
             self::assertIsString($manifest);
             self::assertStringContainsString("'rows' =>", $manifest);
