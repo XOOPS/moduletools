@@ -360,7 +360,7 @@ final class ConsumerBridgeGenerator
     {
         $columns = "['" . implode("', '", array_keys($table['columns'])) . "']";
         $key = $table['primaryKey'][0];
-        return "<?php\n\ndeclare(strict_types=1);\n\nnamespace {$namespace};\n\n"
+        return "<?php\n\ndeclare(strict_types=1);\n\nnamespace {$namespace};\n\n" . self::XMF2_NOTE . "\n"
             . "final class {$class}Repository extends SqlBridgeRepository\n{\n"
             . "    public function __construct(\\XoopsMySQLDatabase \$db)\n    {\n        parent::__construct(\n"
             . "            \$db,\n            '{$table['name']}',\n            '{$key}',\n            {$columns},\n"
