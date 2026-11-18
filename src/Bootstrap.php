@@ -15,7 +15,7 @@ final class Bootstrap
     /**
      * @var string
      */
-    public const VERSION = '1.7.1';
+    public const VERSION = '1.7.2';
     /**
      * @var string
      */

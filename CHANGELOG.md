@@ -6,6 +6,22 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+## [1.7.2] — 2026-11-18
+
+1.7.2 replaces the copy of 1.5.0 that the XOOPS 2.8 tree carried: it contains every change that
+copy had made, so 2.8 can require the published package.
+
+### Fixed
+- `Common\Blocksadmin` keeps a block title that is stored as a language key (`_MI_*`). Saving the
+  order form, the edit form or a clone without touching the title used to replace the key with
+  the text it displayed, so the title stopped following the site language. The check depended on
+  a class, `Xmf\I18n\LabelResolver`, that no XMF release contains. On XOOPS 2.8 the title now goes
+  through `XoopsBlock::setTitle()`; on XOOPS 2.7.5, which translates keys for display but has no
+  setter, a title that comes back exactly as it was shown is left as stored.
+- `Common\Blocksadmin` loads `class/xoopsblock.php` itself. A module's `admin/blocksadmin.php`
+  that did not load it failed with `Class "XoopsBlock" not found`, because core loads that class
+  on front pages only.
+
 ### Changed
 - **Requires `xoops/helpers` ^1.1 and `xoops/xmf` ^1.3.3** (were ^1.0 and ^1.3), so Composer can
   no longer install releases without their security fixes. With helpers 1.0,
