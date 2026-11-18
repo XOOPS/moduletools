@@ -631,12 +631,6 @@ parameters:
 			path: src/Common/TestdataSample.php
 
 		-
-			message: '#^Instanceof between XoopsModule and XoopsModule will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 2
-			path: src/Common/UpdateChecker.php
-
-		-
 			message: '#^Method Xoops\\ModuleTools\\Common\\UpdateChecker\:\:checkVerModule\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
