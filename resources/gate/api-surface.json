@@ -2586,7 +2586,9 @@
                         }
                     ],
                     "return_type": null,
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": true
                 },
                 "enumerate": {
@@ -2619,7 +2621,9 @@
                         }
                     ],
                     "return_type": "array",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "fieldExists": {
@@ -5336,7 +5340,9 @@
                         }
                     ],
                     "return_type": null,
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "enumerate": {
@@ -5361,7 +5367,9 @@
                         }
                     ],
                     "return_type": "array",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "fieldExists": {

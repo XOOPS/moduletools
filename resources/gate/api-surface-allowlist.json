@@ -83,6 +83,10 @@
         "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/editBlock/throws/0:added",
         "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/listBlocks/throws/0:added",
         "symbols/Xoops\\ModuleTools\\Common\\Db/methods/cloneRecord/throws/0:added",
-        "symbols/Xoops\\ModuleTools\\Common\\Db/methods/enumerate/throws/0:added"
+        "symbols/Xoops\\ModuleTools\\Common\\Db/methods/enumerate/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\DbInterface/methods/cloneRecord/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\DbInterface/methods/enumerate/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\SysUtility/methods/cloneRecord/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\SysUtility/methods/enumerate/throws/0:added"
     ]
 }
