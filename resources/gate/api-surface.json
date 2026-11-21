@@ -1365,7 +1365,9 @@
                         }
                     ],
                     "return_type": "void",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "deleteBlock": {
@@ -1382,7 +1384,9 @@
                         }
                     ],
                     "return_type": "void",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "editBlock": {
@@ -1399,7 +1403,9 @@
                         }
                     ],
                     "return_type": "void",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "isBlockCloned": {
@@ -1480,7 +1486,9 @@
                     "by_ref": false,
                     "parameters": [],
                     "return_type": "void",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "orderBlock": {
@@ -2314,7 +2322,9 @@
                         }
                     ],
                     "return_type": null,
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": true
                 },
                 "enumValues": {
@@ -2364,7 +2374,9 @@
                         }
                     ],
                     "return_type": "array",
-                    "throws": [],
+                    "throws": [
+                        "\\RuntimeException"
+                    ],
                     "documented_false_or_null": false
                 },
                 "fieldExists": {

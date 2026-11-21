@@ -58,4 +58,13 @@ final class PaginatorTest extends TestCase
         self::assertStringContainsString('href="list.php?', $hrefs('list.php'));
         self::assertStringContainsString('href="?', $hrefs(''));
     }
+
+    #[Test]
+    public function aQueryStringWithANulByteGivesNoQuery(): void
+    {
+        // parse_str() cut the string at the NUL up to PHP 8.5 and throws as of 8.6.
+        $_SERVER['QUERY_STRING'] = "cat=3&q=a\0b";
+
+        self::assertSame('', (new Paginator(50, 10, 5))->processQuery(['g2p']));
+    }
 }

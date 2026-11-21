@@ -77,6 +77,12 @@
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/parameters/2:added",
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/parameters/3:added",
         "symbols/Xoops\\ModuleTools\\Admin\\ObjectController/methods/storeSmartObject/documented_false_or_null:value-changed",
-        "symbols/Xoops\\ModuleTools\\Common\\Output/methods/navigationTarget:added"
+        "symbols/Xoops\\ModuleTools\\Common\\Output/methods/navigationTarget:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/cloneBlock/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/deleteBlock/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/editBlock/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Blocksadmin/methods/listBlocks/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Db/methods/cloneRecord/throws/0:added",
+        "symbols/Xoops\\ModuleTools\\Common\\Db/methods/enumerate/throws/0:added"
     ]
 }

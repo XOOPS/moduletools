@@ -6,6 +6,19 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Fixed
+- `Common\Paginator::processQuery()` returns no query for a query string that holds a raw NUL
+  byte. `parse_str()` cut the string at the NUL up to PHP 8.5 and throws a `ValueError` as of
+  PHP 8.6.
+- `Common\Blocksadmin` and `Common\Db::cloneRecord()` / `enumerate()` throw a `\RuntimeException`
+  when a query fails, as `Db::queryAndCheck()` does, instead of raising it with
+  `trigger_error(E_USER_ERROR)`, which PHP 8.4 deprecated. On a XOOPS site the request stops with
+  the error page as before; a caller can now catch the failure. **Changed** for code that runs
+  with an error handler that returns from `E_USER_ERROR` (a command-line script, a test): the
+  method no longer carries on after the failed query.
+- `Common\Db::fieldExists()`, `cloneRecord()` and `enumerate()` refuse a table or column name
+  that ends in a line feed. `fieldExists()` still takes a table name in backticks.
+
 ## [1.7.2] — 2026-11-18
 
 1.7.2 replaces the copy of 1.5.0 that the XOOPS 2.8 tree carried: it contains every change that
