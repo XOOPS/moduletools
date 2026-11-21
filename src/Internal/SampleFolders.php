@@ -50,24 +50,21 @@ final class SampleFolders
     {
         // A NUL byte or a URI is rcopy()'s to refuse: is_dir() throws on the first as of
         // PHP 8.6 and would ask a stream wrapper about the second.
-        if ('' === $source || \str_contains($source, "\0") || \str_contains($source, '://')) {
-            return false;
-        }
-        if (\is_dir($source)) {
+        if ('' === $source || \str_contains($source, "\0") || \str_contains($source, '://') || \is_dir($source)) {
             return false;
         }
 
         // Walk up to the nearest ancestor that is a folder and ask it for the missing entry.
-        $path = \rtrim(\str_replace('\\', '/', $source), '/');
-        for ($parent = \dirname($path); $parent !== $path; $parent = \dirname($path)) {
-            if (\is_dir($parent)) {
-                $entries = \is_readable($parent) ? \scandir($parent) : false;
-
-                return \is_array($entries) && !\in_array(\basename($path), $entries, true);
-            }
-            $path = $parent;
+        // The path stays as configured: dirname() and basename() split it the way the copier
+        // will, and both ignore a trailing separator.
+        $path   = $source;
+        $parent = \dirname($path);
+        while ($parent !== $path && !\is_dir($parent)) {
+            $path   = $parent;
+            $parent = \dirname($path);
         }
+        $entries = $parent !== $path && \is_readable($parent) ? \scandir($parent) : false;
 
-        return false;
+        return \is_array($entries) && !\in_array(\basename($path), $entries, true);
     }
 }

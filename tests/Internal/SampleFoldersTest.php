@@ -74,11 +74,24 @@ final class SampleFoldersTest extends TestCase
         // is_dir() throws on a NUL byte as of PHP 8.6 and would ask a stream wrapper about a URI.
         $pairs = [
             [$this->dir . "/module/testdata/up\0loads", $this->dir . '/uploads'],
-            ['ftp://example.invalid/testdata/uploads', $this->dir . '/uploads'],
+            ['sample://example.invalid/testdata/uploads', $this->dir . '/uploads'],
             ['', $this->dir . '/uploads'],
         ];
 
         self::assertSame($pairs, SampleFolders::copy($pairs));
+    }
+
+    public function testABackslashInTheConfiguredPathIsNotReadAsASeparatorWhereItIsNone(): void
+    {
+        if ('\\' === \DIRECTORY_SEPARATOR) {
+            self::markTestSkipped('A backslash separates folders on Windows.');
+        }
+
+        // "testdata\images" names one entry of the module folder here, and there is none.
+        $failed = SampleFolders::copy([[$this->dir . '/module/testdata\\images', $this->dir . '/uploads/images']]);
+
+        self::assertSame([], $failed);
+        self::assertDirectoryDoesNotExist($this->dir . '/uploads');
     }
 
     public function testAFolderBelowAParentThatCannotBeSearchedIsReported(): void
