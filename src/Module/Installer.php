@@ -81,11 +81,17 @@ final class Installer
 
     /**
      * Recursively copy each configured `[source, destination]` test-data folder pair.
+     * A pair whose source folder the module does not ship is skipped.
      */
     public static function copyTestFolders(Configurator $configurator): void
     {
         foreach (self::plan($configurator)->testFolderCopies as $pair) {
             [$src, $dest] = $pair;
+            // Sample data is optional: most modules keep the skeleton's `testdata/uploads`
+            // entry without shipping that folder. Nothing to copy is not a failed copy.
+            if (!\is_dir((string)$src)) {
+                continue;
+            }
             if (!SysUtility::rcopy($src, $dest)) {
                 \trigger_error(\sprintf('Test data folder "%s" was not copied to "%s"', $src, $dest), \E_USER_WARNING);
             }

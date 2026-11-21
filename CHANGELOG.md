@@ -18,6 +18,10 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
   method no longer carries on after the failed query.
 - `Common\Db::fieldExists()`, `cloneRecord()` and `enumerate()` refuse a table or column name
   that ends in a line feed. `fieldExists()` still takes a table name in backticks.
+- `Module\Installer::copyTestFolders()` skips a configured sample folder that the module does
+  not ship. Installing such a module used to raise
+  `Warning: Test data folder "…/testdata/uploads" was not copied to "…"`. A folder that exists
+  and cannot be copied still raises the warning.
 
 ## [1.7.2] — 2026-11-18
 
