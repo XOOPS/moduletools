@@ -42,6 +42,21 @@ if (!class_exists('XoopsUser')) {
     }
 }
 
+if (!class_exists('XoopsModule')) {
+    /** Just enough of a module for "which module is being served": getVar('dirname') answers what the test sets. */
+    class XoopsModule extends XoopsObject
+    {
+        public function __construct(private readonly string $dirname = '')
+        {
+        }
+
+        public function getVar(string $key): ?string
+        {
+            return 'dirname' === $key ? $this->dirname : null;
+        }
+    }
+}
+
 if (!class_exists('XoopsMediaUploader')) {
     /** Records which upload fields reached the uploader and were moved; every upload "succeeds" as "saved-<field>". */
     class XoopsMediaUploader
