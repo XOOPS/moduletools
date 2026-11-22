@@ -6,6 +6,11 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+### Fixed
+- `Common\Breadcrumb` created without a module name (`new Breadcrumb()`) uses the module being
+  served. It used to take the library's own folder name, so the page failed with
+  `Unable to load 'db:moduletools_common_breadcrumb.tpl'`.
+
 ## [1.7.3] — 2026-11-21
 
 ### Fixed

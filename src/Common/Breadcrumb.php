@@ -42,7 +42,7 @@ class Breadcrumb
 
     public function __construct(?string $dirname = null, ?string $template = null)
     {
-        $this->dirname  = $dirname ? basename($dirname) : \basename(\dirname(__DIR__, 2));
+        $this->dirname  = $dirname ? basename($dirname) : self::currentModuleDirname();
         $this->template = $template ?: $this->dirname . '_common_breadcrumb.tpl';
     }
 
@@ -80,6 +80,19 @@ class Breadcrumb
         unset($breadcrumbTpl);
 
         return $html;
+    }
+
+    /**
+     * The module being served, whose `<dirname>_common_breadcrumb.tpl` is the default template;
+     * the library's own folder name when no module is being served.
+     */
+    private static function currentModuleDirname(): string
+    {
+        $module = self::runtimeGlobal('xoopsModule');
+
+        return $module instanceof \XoopsModule
+            ? (string)$module->getVar('dirname')
+            : \basename(\dirname(__DIR__, 2));
     }
 
     /** @legacy-global-accessor */
