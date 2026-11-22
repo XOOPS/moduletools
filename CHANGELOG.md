@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+## [1.7.3] — 2026-11-21
+
 ### Fixed
 - `Common\Paginator::processQuery()` returns no query for a query string that holds a raw NUL
   byte. `parse_str()` cut the string at the NUL up to PHP 8.5 and throws a `ValueError` as of
