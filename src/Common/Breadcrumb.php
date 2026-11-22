@@ -42,7 +42,7 @@ class Breadcrumb
 
     public function __construct(?string $dirname = null, ?string $template = null)
     {
-        $this->dirname  = $dirname ? basename($dirname) : self::currentModuleDirname();
+        $this->dirname  = null === $dirname || '' === $dirname ? self::currentModuleDirname() : basename($dirname);
         $this->template = $template ?: $this->dirname . '_common_breadcrumb.tpl';
     }
 
