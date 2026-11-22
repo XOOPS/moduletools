@@ -117,7 +117,7 @@ The library classes cannot guess your dirname, so **pass it**:
 | `ModuleFeedback::getInstance()` | `new ModuleFeedback(null, $helper->dirname())` |
 | `Utility::getServerStats()` | unchanged — reads `$GLOBALS['xoopsModule']` |
 
-In releases after 1.7.3, `new Breadcrumb()` without an argument takes the module being served.
+As of 1.7.4, `new Breadcrumb()` without an argument takes the module being served.
 Keep passing the dirname in code that runs on another module's page, such as a block.
 
 `Xmf\Module\Helper` exposes the directory as **`$helper->dirname()`**. Some generated module

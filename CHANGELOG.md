@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+## [1.7.4] — 2026-11-21
+
 ### Fixed
 - `Common\Breadcrumb` created without a module name (`new Breadcrumb()`) uses the module being
   served. It used to take the library's own folder name, so the page failed with
